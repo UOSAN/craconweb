@@ -1,5 +1,6 @@
 module View exposing (view)
 
+import Browser exposing (Document)
 import Entity
 import Game
 import Game.View as Game
@@ -803,7 +804,7 @@ statement mes =
 -}
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
     let
         page =

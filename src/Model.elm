@@ -1,5 +1,6 @@
 module Model exposing (..)
 
+import Browser.Navigation
 import Entity
 import Game
 import Http
@@ -63,6 +64,7 @@ type alias Model =
     , fmriUserData : RemoteData.RemoteData ValuationsError FmriUserData
     , statementsModal : Bool
     , windowSize : Maybe W.Size
+    , key : Browser.Navigation.Key
     }
 
 

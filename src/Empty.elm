@@ -54,6 +54,7 @@ initialModel =
     , fmriUserData = RemoteData.NotAsked
     , statementsModal = False
     , windowSize = Nothing
+    , key = Nothing
     }
 
 

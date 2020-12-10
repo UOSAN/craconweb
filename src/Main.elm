@@ -18,13 +18,12 @@ import Window
 
 main : Program M.Flags M.Model M.Msg
 main =
-    Navigation.programWithFlags M.OnUpdateLocation
+    Browser.application M.OnUpdateLocation
         { init = init
         , view = View.view
         , update = Update.update
         , subscriptions = subscriptions
         }
-
 
 subscriptions : M.Model -> Sub M.Msg
 subscriptions model =
@@ -46,8 +45,8 @@ ticker gameState =
         Sub.none
 
 
-init : M.Flags -> Url.Url -> ( M.Model, Cmd M.Msg )
-init flags location =
+init : M.Flags -> Url.Url -> Browser.Navigation.Key -> ( M.Model, Cmd M.Msg )
+init flags location key =
     let
         ( httpsrv, tasksrv, filesrv ) =
             servers location.host
@@ -76,6 +75,7 @@ init flags location =
                 , activeRoute = route_
                 , visitor = visitor_
                 , loadTime = flags.time
+                , key = key
             }
     in
     Api.fetchFmriUserData model_
