@@ -29,10 +29,14 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         BadgesResp badges ->
-            { model | badgesEarned = badges } ! []
+            ( { model | badgesEarned = badges }
+            , Cmd.none
+            )
 
         BadgeRulesResp badgeRules_ ->
-            { model | badgeRules = badgeRules_ } ! []
+            ( { model | badgeRules = badgeRules_ }
+            , Cmd.none
+            )
 
         MesAnswersResp (Ok myAnswers) ->
             let
@@ -123,10 +127,14 @@ update msg model =
             )
 
         EditUserResp (Ok user) ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         EditUserResp (Err err) ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         SetRequestNothing ->
             ( { model | request = Nothing }, Cmd.none )
@@ -172,7 +180,9 @@ update msg model =
         TrySubmitMesAnswer ->
             case model.mesAnswer of
                 Nothing ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
                 Just mesAns ->
                     if mesAns.essay == "" then
@@ -184,7 +194,9 @@ update msg model =
                     else
                         case model.visitor of
                             Anon ->
-                                model ! []
+                                ( model
+                                , Cmd.none
+                                )
 
                             LoggedIn { sub } ->
                                 ( { model | mesQuery = Nothing, request = Nothing }
@@ -200,7 +212,9 @@ update msg model =
                                 )
 
         MesPostResp _ ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         GroupChanged groupId_ ->
             let
@@ -224,15 +238,21 @@ update msg model =
             ( { model | adminModel = adminModel_ }, Cmd.none )
 
         UserEditResp (Ok _) ->
-            { model | informing = Just "User saved." } ! []
+            ( { model | informing = Just "User saved." }
+            , Cmd.none
+            )
 
         UserEditResp (Err err) ->
-            { model | informing = Just (Helpers.httpHumanError err) } ! []
+            ( { model | informing = Just (Helpers.httpHumanError err) }
+            , Cmd.none
+            )
 
         TryPutUser ->
             case model.adminModel.tmpUserEdit of
                 Nothing ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
                 Just user ->
                     ( model
@@ -279,7 +299,9 @@ update msg model =
                     ( { model | groupIdExp = Just group.id }, Cmd.none )
 
                 _ ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
         UsersResp (Ok users_) ->
             ( { model
@@ -344,7 +366,9 @@ update msg model =
             ( { model | adminModel = { adminModel_ | tmpUserRecord = tmpUserRecord_ } }, Cmd.none )
 
         EditUserAccount key value ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         TryRegisterUser ->
             if missing model.adminModel.tmpUserRecord then
@@ -363,7 +387,9 @@ update msg model =
         MesAuthorsResp (Ok mesAuthors) ->
             case model.statements of
                 Nothing ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
                 Just mesAnswers ->
                     ( { model
@@ -404,7 +430,9 @@ update msg model =
         PublishMes id ->
             case model.adminModel.mesAnswers of
                 Nothing ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
                 Just mess ->
                     let
@@ -432,7 +460,9 @@ update msg model =
                     in
                     case mesAns of
                         Nothing ->
-                            model ! []
+                            ( model
+                            , Cmd.none
+                            )
 
                         Just mesAnswer ->
                             ( model_
@@ -448,7 +478,9 @@ update msg model =
                             )
 
         PutMesResp (Ok r) ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         RegisterUserResp (Ok newUser) ->
             ( { model
@@ -499,7 +531,8 @@ update msg model =
                 login_ =
                     model.login
             in
-            ( { model | login = { login_ | password = newPassword }
+            ( { model
+                | login = { login_ | password = newPassword }
               }
             , Cmd.none
             )
@@ -568,7 +601,9 @@ update msg model =
             ( model_, command_ )
 
         UserResp (Ok user_) ->
-            { model | user = Just user_ } ! []
+            ( { model | user = Just user_ }
+            , Cmd.none
+            )
 
         StartSession data ->
             startSession data model
@@ -622,7 +657,9 @@ update msg model =
                     ( { model | visualsearchGame = Just game }, Cmd.none )
 
                 _ ->
-                    model ! []
+                    ( model
+                    , Cmd.none
+                    )
 
         Presses keyCode ->
             presses keyCode model
@@ -704,16 +741,24 @@ update msg model =
             httpErrorState model err
 
         MesAuthorsResp (Err err) ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         MesAnswersResp (Err err) ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         MesResp (Err err) ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         PublicMesResp (Err err) ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         MesQuerysResp (Err err) ->
             httpErrorState model err
@@ -726,7 +771,9 @@ initFmriStopSignal : { user : Entity.User } -> Model -> ( Model, Cmd Msg )
 initFmriStopSignal { user } model =
     case model.stopsignalGame of
         Nothing ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         Just gameEntity ->
             let
@@ -789,7 +836,9 @@ initStopSignal : Model -> ( Model, Cmd Msg )
 initStopSignal model =
     case model.stopsignalGame of
         Nothing ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         Just gameEntity ->
             let
@@ -846,7 +895,9 @@ initGoNoGo : Model -> ( Model, Cmd Msg )
 initGoNoGo model =
     case model.gonogoGame of
         Nothing ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         Just gameEntity ->
             ( model
@@ -891,7 +942,9 @@ initDotProbe : Model -> ( Model, Cmd Msg )
 initDotProbe model =
     case model.dotprobeGame of
         Nothing ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         Just gameEntity ->
             ( model
@@ -935,7 +988,9 @@ initVisualSearch : Model -> ( Model, Cmd Msg )
 initVisualSearch model =
     case model.visualsearchGame of
         Nothing ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         Just gameEntity ->
             ( model
@@ -1042,12 +1097,12 @@ highlight l =
 
 solid : String -> Html Msg
 solid t =
-    span [ style [ ( "border", "solid 1px #000" ), ( "padding", "2px" ) ] ] [ text t ]
+    span [ style "border" "solid 1px #000", style "padding" "2px" ] [ text t ]
 
 
 dashed : String -> Html Msg
 dashed t =
-    span [ style [ ( "border", "dashed 1px #000" ), ( "padding", "2px" ) ] ] [ text t ]
+    span [ style "border" "dashed 1px #000", style "padding" "2px" ] [ text t ]
 
 
 base : List (Html Msg) -> Html Msg
@@ -1146,21 +1201,23 @@ startSession : { gameId : String, game : Game.Game Msg, time : Time, initialSeed
 startSession { gameId, game, time, initialSeed, nextSeed } model =
     case model.visitor of
         Anon ->
-            model ! []
+            ( model
+            , Cmd.none
+            )
 
         LoggedIn jwt ->
-            { model | gameState = Game.Loading game RemoteData.Loading }
-                ! [ Api.startSession
-                        { token = model.jwtencoded
-                        , userId = model.fmriUserData |> RemoteData.toMaybe |> Maybe.map (\{ user } -> user.id) |> Maybe.withDefault jwt.sub
-                        , gameId = gameId
-                        , start = time
-                        , initialSeed = initialSeed
-                        , httpsrv = model.httpsrv
-                        , jitter = model.fmriUserData |> RemoteData.toMaybe |> Maybe.map (always True) |> Maybe.withDefault False
-                        }
-                        |> Task.perform (StartSessionResp nextSeed game)
-                  ]
+            ( { model | gameState = Game.Loading game RemoteData.Loading }
+            , Api.startSession
+                { token = model.jwtencoded
+                , userId = model.fmriUserData |> RemoteData.toMaybe |> Maybe.map (\{ user } -> user.id) |> Maybe.withDefault jwt.sub
+                , gameId = gameId
+                , start = time
+                , initialSeed = initialSeed
+                , httpsrv = model.httpsrv
+                , jitter = model.fmriUserData |> RemoteData.toMaybe |> Maybe.map (always True) |> Maybe.withDefault False
+                }
+                |> Task.perform (StartSessionResp nextSeed game)
+            )
 
 
 playGame : Game.Game Msg -> Game.Session -> Random.Seed -> Model -> ( Model, Cmd Msg )
@@ -1304,14 +1361,19 @@ startSessionResp nextSeed game remoteData model =
             playGame game session nextSeed updatedModel
 
         RemoteData.Failure err ->
-            { updatedModel | glitching = Just <| Helpers.httpHumanError err }
-                ! []
+            ( { updatedModel | glitching = Just <| Helpers.httpHumanError err }
+            , Cmd.none
+            )
 
         RemoteData.Loading ->
-            updatedModel ! []
+            ( updatedModel
+            , Cmd.none
+            )
 
         RemoteData.NotAsked ->
-            updatedModel ! []
+            ( updatedModel
+            , Cmd.none
+            )
 
 
 gameDataSaved : Game.State -> Game.Session -> RemoteData.WebData ( Game.Session, List Game.Cycle ) -> Model -> ( Model, Cmd Msg )
@@ -1322,20 +1384,27 @@ gameDataSaved state session remoteData model =
     in
     case remoteData of
         RemoteData.Success ( session, cycles ) ->
-            { model
+            ( { model
                 | gameState = Game.Saved state { session = session, cycles = cycles }
                 , fmriUserData = RemoteData.NotAsked
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         RemoteData.Failure err ->
-            { updatedModel | glitching = Just <| Helpers.httpHumanError err } ! []
+            ( { updatedModel | glitching = Just <| Helpers.httpHumanError err }
+            , Cmd.none
+            )
 
         RemoteData.Loading ->
-            updatedModel ! []
+            ( updatedModel
+            , Cmd.none
+            )
 
         RemoteData.NotAsked ->
-            updatedModel ! []
+            ( updatedModel
+            , Cmd.none
+            )
 
 
 saveGameData : Game.State -> Game.Session -> Model -> ( Model, Cmd Msg )
@@ -1344,8 +1413,9 @@ saveGameData state session model =
         updatedModel =
             { model | gameState = Game.Saving state session RemoteData.Loading }
     in
-    updatedModel
-        ! [ saveGameDataCmd state session updatedModel ]
+    ( updatedModel
+    , saveGameDataCmd state session updatedModel
+    )
 
 
 saveGameDataCmd : Game.State -> Game.Session -> Model -> Cmd Msg
@@ -1369,8 +1439,8 @@ saveGameDataCmd state session model =
         cycles =
             Game.Cycle.generate session.id state.log
     in
-    Task.map2 (,) endSessionTask postCyclesTask
-        |> Task.map (\( a, b ) -> RemoteData.map2 (,) a b)
+    Task.map2 (\a b -> ( a, b )) endSessionTask postCyclesTask
+        |> Task.map (\( a, b ) -> RemoteData.map2 (\a b -> ( a, b )) a b)
         |> Task.perform (GameDataSaved state session)
 
 

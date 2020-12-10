@@ -390,7 +390,7 @@ viewRest messages state =
                 0
 
             else
-                (state.blockCounter - 1) % List.length messages
+                modBy (List.length messages) (state.blockCounter - 1)
 
         message =
             messages |> List.Extra.getAt index |> Maybe.withDefault defaultMessage

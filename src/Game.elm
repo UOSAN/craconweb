@@ -1,6 +1,6 @@
 module Game exposing (..)
 
-import Game.Card as Card exposing (Continuation(Complete, Continue))
+import Game.Card as Card exposing (Continuation(..))
 import Random exposing (Generator)
 import Random.Extra
 import Random.List
@@ -452,7 +452,7 @@ trialFailed : Logic
 trialFailed state input =
     state
         |> isFailed
-        |> flip (,) state
+        |> (\a -> (\a b -> ( a, b )) a state)
 
 
 showZoom : Logic

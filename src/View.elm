@@ -17,11 +17,11 @@ import Window as W
 
 bigLogo : String -> Html Msg
 bigLogo filesrv =
-    p [ style [ ( "text-align", "center" ) ] ]
+    p [ style "text-align" "center" ]
         [ img
             [ class "logo is-vcentered"
             , src (filesrv ++ "/repo/logo.svg")
-            , style [ ( "max-width", "300px" ) ]
+            , style "max-width" "300px"
             ]
             []
         ]
@@ -60,7 +60,7 @@ loginPage model =
                     [ bigLogo model.filesrv
                     , loginPageBoxForm model
                     , Parts.notification model.glitching "is-warning"
-                    , h4 [ class "is-4 subtitle is-centered", style [ ( "text-align", "center" ) ] ]
+                    , h4 [ class "is-4 subtitle is-centered", style "text-align" "center" ]
                         [ strong [] [ text "Not already a member of the CraveControl study?" ]
                         , br [] []
                         , text "Click "
@@ -68,7 +68,7 @@ loginPage model =
                         , text " to see if you're eligible to participate!"
                         , br [] []
                         ]
-                    , div [ class "is-centered", style [ ( "text-align", "center" ) ] ]
+                    , div [ class "is-centered", style "text-align" "center" ]
                         [ button
                             [ class <| statementsModalButtonClass model.statementsModal
                             , onClick ToggleStatementsModal
@@ -133,10 +133,8 @@ navBar model =
     case model.activeRoute of
         R.FmriRoute _ ->
             div
-                [ style
-                    [ ( "min-height", "15vh" )
-                    , ( "cursor", "none" )
-                    ]
+                [ style "min-height" "15vh"
+                , style "cursor" "none"
                 ]
                 []
 
@@ -494,8 +492,8 @@ badgeBox b =
             else
                 ( "", i [ class "fa fa-lock" ] [] )
     in
-    div [ class <| "box " ++ wobble, style [ ( "background-color", b.bg ), ( "color", b.fg ) ] ]
-        [ h1 [ class "title is-1", style [ ( "color", b.fg ) ] ] [ text <| b.name ++ " ", icon ]
+    div [ class <| "box " ++ wobble, style "background-color" b.bg, style "color" b.fg ]
+        [ h1 [ class "title is-1", style "color" b.fg ] [ text <| b.name ++ " ", icon ]
         , p [] [ text b.dscript ]
         ]
 
