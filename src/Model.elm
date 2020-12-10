@@ -209,7 +209,7 @@ mesAuthorsDecoder =
 
 mesAuthorDecoder : JD.Decoder MesAuthor
 mesAuthorDecoder =
-    JP.decode MesAuthor
+    JD.succeed MesAuthor
         |> JP.required "mesanswerId" JD.string
         |> JP.required "userName" JD.string
 
@@ -249,7 +249,7 @@ mesAnswersDecoder =
 
 mesAnswerDecoder : JD.Decoder MesAnswer
 mesAnswerDecoder =
-    JP.decode MesAnswer
+    JD.succeed MesAnswer
         |> JP.required "id" JD.string
         |> JP.required "content" JD.string
         |> JP.optional "public" JD.bool False
@@ -272,7 +272,7 @@ type alias MesQuery =
 
 mesQueryDecoder : JD.Decoder MesQuery
 mesQueryDecoder =
-    JP.decode MesQuery
+    JD.succeed MesQuery
         |> JP.required "id" JD.string
         |> JP.required "content" JD.string
 
@@ -347,14 +347,14 @@ tokenEncoder token =
 
 errorCodeDecoder : JD.Decoder ErrorCode
 errorCodeDecoder =
-    JP.decode ErrorCode
+    JD.succeed ErrorCode
         |> JP.required "error" JD.string
         |> JP.required "code" JD.int
 
 
 jwtDecoder : JD.Decoder JwtPayload
 jwtDecoder =
-    JP.decode JwtPayload
+    JD.succeed JwtPayload
         |> JP.required "aud" JD.string
         |> JP.required "exp" JD.float
         |> JP.required "iat" JD.int

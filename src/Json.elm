@@ -15,7 +15,7 @@ module Json exposing
 
 import Game
 import Json.Decode as JD exposing (Decoder)
-import Json.Decode.Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as JE exposing (object)
 import Model as M
 import String
@@ -24,7 +24,7 @@ import Time exposing (Time)
 
 sessionDecoder : Decoder Game.Session
 sessionDecoder =
-    decode Game.Session
+    JD.succeed Game.Session
         |> required "id" JD.string
         |> required "userId" JD.string
         |> required "gameId" JD.string
@@ -36,7 +36,7 @@ sessionDecoder =
 
 cycleDecoder : Decoder Game.Cycle
 cycleDecoder =
-    decode Game.Cycle
+    JD.succeed Game.Cycle
         |> required "id" (JD.maybe JD.string)
         |> required "gsessionId" JD.string
         |> optional "sort" JD.int 0
@@ -193,7 +193,7 @@ badgeRulesDecoder =
 
 badgeRuleDecoder : Decoder M.BadgeRule
 badgeRuleDecoder =
-    decode M.BadgeRule
+    JD.succeed M.BadgeRule
         |> required "id" JD.string
         |> required "name" JD.string
         |> required "dscript" JD.string
