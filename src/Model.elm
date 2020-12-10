@@ -86,7 +86,7 @@ type Msg
     | Logout
     | ResetNotifications
     | MainMenuToggle
-    | NewCurrentTime Time.Time
+    | NewCurrentTime Time.Posix
     | Presses Int
     | SelectInput Int
     | DirectionInput Game.Direction

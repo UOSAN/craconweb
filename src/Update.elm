@@ -1345,7 +1345,7 @@ handleIndicationInput model =
     handleInput Game.Indication model
 
 
-handleTimeUpdate : Time -> Model -> ( Model, Cmd Msg )
+handleTimeUpdate : Time.Posix -> Model -> ( Model, Cmd Msg )
 handleTimeUpdate t model =
     handleInput (Game.Tick t) model
 

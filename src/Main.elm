@@ -1,7 +1,7 @@
 module Main exposing (..)
 
-import AnimationFrame
 import Api
+import Browser.Events
 import Empty exposing (initialModel)
 import Game
 import Helpers
@@ -40,7 +40,7 @@ subscriptions model =
 ticker : Game.GameState M.Msg -> Sub M.Msg
 ticker gameState =
     if Game.isPlaying gameState then
-        AnimationFrame.times M.NewCurrentTime
+        Browser.Events.onAnimationFrame M.NewCurrentTime
 
     else
         Sub.none

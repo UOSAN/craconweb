@@ -62,7 +62,7 @@ type alias Continuation msg =
 
 type Input
     = Initialize
-    | Tick Time
+    | Tick Time.Posix
     | Indication
     | Select Int
     | Direction Direction
