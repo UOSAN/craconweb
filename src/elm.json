@@ -25,8 +25,7 @@
             "ggb/numeral-elm": "1.4.3",
             "krisajenkins/remotedata": "6.0.1",
             "simonh1000/elm-jwt": "7.1.0",
-            "tiziano88/elm-protobuf": "3.0.0",
-            "Fresheyeball/elm-font-awesome": "2.0.2"
+            "tiziano88/elm-protobuf": "3.0.0"
         },
         "indirect": {
             "elm/bytes": "1.0.8",
