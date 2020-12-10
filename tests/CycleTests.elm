@@ -1,11 +1,11 @@
 module CycleTests exposing (all)
 
-import Test exposing (..)
-import Cycle.GoNoGoTests
 import Cycle.DotProbeTests
-import Cycle.StopSignalTests
 import Cycle.FmriStopSignalTests
+import Cycle.GoNoGoTests
+import Cycle.StopSignalTests
 import Cycle.VisualSearchTests
+import Test exposing (..)
 
 
 all : Test

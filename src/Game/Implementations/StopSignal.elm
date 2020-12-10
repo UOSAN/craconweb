@@ -1,7 +1,4 @@
-module Game.Implementations.StopSignal
-    exposing
-        ( init
-        )
+module Game.Implementations.StopSignal exposing (init)
 
 import Game
     exposing
@@ -74,7 +71,7 @@ init ({ borderDelay, totalDuration, infoString, responseImages, nonResponseImage
         trials =
             gos ++ noGos
     in
-        Game.shuffle args trials
+    Game.shuffle args trials
 
 
 trial :
@@ -91,6 +88,7 @@ trial { borderDelay, totalDuration, goTrial, redCrossDuration } image state =
         borderType =
             if goTrial then
                 Blue
+
             else
                 Gray
 
@@ -103,12 +101,12 @@ trial { borderDelay, totalDuration, goTrial, redCrossDuration } image state =
         redCross =
             Just (RedCross borderType)
     in
-        log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime }
-            |> andThen (log (BeginDisplay borderless))
-            |> andThen (segment [ timeout borderDelay ] borderless)
-            |> andThen (log BeginInput)
-            |> andThen (log (BeginDisplay bordered))
-            |> andThen (segment [ onIndication goTrial, resultTimeout (not goTrial) totalDuration ] bordered)
-            |> andThen (logWithCondition isFailed (BeginDisplay redCross))
-            |> andThen (segment [ trialFailed, timeoutFromSegmentStart redCrossDuration ] redCross)
-            |> andThen (log EndTrial)
+    log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime }
+        |> andThen (log (BeginDisplay borderless))
+        |> andThen (segment [ timeout borderDelay ] borderless)
+        |> andThen (log BeginInput)
+        |> andThen (log (BeginDisplay bordered))
+        |> andThen (segment [ onIndication goTrial, resultTimeout (not goTrial) totalDuration ] bordered)
+        |> andThen (logWithCondition isFailed (BeginDisplay redCross))
+        |> andThen (segment [ trialFailed, timeoutFromSegmentStart redCrossDuration ] redCross)
+        |> andThen (log EndTrial)

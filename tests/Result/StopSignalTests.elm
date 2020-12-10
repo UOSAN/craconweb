@@ -1,9 +1,9 @@
 module Result.StopSignalTests exposing (all)
 
-import Test exposing (..)
 import Expect
-import Game exposing (LogEntry(..), BorderType(..), Layout(..), Direction(..))
+import Game exposing (BorderType(..), Direction(..), Layout(..), LogEntry(..))
 import Game.Result
+import Test exposing (..)
 
 
 all : Test

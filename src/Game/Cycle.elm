@@ -94,14 +94,15 @@ beginDisplay { sessionId, time, maybeLayout } cycles =
                             , targetIndex = 0
                             , selectedIndex = 0
                         }
+
                     else
                         cycle
             in
-                (updatedCycle :: tail)
-                    |> beginBorder
-                        { borderType = borderType
-                        , time = time
-                        }
+            (updatedCycle :: tail)
+                |> beginBorder
+                    { borderType = borderType
+                    , time = time
+                    }
 
         ( Just (Game.LeftOrRight borderType direction image), cycle :: tail ) ->
             let
@@ -118,11 +119,12 @@ beginDisplay { sessionId, time, maybeLayout } cycles =
                             , selectedIndex = 0
                             , width = Just 2
                         }
+
                     else
                         cycle
             in
-                (updatedCycle :: tail)
-                    |> beginBorder { borderType = borderType, time = time }
+            (updatedCycle :: tail)
+                |> beginBorder { borderType = borderType, time = time }
 
         ( Just (Game.LeftRight borderType direction leftImage rightImage), cycle :: tail ) ->
             let
@@ -135,11 +137,12 @@ beginDisplay { sessionId, time, maybeLayout } cycles =
                             , width = Just 2
                             , targetIndex = Game.directionToIndex direction
                         }
+
                     else
                         cycle
             in
-                (updatedCycle :: tail)
-                    |> beginBorder { borderType = borderType, time = time }
+            (updatedCycle :: tail)
+                |> beginBorder { borderType = borderType, time = time }
 
         ( Just (Game.SelectGrid borderType { columns, images, goIndex }), cycle :: tail ) ->
             let
@@ -154,33 +157,36 @@ beginDisplay { sessionId, time, maybeLayout } cycles =
                             , width = Just columns
                             , height = Just (List.length images // columns)
                         }
+
                     else
                         cycle
             in
-                (updatedCycle :: tail)
-                    |> beginBorder { borderType = borderType, time = time }
+            (updatedCycle :: tail)
+                |> beginBorder { borderType = borderType, time = time }
 
         ( Just (Game.RedCross borderType), cycle :: tail ) ->
             let
                 updatedCycle =
                     if cycle.redcross == Nothing then
                         { cycle | redcross = Just time }
+
                     else
                         cycle
             in
-                (updatedCycle :: tail)
-                    |> beginBorder { borderType = borderType, time = time }
+            (updatedCycle :: tail)
+                |> beginBorder { borderType = borderType, time = time }
 
         ( Just (Game.Fixation borderType), cycle :: tail ) ->
             let
                 updatedCycle =
                     if cycle.fixation == Nothing then
                         { cycle | fixation = Just time }
+
                     else
                         cycle
             in
-                (updatedCycle :: tail)
-                    |> beginBorder { borderType = borderType, time = time }
+            (updatedCycle :: tail)
+                |> beginBorder { borderType = borderType, time = time }
 
         ( Just (Game.Probe borderType direction), cycle :: tail ) ->
             let
@@ -190,31 +196,34 @@ beginDisplay { sessionId, time, maybeLayout } cycles =
                             | probe = Just time
                             , targetIndex = Game.directionToIndex direction
                         }
+
                     else
                         cycle
             in
-                (updatedCycle :: tail)
-                    |> beginBorder { borderType = borderType, time = time }
+            (updatedCycle :: tail)
+                |> beginBorder { borderType = borderType, time = time }
 
         ( Just Game.Rest, cycle :: tail ) ->
             let
                 updatedCycle =
                     if cycle.rest == Nothing then
                         { cycle | rest = Just time }
+
                     else
                         cycle
             in
-                (updatedCycle :: tail)
+            updatedCycle :: tail
 
         ( Just Game.Interval, cycle :: tail ) ->
             let
                 updatedCycle =
                     if cycle.interval == Nothing then
                         { cycle | interval = Just time }
+
                     else
                         cycle
             in
-                (updatedCycle :: tail)
+            updatedCycle :: tail
 
 
 beginBorder : { borderType : Game.BorderType, time : Time } -> List Game.Cycle -> List Game.Cycle
@@ -229,24 +238,28 @@ beginBorder { borderType, time } cycles =
         ( Game.Blue, cycle :: tail ) ->
             if cycle.border == Nothing then
                 { cycle | border = Just time, blue = True } :: tail
+
             else
                 cycles
 
         ( Game.Gray, cycle :: tail ) ->
             if cycle.border == Nothing then
                 { cycle | border = Just time, gray = True } :: tail
+
             else
                 cycles
 
         ( Game.Black, cycle :: tail ) ->
             if cycle.border == Nothing then
                 { cycle | border = Just time, blue = False, gray = False } :: tail
+
             else
                 cycles
 
         ( Game.Dashed, cycle :: tail ) ->
             if cycle.border == Nothing then
                 { cycle | border = Just time, dash = True } :: tail
+
             else
                 cycles
 

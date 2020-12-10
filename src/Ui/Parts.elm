@@ -1,22 +1,21 @@
-module Ui.Parts
-    exposing
-        ( notification
-        , linkAttrs
-        , notificationRemoteData
-        , modal
-        , modalCard
-        , grid
-        , middleBlock
-        )
+module Ui.Parts exposing
+    ( grid
+    , linkAttrs
+    , middleBlock
+    , modal
+    , modalCard
+    , notification
+    , notificationRemoteData
+    )
 
+import Helpers
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Model exposing (Msg(..))
 import Html.Events exposing (onClick)
-import Routing as R
-import RemoteData
-import Helpers
 import List.Extra
+import Model exposing (Msg(..))
+import RemoteData
+import Routing as R
 
 
 notification : Maybe String -> String -> Html Msg

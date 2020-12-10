@@ -8,11 +8,11 @@ import Json.Decode.Pipeline as JP
 import Json.Encode as JE
 import List.Extra as LE
 import Navigation
+import Random
 import RemoteData
 import Routing
 import Time
 import Window as W
-import Random
 
 
 type alias Flags =

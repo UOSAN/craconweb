@@ -1,9 +1,9 @@
 module Cycle.GoNoGoTests exposing (all)
 
-import Test exposing (..)
 import Expect
-import Game exposing (LogEntry(..), BorderType(..), Layout(..), Direction(..))
+import Game exposing (BorderType(..), Direction(..), Layout(..), LogEntry(..))
 import Game.Cycle
+import Test exposing (..)
 
 
 all : Test

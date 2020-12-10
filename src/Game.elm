@@ -3,9 +3,9 @@ module Game exposing (..)
 import Game.Card as Card exposing (Continuation(Complete, Continue))
 import Random exposing (Generator)
 import Random.Extra
+import Random.List
 import RemoteData
 import Time exposing (Time)
-import Random.List
 
 
 type GameState msg
@@ -167,16 +167,16 @@ segment logics layout state =
         combined =
             oneOf (updateCurrTime :: logics) state
     in
-        Card.card
-            layout
-            (\input ->
-                case combined input of
-                    ( True, newState ) ->
-                        ( Continue newState (segment logics layout newState), Cmd.none )
+    Card.card
+        layout
+        (\input ->
+            case combined input of
+                ( True, newState ) ->
+                    ( Continue newState (segment logics layout newState), Cmd.none )
 
-                    ( False, newState ) ->
-                        ( Complete newState, Cmd.none )
-            )
+                ( False, newState ) ->
+                    ( Complete newState, Cmd.none )
+        )
 
 
 andThenCheckTimeout : Time -> (State -> Game msg) -> Game msg -> Game msg
@@ -239,6 +239,7 @@ oneOf logics state input =
         (\logic ( continue, newState ) ->
             if continue then
                 logic newState input
+
             else
                 ( continue, newState )
         )
@@ -260,14 +261,15 @@ logWithCondition enabled logEntry originalState =
                 ( _, updatedState ) =
                     updateCurrTime originalState input
             in
-                ( Complete
-                    (if enabled updatedState then
-                        { updatedState | log = logEntry updatedState.currTime :: updatedState.log }
-                     else
-                        updatedState
-                    )
-                , Cmd.none
+            ( Complete
+                (if enabled updatedState then
+                    { updatedState | log = logEntry updatedState.currTime :: updatedState.log }
+
+                 else
+                    updatedState
                 )
+            , Cmd.none
+            )
         )
 
 
@@ -299,8 +301,8 @@ addIntervals layout min jitter trials =
 
 prependInterval : Maybe Layout -> Time -> Time -> List (State -> Game msg) -> Generator (List (State -> Game msg))
 prependInterval layout min jitter trials =
-    (randomInterval min jitter)
-        :: (List.map Random.Extra.constant trials)
+    randomInterval min jitter
+        :: List.map Random.Extra.constant trials
         |> Random.Extra.combine
 
 
@@ -519,6 +521,7 @@ leftOrRight =
             (\bool ->
                 if bool then
                     Left
+
                 else
                     Right
             )
@@ -542,7 +545,7 @@ restart args state gameState =
         Playing { game, session, nextSeed } ->
             let
                 ( newGame, newSeed ) =
-                    (args.nextTrials
+                    args.nextTrials
                         |> Random.map
                             (\trials ->
                                 (trials ++ [ Card.restart args ])
@@ -556,13 +559,12 @@ restart args state gameState =
                                         (Card.complete state)
                             )
                         |> (\generator -> Random.step generator nextSeed)
-                    )
             in
-                Playing
-                    { game = newGame
-                    , session = session
-                    , nextSeed = newSeed
-                    }
+            Playing
+                { game = newGame
+                , session = session
+                , nextSeed = newSeed
+                }
 
         Loading _ _ ->
             gameState

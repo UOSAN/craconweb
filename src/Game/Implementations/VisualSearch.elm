@@ -2,31 +2,31 @@ module Game.Implementations.VisualSearch exposing (init)
 
 import Game
     exposing
-        ( Game
+        ( BorderType(..)
+        , Game
         , Image
         , Layout(..)
-        , BorderType(..)
         , LogEntry(..)
         , State
-        , onDirection
+        , addIntervals
         , andThen
         , emptyState
-        , segment
-        , log
-        , addIntervals
         , info
+        , leftOrRight
+        , log
+        , onDirection
+        , onSelect
+        , segment
+        , selectTimeout
+        , showZoom
+        , startSession
         , timeout
         , timeoutFromSegmentStart
-        , selectTimeout
-        , startSession
-        , leftOrRight
-        , onSelect
-        , showZoom
         )
+import List.Extra
 import Random exposing (Generator)
 import Random.List
 import Time exposing (Time)
-import List.Extra
 
 
 init :
@@ -59,7 +59,7 @@ init ({ fixationDuration, imageDuration, zoomDuration, infoString, responseImage
                         }
                     )
     in
-        Game.shuffle args trials
+    Game.shuffle args trials
 
 
 trial :
@@ -78,7 +78,7 @@ trial { fixationDuration, imageDuration, zoomDuration, goTrial, noGoImages } goI
             Random.step (Random.List.shuffle noGoImages) state.currentSeed
 
         ( images, nextSeed ) =
-            Random.step (Random.List.shuffle (goImage :: (List.take 15 noGoImagesShuffled))) newSeed
+            Random.step (Random.List.shuffle (goImage :: List.take 15 noGoImagesShuffled)) newSeed
 
         goIndex =
             case List.Extra.elemIndex goImage images of
@@ -94,11 +94,11 @@ trial { fixationDuration, imageDuration, zoomDuration, goTrial, noGoImages } goI
         fixation =
             Just (Fixation None)
     in
-        log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime, currentSeed = nextSeed }
-            |> andThen (log (BeginDisplay fixation))
-            |> andThen (segment [ timeout fixationDuration ] fixation)
-            |> andThen (log (BeginDisplay trial))
-            |> andThen (log BeginInput)
-            |> andThen (segment [ onSelect goIndex, selectTimeout (fixationDuration + imageDuration) ] trial)
-            |> andThen (segment [ timeoutFromSegmentStart zoomDuration ] trial)
-            |> andThen (log EndTrial)
+    log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime, currentSeed = nextSeed }
+        |> andThen (log (BeginDisplay fixation))
+        |> andThen (segment [ timeout fixationDuration ] fixation)
+        |> andThen (log (BeginDisplay trial))
+        |> andThen (log BeginInput)
+        |> andThen (segment [ onSelect goIndex, selectTimeout (fixationDuration + imageDuration) ] trial)
+        |> andThen (segment [ timeoutFromSegmentStart zoomDuration ] trial)
+        |> andThen (log EndTrial)

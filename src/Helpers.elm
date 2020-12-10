@@ -66,6 +66,7 @@ checkAccess route jwt =
         R.AdminRoute ->
             if isAdmin jwt || isStaff jwt then
                 route
+
             else
                 R.AccessDeniedRoute
 
@@ -81,6 +82,7 @@ checkAccess route jwt =
         R.FmriRoute _ ->
             if isAdmin jwt || isStaff jwt then
                 route
+
             else
                 R.AccessDeniedRoute
 

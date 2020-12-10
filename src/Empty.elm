@@ -1,11 +1,11 @@
 module Empty exposing (..)
 
 import Entity
+import Game
 import Model
 import Navigation
-import Routing
-import Game
 import RemoteData
+import Routing
 
 
 initialModel : Model.Model

@@ -14,7 +14,7 @@ powerPaths =
 
 parseLocation : Navigation.Location -> Route
 parseLocation location =
-    case (parsePath matchers location) of
+    case parsePath matchers location of
         Just route ->
             route
 
@@ -30,7 +30,7 @@ onLinkClick message =
             , preventDefault = True
             }
     in
-        onWithOptions "click" options (Decode.succeed message)
+    onWithOptions "click" options (Decode.succeed message)
 
 
 {-| Represents where I am in the application

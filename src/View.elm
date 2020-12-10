@@ -10,7 +10,6 @@ import List.Extra
 import Model exposing (..)
 import RemoteData
 import Routing as R
-import Entity
 import Ui.Admin as Admin
 import Ui.Parts as Parts
 import Window as W
@@ -209,11 +208,12 @@ navLink text_ path active =
         class_ =
             if active then
                 "nav-item is-tab is-active"
+
             else
                 "nav-item is-tab"
     in
-        a ([ class class_ ] ++ Parts.linkAttrs path)
-            [ text text_ ]
+    a ([ class class_ ] ++ Parts.linkAttrs path)
+        [ text text_ ]
 
 
 tinyLogo : String -> Html Msg
@@ -230,6 +230,7 @@ isActive : Bool -> String
 isActive active =
     if active then
         " is-active"
+
     else
         ""
 
@@ -310,12 +311,12 @@ homePageGameCards model =
                 Nothing ->
                     div [] []
     in
-        List.map toCard
-            [ model.gonogoGame
-            , model.dotprobeGame
-            , model.stopsignalGame
-            , model.visualsearchGame
-            ]
+    List.map toCard
+        [ model.gonogoGame
+        , model.dotprobeGame
+        , model.stopsignalGame
+        , model.visualsearchGame
+        ]
 
 
 homePageGameCard : String -> String -> String -> String -> Html Msg
@@ -448,12 +449,12 @@ tryUnlock ids b =
         b_ =
             { name = b.name, dscript = b.dscript, unlocked = True, fg = "#000", bg = "#eee" }
     in
-        case List.member b.id ids of
-            True ->
-                { b_ | unlocked = True, bg = "#F2E86B" }
+    case List.member b.id ids of
+        True ->
+            { b_ | unlocked = True, bg = "#F2E86B" }
 
-            False ->
-                { b_ | unlocked = False }
+        False ->
+            { b_ | unlocked = False }
 
 
 rules :
@@ -489,13 +490,14 @@ badgeBox b =
         ( wobble, icon ) =
             if b.unlocked then
                 ( "wobble-hor-bottom", i [ class "fa fa-unlock" ] [] )
+
             else
                 ( "", i [ class "fa fa-lock" ] [] )
     in
-        div [ class <| "box " ++ wobble, style [ ( "background-color", b.bg ), ( "color", b.fg ) ] ]
-            [ h1 [ class "title is-1", style [ ( "color", b.fg ) ] ] [ text <| b.name ++ " ", icon ]
-            , p [] [ text b.dscript ]
-            ]
+    div [ class <| "box " ++ wobble, style [ ( "background-color", b.bg ), ( "color", b.fg ) ] ]
+        [ h1 [ class "title is-1", style [ ( "color", b.fg ) ] ] [ text <| b.name ++ " ", icon ]
+        , p [] [ text b.dscript ]
+        ]
 
 
 settingsPage : Model -> Html Msg
@@ -515,12 +517,14 @@ easeIOTransform curr base mod =
         m =
             if mod >= 1.0 then
                 2.125
+
             else if mod <= 0.0 then
                 1.125
+
             else
                 mod + 1.125
     in
-        (curr ^ m) / ((curr ^ m) + ((base - curr) ^ m))
+    (curr ^ m) / ((curr ^ m) + ((base - curr) ^ m))
 
 
 easeInTransform : Float -> Float -> Float -> Float
@@ -529,12 +533,14 @@ easeInTransform curr base mod =
         m =
             if mod > 1.0 then
                 1.0
+
             else if mod < 0.0 then
                 0.0
+
             else
                 mod
     in
-        (curr - (base - curr) * (m * (curr / base))) / base
+    (curr - (base - curr) * (m * (curr / base))) / base
 
 
 visSearchScale : W.Size -> Float
@@ -546,21 +552,24 @@ visSearchScale size =
         currRatio =
             toFloat size.height / toFloat size.width
     in
-        if baseRatio > currRatio then
-            if size.width < 955 then
-                easeInTransform currRatio baseRatio 0.5
-            else if size.width < 1384 then
-                easeInTransform currRatio baseRatio 0.25
-            else
-                easeIOTransform currRatio baseRatio 0.5
+    if baseRatio > currRatio then
+        if size.width < 955 then
+            easeInTransform currRatio baseRatio 0.5
+
+        else if size.width < 1384 then
+            easeInTransform currRatio baseRatio 0.25
+
         else
-            1.0
+            easeIOTransform currRatio baseRatio 0.5
+
+    else
+        1.0
 
 
 scaleStyleFromFloat : Float -> Attribute msg
 scaleStyleFromFloat scale =
     style
-        [ ( "transform", "scale(" ++ (toString scale) ++ ")" )
+        [ ( "transform", "scale(" ++ toString scale ++ ")" )
         , ( "transform-origin", "50% 0" )
         ]
 
@@ -594,64 +603,64 @@ game model title initMsg =
                 _ ->
                     text ""
     in
-        basicPage model
-            [ div
-                [ class "container ", (scaleStyle model.activeRoute model.windowSize) ]
-                [ title_
-                , case model.activeRoute of
-                    R.GameRouteSs ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.stopsignalGame |> Maybe.map .slug |> Maybe.withDefault "stopsignal"
-                            , fmriUser = Nothing
-                            , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
-                            }
+    basicPage model
+        [ div
+            [ class "container ", scaleStyle model.activeRoute model.windowSize ]
+            [ title_
+            , case model.activeRoute of
+                R.GameRouteSs ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.stopsignalGame |> Maybe.map .slug |> Maybe.withDefault "stopsignal"
+                        , fmriUser = Nothing
+                        , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
+                        }
 
-                    R.GameRouteGn ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.gonogoGame |> Maybe.map .slug |> Maybe.withDefault "gonogo"
-                            , fmriUser = Nothing
-                            , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
-                            }
+                R.GameRouteGn ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.gonogoGame |> Maybe.map .slug |> Maybe.withDefault "gonogo"
+                        , fmriUser = Nothing
+                        , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
+                        }
 
-                    R.GameRouteDp ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.dotprobeGame |> Maybe.map .slug |> Maybe.withDefault "dotprobe"
-                            , fmriUser = Nothing
-                            , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
-                            }
+                R.GameRouteDp ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.dotprobeGame |> Maybe.map .slug |> Maybe.withDefault "dotprobe"
+                        , fmriUser = Nothing
+                        , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
+                        }
 
-                    R.GameRouteVs ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.visualsearchGame |> Maybe.map .slug |> Maybe.withDefault "visualsearch"
-                            , fmriUser = Nothing
-                            , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
-                            }
+                R.GameRouteVs ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.visualsearchGame |> Maybe.map .slug |> Maybe.withDefault "visualsearch"
+                        , fmriUser = Nothing
+                        , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
+                        }
 
-                    R.FmriRoute _ ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.stopsignalGame |> Maybe.map .slug |> Maybe.withDefault "stopsignal"
-                            , fmriUser =
-                                model.fmriUserData
-                                    |> RemoteData.toMaybe
-                                    |> Maybe.map (\fmriUserData -> fmriUserData.user)
-                            , restMessages = []
-                            }
+                R.FmriRoute _ ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.stopsignalGame |> Maybe.map .slug |> Maybe.withDefault "stopsignal"
+                        , fmriUser =
+                            model.fmriUserData
+                                |> RemoteData.toMaybe
+                                |> Maybe.map (\fmriUserData -> fmriUserData.user)
+                        , restMessages = []
+                        }
 
-                    _ ->
-                        text "Invalid Game"
-                ]
-            , loading_screen (RemoteData.isLoading model.fmriUserData)
+                _ ->
+                    text "Invalid Game"
             ]
+        , loading_screen (RemoteData.isLoading model.fmriUserData)
+        ]
 
 
 visualSearchGame : Model -> Html Msg
@@ -744,17 +753,17 @@ toStyle styles =
                 _ ->
                     ( "", "" )
     in
-        String.split ";" styles
-            |> List.map (\s -> String.split ":" s)
-            |> List.filter (\e -> e /= [ "" ])
-            |> List.map toTuple
+    String.split ";" styles
+        |> List.map (\s -> String.split ":" s)
+        |> List.filter (\e -> e /= [ "" ])
+        |> List.map toTuple
 
 
 statementsPage : Model -> Html Msg
 statementsPage model =
     basicPage model
         ([ h1 [ class "title has-text-centered" ] [ text "Statements" ] ]
-            ++ (statements 4 model.statements)
+            ++ statements 4 model.statements
         )
 
 
@@ -852,7 +861,7 @@ view model =
                 R.FmriRoute userId ->
                     stopSignalGame model
     in
-        div [] [ page ]
+    div [] [ page ]
 
 
 adminView : Model -> Html Msg

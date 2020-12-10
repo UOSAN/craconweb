@@ -1,9 +1,8 @@
-module Game.Result
-    exposing
-        ( averageResponseTimeInMillisecond
-        , percentCorrect
-        , isCorrect
-        )
+module Game.Result exposing
+    ( averageResponseTimeInMillisecond
+    , isCorrect
+    , percentCorrect
+    )
 
 import Game
 import Game.Cycle
@@ -48,10 +47,11 @@ averageResponseTimeInMillisecond state =
         totalResponses =
             responseTimes |> List.length
     in
-        if totalResponses == 0 then
-            Err "No Response"
-        else
-            Ok <| List.sum responseTimes / toFloat totalResponses
+    if totalResponses == 0 then
+        Err "No Response"
+
+    else
+        Ok <| List.sum responseTimes / toFloat totalResponses
 
 
 percentCorrect : { gameSlug : String } -> Game.State -> Float
@@ -68,7 +68,7 @@ percentCorrect gameSlug state =
                 |> List.filter (isCorrect gameSlug)
                 |> List.length
     in
-        (toFloat correctAnswers / toFloat totalAnswer) * 100
+    (toFloat correctAnswers / toFloat totalAnswer) * 100
 
 
 isCorrect : { gameSlug : String } -> Game.Cycle -> Bool
@@ -98,15 +98,17 @@ isDotProbeCorrect cycle =
 isGoNoGoCorrect : Game.Cycle -> Bool
 isGoNoGoCorrect cycle =
     if not cycle.dash then
-        (isNothing cycle.timeout) && (cycle.selectedIndex == cycle.targetIndex)
+        isNothing cycle.timeout && (cycle.selectedIndex == cycle.targetIndex)
+
     else
-        (isJust cycle.timeout)
+        isJust cycle.timeout
 
 
 isStopSignalCorrect : Game.Cycle -> Bool
 isStopSignalCorrect cycle =
     if cycle.blue then
         isNothing cycle.timeout
+
     else
         isJust cycle.timeout
 

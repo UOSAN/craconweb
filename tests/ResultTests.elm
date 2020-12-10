@@ -1,10 +1,10 @@
 module ResultTests exposing (all)
 
-import Test exposing (..)
-import Result.GoNoGoTests
 import Result.DotProbeTests
+import Result.GoNoGoTests
 import Result.StopSignalTests
 import Result.VisualSearchTests
+import Test exposing (..)
 
 
 all : Test

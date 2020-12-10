@@ -1,19 +1,18 @@
-module Game.Card
-    exposing
-        ( Card
-        , Continuation(..)
-        , andThen
-        , andThenRest
-        , card
-        , complete
-        , restart
-        , layout
-        , step
-        , unwrap
-        )
+module Game.Card exposing
+    ( Card
+    , Continuation(..)
+    , andThen
+    , andThenRest
+    , card
+    , complete
+    , layout
+    , restart
+    , step
+    , unwrap
+    )
 
-import Time exposing (Time)
 import Random
+import Time exposing (Time)
 
 
 type Card state layout input msg
@@ -44,12 +43,13 @@ andThen isTimeout resetSegmentStart initialize f (Card card) =
                 ( Complete state, cmd1 ) ->
                     if isTimeout state then
                         ( Complete state, cmd1 )
+
                     else
                         let
                             ( continuation, cmd2 ) =
                                 step input (f (resetSegmentStart state))
                         in
-                            ( continuation, Cmd.batch [ cmd1, cmd2 ] )
+                        ( continuation, Cmd.batch [ cmd1, cmd2 ] )
 
                 ( Continue state newCard, cmd ) ->
                     ( Continue
@@ -68,7 +68,7 @@ andThen isTimeout resetSegmentStart initialize f (Card card) =
                 ( Restart _ _, cmd ) ->
                     Debug.crash "andThen"
     in
-        Card { card | logic = newLogic }
+    Card { card | logic = newLogic }
 
 
 andThenRest :
@@ -93,24 +93,24 @@ andThenRest ({ restCard, isInterval, restDuration, shouldRest, isFinish, resetSe
                         updatedState =
                             resetSegmentStart state
                     in
-                        case ( shouldRest state, isFinish state ) of
-                            ( True, False ) ->
-                                ( updatedState
-                                    |> resetBlockStart restDuration
-                                    |> restCard
-                                    |> Rest updatedState
-                                , cmd1
-                                )
+                    case ( shouldRest state, isFinish state ) of
+                        ( True, False ) ->
+                            ( updatedState
+                                |> resetBlockStart restDuration
+                                |> restCard
+                                |> Rest updatedState
+                            , cmd1
+                            )
 
-                            ( True, True ) ->
-                                ( Complete state, cmd1 )
+                        ( True, True ) ->
+                            ( Complete state, cmd1 )
 
-                            ( False, _ ) ->
-                                let
-                                    ( continuation, cmd2 ) =
-                                        step input (f updatedState)
-                                in
-                                    ( continuation, Cmd.batch [ cmd1, cmd2 ] )
+                        ( False, _ ) ->
+                            let
+                                ( continuation, cmd2 ) =
+                                    step input (f updatedState)
+                            in
+                            ( continuation, Cmd.batch [ cmd1, cmd2 ] )
 
                 ( Rest state newCard, cmd1 ) ->
                     continuingFromRest args cmd1 newCard f state
@@ -125,7 +125,7 @@ andThenRest ({ restCard, isInterval, restDuration, shouldRest, isFinish, resetSe
                 ( Restart state _, cmd ) ->
                     ( Complete state, cmd )
     in
-        Card { card | logic = newLogic }
+    Card { card | logic = newLogic }
 
 
 continuingFromRest :
@@ -151,25 +151,25 @@ continuingFromRest args cmd newCard f state =
         contCard =
             continuationCard continuation
     in
-        case ( contCard, Maybe.map args.isInterval contCard ) of
-            ( Just card, Just True ) ->
-                let
-                    ( nextContinuation, cmd3 ) =
-                        step args.initialize (f (args.resetSegmentStart (unwrapContinuation continuation)))
-                in
-                    ( nextContinuation
-                        |> continuationCard
-                        |> Maybe.map (\nextCard -> Continue state (andThenRest args f nextCard))
-                        |> Maybe.withDefault (Complete state)
-                    , Cmd.batch [ cmd, cmd2, cmd3 ]
-                    )
+    case ( contCard, Maybe.map args.isInterval contCard ) of
+        ( Just card, Just True ) ->
+            let
+                ( nextContinuation, cmd3 ) =
+                    step args.initialize (f (args.resetSegmentStart (unwrapContinuation continuation)))
+            in
+            ( nextContinuation
+                |> continuationCard
+                |> Maybe.map (\nextCard -> Continue state (andThenRest args f nextCard))
+                |> Maybe.withDefault (Complete state)
+            , Cmd.batch [ cmd, cmd2, cmd3 ]
+            )
 
-            _ ->
-                ( Continue
-                    state
-                    (andThenRest args f newCard)
-                , cmd
-                )
+        _ ->
+            ( Continue
+                state
+                (andThenRest args f newCard)
+            , cmd
+            )
 
 
 card : Maybe layout -> (input -> ( Continuation a layout input msg, Cmd msg )) -> Card a layout input msg
@@ -205,7 +205,7 @@ unwrap initialize card =
                 ( continuation, _ ) =
                     logic initialize
             in
-                unwrapContinuation continuation
+            unwrapContinuation continuation
 
 
 unwrapContinuation : Continuation a layout input msg -> a

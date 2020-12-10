@@ -1,19 +1,19 @@
 module Main exposing (..)
 
+import AnimationFrame
 import Api
 import Empty exposing (initialModel)
+import Game
+import Helpers
 import Keyboard
 import Model as M
-import Game
 import Navigation
+import Port
 import Routing as R
+import Task
 import Update
 import View
-import Port
 import Window
-import AnimationFrame
-import Helpers
-import Task
 
 
 main : Program M.Flags M.Model M.Msg
@@ -41,6 +41,7 @@ ticker : Game.GameState M.Msg -> Sub M.Msg
 ticker gameState =
     if Game.isPlaying gameState then
         AnimationFrame.times M.NewCurrentTime
+
     else
         Sub.none
 
@@ -77,15 +78,15 @@ init flags location =
                 , loadTime = flags.time
             }
     in
-        Api.fetchFmriUserData model_
-            |> Tuple.mapSecond
-                (\cmd ->
-                    Cmd.batch
-                        [ commands_
-                        , cmd
-                        , (Task.perform M.WindowResize Window.size)
-                        ]
-                )
+    Api.fetchFmriUserData model_
+        |> Tuple.mapSecond
+            (\cmd ->
+                Cmd.batch
+                    [ commands_
+                    , cmd
+                    , Task.perform M.WindowResize Window.size
+                    ]
+            )
 
 
 servers : String -> ( String, String, String )

@@ -1,18 +1,18 @@
 module Update.GoNoGoTests exposing (all)
 
-import Test exposing (..)
-import Empty exposing (initialModel)
-import Expect
-import Update
-import Model exposing (Msg(..))
 import Date
+import Empty exposing (initialModel)
 import Entity
-import Protobuf
-import Time
+import Expect
 import Game
-import Random
-import Game.Implementations.GoNoGo as GoNoGo
 import Game.Cycle as Cycle
+import Game.Implementations.GoNoGo as GoNoGo
+import Model exposing (Msg(..))
+import Protobuf
+import Random
+import Test exposing (..)
+import Time
+import Update
 
 
 all : Test
@@ -39,16 +39,16 @@ currentTimeShouldBeUpdated =
                         { gameId = (game timestamp).id
                         , game = gameStateData timestamp
                         , time = timestamp
-                        , initialSeed = (round timestamp)
+                        , initialSeed = round timestamp
                         , nextSeed = nextSeed timestamp
                         }
                     , NewCurrentTime (timestamp + (10 * Time.millisecond))
                     , DirectionInput Game.Left
                     ]
             in
-                Expect.equal
-                    (Just (timestamp + (10 * Time.millisecond)))
-                    ((List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) msgs) |> toTime)
+            Expect.equal
+                (Just (timestamp + (10 * Time.millisecond)))
+                (List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) msgs |> toTime)
 
 
 shouldTimedout : Test
@@ -65,7 +65,7 @@ shouldTimedout =
                         { gameId = (game timestamp).id
                         , game = gameStateData timestamp
                         , time = timestamp
-                        , initialSeed = (round timestamp)
+                        , initialSeed = round timestamp
                         , nextSeed = nextSeed timestamp
                         }
                     , NewCurrentTime (timestamp + (0 * Time.millisecond))
@@ -73,31 +73,31 @@ shouldTimedout =
                     , DirectionInput Game.Left
                     ]
             in
-                Expect.equal
-                    [ { id = Nothing
-                      , sessionId = "SessionId"
-                      , sort = 0
-                      , fixation = Nothing
-                      , selection = Nothing
-                      , pictures = Just timestamp
-                      , redcross = Nothing
-                      , probe = Nothing
-                      , border = Just timestamp
-                      , timeout = Just (timestamp + 1250)
-                      , rest = Nothing
-                      , interval = Just (timestamp + 1250)
-                      , width = Just 2
-                      , height = Nothing
-                      , blue = False
-                      , gray = False
-                      , dash = True
-                      , targetIndex = 0
-                      , selectedIndex = 0
-                      , startIndex = 0
-                      , images = [ "non-response" ]
-                      }
-                    ]
-                    ((List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) msgs) |> toCycles)
+            Expect.equal
+                [ { id = Nothing
+                  , sessionId = "SessionId"
+                  , sort = 0
+                  , fixation = Nothing
+                  , selection = Nothing
+                  , pictures = Just timestamp
+                  , redcross = Nothing
+                  , probe = Nothing
+                  , border = Just timestamp
+                  , timeout = Just (timestamp + 1250)
+                  , rest = Nothing
+                  , interval = Just (timestamp + 1250)
+                  , width = Just 2
+                  , height = Nothing
+                  , blue = False
+                  , gray = False
+                  , dash = True
+                  , targetIndex = 0
+                  , selectedIndex = 0
+                  , startIndex = 0
+                  , images = [ "non-response" ]
+                  }
+                ]
+                (List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) msgs |> toCycles)
 
 
 shouldHaveSelection : Test
@@ -114,7 +114,7 @@ shouldHaveSelection =
                         { gameId = (game timestamp).id
                         , game = gameStateData timestamp
                         , time = timestamp
-                        , initialSeed = (round timestamp)
+                        , initialSeed = round timestamp
                         , nextSeed = nextSeed timestamp
                         }
                     , NewCurrentTime (timestamp + (0 * Time.millisecond))
@@ -123,31 +123,31 @@ shouldHaveSelection =
                     , NewCurrentTime (timestamp + (1250 * Time.millisecond))
                     ]
             in
-                Expect.equal
-                    [ { id = Nothing
-                      , sessionId = "SessionId"
-                      , sort = 0
-                      , fixation = Nothing
-                      , selection = Just (timestamp + (1249 * Time.millisecond))
-                      , pictures = Just timestamp
-                      , redcross = Nothing
-                      , probe = Nothing
-                      , border = Just timestamp
-                      , timeout = Nothing
-                      , rest = Nothing
-                      , interval = Just (timestamp + (1249 * Time.millisecond))
-                      , width = Just 2
-                      , height = Nothing
-                      , blue = False
-                      , gray = False
-                      , dash = False
-                      , targetIndex = 0
-                      , selectedIndex = 0
-                      , startIndex = 0
-                      , images = [ "filler" ]
-                      }
-                    ]
-                    ((List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) msgs) |> toCycles)
+            Expect.equal
+                [ { id = Nothing
+                  , sessionId = "SessionId"
+                  , sort = 0
+                  , fixation = Nothing
+                  , selection = Just (timestamp + (1249 * Time.millisecond))
+                  , pictures = Just timestamp
+                  , redcross = Nothing
+                  , probe = Nothing
+                  , border = Just timestamp
+                  , timeout = Nothing
+                  , rest = Nothing
+                  , interval = Just (timestamp + (1249 * Time.millisecond))
+                  , width = Just 2
+                  , height = Nothing
+                  , blue = False
+                  , gray = False
+                  , dash = False
+                  , targetIndex = 0
+                  , selectedIndex = 0
+                  , startIndex = 0
+                  , images = [ "filler" ]
+                  }
+                ]
+                (List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) msgs |> toCycles)
 
 
 answerBeforeTimeout : Test
@@ -159,7 +159,7 @@ answerBeforeTimeout =
                 { gameId = (game timestamp).id
                 , game = gameStateData timestamp
                 , time = timestamp
-                , initialSeed = (round timestamp)
+                , initialSeed = round timestamp
                 , nextSeed = nextSeed timestamp
                 }
             , NewCurrentTime (timestamp + (0 * Time.millisecond))
@@ -169,70 +169,70 @@ answerBeforeTimeout =
             , NewCurrentTime (timestamp + (1251 * Time.millisecond))
             ]
     in
-        describe "Answer before timeout"
-            [ test "Wrong answer" <|
-                \() ->
-                    let
-                        timestamp =
-                            0
-                    in
-                        Expect.equal
-                            [ { id = Nothing
-                              , sessionId = "SessionId"
-                              , sort = 0
-                              , fixation = Nothing
-                              , selection = Just (timestamp + 1249)
-                              , pictures = Just timestamp
-                              , redcross = Just (timestamp + 1249)
-                              , probe = Nothing
-                              , border = Just timestamp
-                              , timeout = Nothing
-                              , rest = Nothing
-                              , interval = Nothing
-                              , width = Just 2
-                              , height = Nothing
-                              , blue = False
-                              , gray = False
-                              , dash = True
-                              , targetIndex = 0
-                              , selectedIndex = 0
-                              , startIndex = 0
-                              , images = [ "non-response" ]
-                              }
-                            ]
-                            ((List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) (msgs timestamp)) |> toCycles)
-            , test "Right answer" <|
-                \() ->
-                    let
-                        timestamp =
-                            3
-                    in
-                        Expect.equal
-                            [ { id = Nothing
-                              , sessionId = "SessionId"
-                              , sort = 0
-                              , fixation = Nothing
-                              , selection = Just (timestamp + 1249)
-                              , pictures = Just timestamp
-                              , redcross = Nothing
-                              , probe = Nothing
-                              , border = Just timestamp
-                              , timeout = Nothing
-                              , rest = Nothing
-                              , interval = Just (timestamp + 1249)
-                              , width = Just 2
-                              , height = Nothing
-                              , blue = False
-                              , gray = False
-                              , dash = False
-                              , targetIndex = 0
-                              , selectedIndex = 0
-                              , startIndex = 0
-                              , images = [ "response" ]
-                              }
-                            ]
-                            ((List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) (msgs timestamp)) |> toCycles)
-            ]
+    describe "Answer before timeout"
+        [ test "Wrong answer" <|
+            \() ->
+                let
+                    timestamp =
+                        0
+                in
+                Expect.equal
+                    [ { id = Nothing
+                      , sessionId = "SessionId"
+                      , sort = 0
+                      , fixation = Nothing
+                      , selection = Just (timestamp + 1249)
+                      , pictures = Just timestamp
+                      , redcross = Just (timestamp + 1249)
+                      , probe = Nothing
+                      , border = Just timestamp
+                      , timeout = Nothing
+                      , rest = Nothing
+                      , interval = Nothing
+                      , width = Just 2
+                      , height = Nothing
+                      , blue = False
+                      , gray = False
+                      , dash = True
+                      , targetIndex = 0
+                      , selectedIndex = 0
+                      , startIndex = 0
+                      , images = [ "non-response" ]
+                      }
+                    ]
+                    (List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) (msgs timestamp) |> toCycles)
+        , test "Right answer" <|
+            \() ->
+                let
+                    timestamp =
+                        3
+                in
+                Expect.equal
+                    [ { id = Nothing
+                      , sessionId = "SessionId"
+                      , sort = 0
+                      , fixation = Nothing
+                      , selection = Just (timestamp + 1249)
+                      , pictures = Just timestamp
+                      , redcross = Nothing
+                      , probe = Nothing
+                      , border = Just timestamp
+                      , timeout = Nothing
+                      , rest = Nothing
+                      , interval = Just (timestamp + 1249)
+                      , width = Just 2
+                      , height = Nothing
+                      , blue = False
+                      , gray = False
+                      , dash = False
+                      , targetIndex = 0
+                      , selectedIndex = 0
+                      , startIndex = 0
+                      , images = [ "response" ]
+                      }
+                    ]
+                    (List.foldl (\msg model -> Update.update msg model |> Tuple.first) (goNoGoModel timestamp) (msgs timestamp) |> toCycles)
+        ]
 
 
 
@@ -345,7 +345,7 @@ generateGameStateData timestamp =
         , responseImages = List.range 1 10 |> List.map (always responseImage)
         , nonResponseImages = List.range 1 10 |> List.map (always nonResponseImage)
         , fillerImages = List.range 1 10 |> List.map (always fillerImage)
-        , seedInt = (round timestamp)
+        , seedInt = round timestamp
         , currentTime = timestamp
         , redCrossDuration = 500 * Time.millisecond
         , blockDuration = 1 * Time.minute
@@ -361,7 +361,7 @@ gameSession timestamp =
     { id = ""
     , userId = ""
     , gameId = ""
-    , seed = (round timestamp)
+    , seed = round timestamp
     , start = timestamp
     , end = Nothing
     , jitter = False
@@ -387,7 +387,7 @@ debugLogEntries model =
         _ =
             Debug.log "LogEntry" (model |> toLogEntries)
     in
-        model
+    model
 
 
 debugCycles : Model.Model -> Model.Model
@@ -396,7 +396,7 @@ debugCycles model =
         _ =
             Debug.log "Cycles" (model |> toCycles)
     in
-        model
+    model
 
 
 debugTime : Model.Model -> Model.Model
@@ -405,7 +405,7 @@ debugTime model =
         _ =
             Debug.log "time" (model |> toTime)
     in
-        model
+    model
 
 
 toTime : Model.Model -> Maybe Time.Time

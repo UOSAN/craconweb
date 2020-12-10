@@ -2,28 +2,28 @@ module Game.Implementations.GoNoGo exposing (init)
 
 import Game
     exposing
-        ( Game
+        ( BorderType(..)
+        , Game
         , Image
         , Layout(..)
-        , BorderType(..)
         , LogEntry(..)
         , State
+        , addIntervals
         , andThen
         , emptyState
-        , segment
-        , log
-        , logWithCondition
-        , addIntervals
         , info
-        , onIndication
-        , timeoutFromSegmentStart
-        , timeout
-        , resultTimeout
-        , startSession
-        , trialFailed
         , isFailed
         , leftOrRight
+        , log
+        , logWithCondition
         , onDirection
+        , onIndication
+        , resultTimeout
+        , segment
+        , startSession
+        , timeout
+        , timeoutFromSegmentStart
+        , trialFailed
         )
 import Random exposing (Generator)
 import Time exposing (Time)
@@ -80,7 +80,7 @@ init ({ totalDuration, infoString, responseImages, nonResponseImages, fillerImag
         trials =
             gos ++ noGos ++ fillers
     in
-        Game.shuffle args trials
+    Game.shuffle args trials
 
 
 trial :
@@ -99,6 +99,7 @@ trial { totalDuration, goTrial, redCrossDuration } image state =
         borderType =
             if goTrial then
                 Black
+
             else
                 Dashed
 
@@ -108,16 +109,16 @@ trial { totalDuration, goTrial, redCrossDuration } image state =
         redCross =
             Just (RedCross borderType)
     in
-        log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime, currentSeed = nextSeed }
-            |> andThen (log (BeginDisplay bordered))
-            |> andThen (log BeginInput)
-            |> andThen
-                (segment
-                    [ onDirection goTrial direction
-                    , resultTimeout (not goTrial) totalDuration
-                    ]
-                    bordered
-                )
-            |> andThen (logWithCondition isFailed (BeginDisplay redCross))
-            |> andThen (segment [ trialFailed, timeoutFromSegmentStart redCrossDuration ] redCross)
-            |> andThen (log EndTrial)
+    log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime, currentSeed = nextSeed }
+        |> andThen (log (BeginDisplay bordered))
+        |> andThen (log BeginInput)
+        |> andThen
+            (segment
+                [ onDirection goTrial direction
+                , resultTimeout (not goTrial) totalDuration
+                ]
+                bordered
+            )
+        |> andThen (logWithCondition isFailed (BeginDisplay redCross))
+        |> andThen (segment [ trialFailed, timeoutFromSegmentStart redCrossDuration ] redCross)
+        |> andThen (log EndTrial)
