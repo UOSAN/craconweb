@@ -7,11 +7,11 @@ import Json.Decode as JD
 import Json.Decode.Pipeline as JP
 import Json.Encode as JE
 import List.Extra as LE
-import Navigation
 import Random
 import RemoteData
 import Routing
 import Time
+import Url
 import Window as W
 
 
@@ -76,7 +76,7 @@ type alias FmriUserData =
 
 type Msg
     = UpdateLocation String
-    | OnUpdateLocation Navigation.Location
+    | OnUpdateLocation Url.Url
     | FillTmpUserEdit String
     | GroupChanged (Maybe String)
     | SetStatus String

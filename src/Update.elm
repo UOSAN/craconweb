@@ -23,6 +23,7 @@ import RemoteData
 import Routing as R
 import Task exposing (Task)
 import Time exposing (Time)
+import Url
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -1474,7 +1475,7 @@ fmriImagesResp resp model =
             ( model, Cmd.none )
 
 
-onUpdateLocation : Navigation.Location -> Model -> ( Model, Cmd Msg )
+onUpdateLocation : Url.Url -> Model -> ( Model, Cmd Msg )
 onUpdateLocation location model =
     let
         model_ =

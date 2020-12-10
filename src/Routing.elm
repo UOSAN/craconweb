@@ -3,8 +3,8 @@ module Routing exposing (..)
 import Html exposing (Attribute)
 import Html.Events exposing (onWithOptions)
 import Json.Decode as Decode
-import Navigation
-import UrlParser exposing (..)
+import Url
+import Url.Parser exposing (Parser, (</>), s, map, oneOf, top, parse)
 
 
 powerPaths : List String
@@ -12,9 +12,9 @@ powerPaths =
     [ adminPath, registerPath, mesPath ]
 
 
-parseLocation : Navigation.Location -> Route
+parseLocation : Url.Url -> Route
 parseLocation location =
-    case parsePath matchers location of
+    case parse matchers location of
         Just route ->
             route
 

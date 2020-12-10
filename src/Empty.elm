@@ -3,7 +3,6 @@ module Empty exposing (..)
 import Entity
 import Game
 import Model
-import Navigation
 import RemoteData
 import Routing
 
@@ -88,22 +87,6 @@ emptyUserRecord =
     , groupId = ""
     , mesOptin = True
     , roles = []
-    , password = ""
-    }
-
-
-emptyLocation : Navigation.Location
-emptyLocation =
-    { href = ""
-    , host = ""
-    , hostname = ""
-    , protocol = ""
-    , origin = ""
-    , port_ = ""
-    , pathname = ""
-    , search = ""
-    , hash = ""
-    , username = ""
     , password = ""
     }
 

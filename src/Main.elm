@@ -46,11 +46,11 @@ ticker gameState =
         Sub.none
 
 
-init : M.Flags -> Navigation.Location -> ( M.Model, Cmd M.Msg )
+init : M.Flags -> Url.Url -> ( M.Model, Cmd M.Msg )
 init flags location =
     let
         ( httpsrv, tasksrv, filesrv ) =
-            servers location.hostname
+            servers location.host
 
         -- based on location and jwt
         ( route_, visitor_, commands_ ) =
