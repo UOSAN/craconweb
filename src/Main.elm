@@ -7,7 +7,6 @@ import Game
 import Helpers
 import Keyboard
 import Model as M
-import Navigation
 import Port
 import Routing as R
 import Task
@@ -63,7 +62,7 @@ init flags location key =
                 Err _ ->
                     ( R.LoginRoute
                     , M.Anon
-                    , Navigation.newUrl R.loginPath
+                    , Browser.Navigation.pushUrl key R.loginPath
                     )
 
         model_ =

@@ -1,6 +1,7 @@
 module Update exposing (update)
 
 import Api
+import Browser.Navigation exposing (pushUrl)
 import Empty
 import Entity
 import Game
@@ -16,7 +17,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
 import Model exposing (..)
-import Navigation
 import Port
 import Random
 import RemoteData
@@ -120,7 +120,7 @@ update msg model =
                                 , groupId = u.groupId
                                 , mesOptin = u.mesOptin
                                 }
-                            , Navigation.newUrl (R.editPath ++ u.id)
+                            , pushUrl model.key (R.editPath ++ u.id)
                             )
             in
             ( { model | adminModel = up_tmpUserEdit model.adminModel tmpUser }
@@ -490,7 +490,7 @@ update msg model =
                 , adminModel =
                     up_tmpUserRecord model.adminModel Empty.emptyUserRecord
               }
-            , Navigation.newUrl R.adminPath
+            , pushUrl model.key R.adminPath
             )
 
         -- SHARED
@@ -509,7 +509,7 @@ update msg model =
         UpdateLocation path ->
             let
                 cmds =
-                    [ Navigation.newUrl path
+                    [ pushUrl model.key path
                     ]
             in
             ( model, Cmd.batch cmds )
@@ -553,7 +553,7 @@ update msg model =
             let
                 cmds =
                     [ Port.clear ()
-                    , Navigation.newUrl "/login"
+                    , pushUrl model.key "/login"
                     ]
             in
             ( Empty.emptyModel model, Cmd.batch cmds )
@@ -573,10 +573,10 @@ update msg model =
 
                                 skipToAdmin jwt =
                                     if isPowerful (List.map .name jwt.roles) then
-                                        Navigation.newUrl R.adminPath
+                                        pushUrl model.key R.adminPath
 
                                     else
-                                        Navigation.newUrl R.homePath
+                                        pushUrl model.key R.homePath
                             in
                             ( { model
                                 | loading = Nothing
@@ -1464,7 +1464,7 @@ fmriImagesResp resp model =
             ( { model | fmriUserData = resp }
             , Cmd.batch
                 [ preloadUgImages model.filesrv (fmriUserData.ugimages_v ++ fmriUserData.ugimages_i ++ fmriUserData.ugimages_f)
-                , Navigation.newUrl "stopsignal"
+                , pushUrl model.key "stopsignal"
                 ]
             )
 
