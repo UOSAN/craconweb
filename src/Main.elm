@@ -12,7 +12,6 @@ import Routing as R
 import Task
 import Update
 import View
-import Window
 
 
 main : Program M.Flags M.Model M.Msg
@@ -31,7 +30,7 @@ subscriptions model =
         , ticker model.gameState
         , Port.status M.SetStatus
         , Port.domLoaded M.DomLoaded
-        , Window.resizes M.WindowResize
+        , Browser.Events.onResize M.WindowResize
         ]
 
 
@@ -83,9 +82,15 @@ init flags location key =
                 Cmd.batch
                     [ commands_
                     , cmd
-                    , Task.perform M.WindowResize Window.size
+                    , Task.perform M.WindowResize getWindowSize
                     ]
             )
+
+
+getWindowSize : () -> M.WindowSize
+getWindowSize _ =
+    s = Browser.Dom.getViewport
+    (s.viewport.width, s.viewport.height)
 
 
 servers : String -> ( String, String, String )

@@ -13,7 +13,6 @@ import RemoteData
 import Routing as R
 import Ui.Admin as Admin
 import Ui.Parts as Parts
-import Window as W
 
 
 bigLogo : String -> Html Msg
@@ -542,7 +541,7 @@ easeInTransform curr base mod =
     (curr - (base - curr) * (m * (curr / base))) / base
 
 
-visSearchScale : W.Size -> Float
+visSearchScale : WindowSize -> Float
 visSearchScale size =
     let
         baseRatio =
@@ -573,7 +572,7 @@ scaleStyleFromFloat scale =
         ]
 
 
-scaleStyle : R.Route -> Maybe W.Size -> Attribute msg
+scaleStyle : R.Route -> Maybe WindowSize -> Attribute msg
 scaleStyle route size =
     case route of
         R.GameRouteVs ->

@@ -13,7 +13,6 @@ import RemoteData
 import Routing
 import Time
 import Url
-import Window as W
 
 
 type alias Flags =
@@ -63,7 +62,7 @@ type alias Model =
     , badgesEarned : RemoteData.WebData (List String)
     , fmriUserData : RemoteData.RemoteData ValuationsError FmriUserData
     , statementsModal : Bool
-    , windowSize : Maybe W.Size
+    , windowSize : Maybe WindowSize
     , key : Browser.Navigation.Key
     }
 
@@ -73,6 +72,12 @@ type alias FmriUserData =
     , ugimages_v : List Entity.Ugimage
     , ugimages_i : List Entity.Ugimage
     , ugimages_f : List Entity.Ugimage
+    }
+
+
+type alias WindowSize =
+    { width : Int
+    , height : Int
     }
 
 
@@ -138,7 +143,7 @@ type Msg
     | ToggleTmpUserEditMesOptin
     | DomLoaded Bool
     | FmriImagesResp (RemoteData.RemoteData ValuationsError FmriUserData)
-    | WindowResize W.Size
+    | WindowResize WindowSize
 
 
 type alias Login =
