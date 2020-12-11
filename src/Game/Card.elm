@@ -36,10 +36,10 @@ type Continuation state layout input msg
 
 
 andThen : (state -> Bool) -> (state -> state) -> input -> (state -> Card state layout input msg) -> Card state layout input msg -> Card state layout input msg
-andThen isTimeout resetSegmentStart initialize f (Card card) =
+andThen isTimeout resetSegmentStart initialize f (Card tempCard) =
     let
         newLogic input =
-            case card.logic input of
+            case tempCard.logic input of
                 ( Complete state, cmd1 ) ->
                     if isTimeout state then
                         ( Complete state, cmd1 )
@@ -68,7 +68,7 @@ andThen isTimeout resetSegmentStart initialize f (Card card) =
                 ( Restart _ _, cmd ) ->
                     Debug.crash "andThen"
     in
-    Card { card | logic = newLogic }
+    Card { tempCard | logic = newLogic }
 
 
 andThenRest :
@@ -84,10 +84,10 @@ andThenRest :
     -> (state -> Card state layout input msg)
     -> Card state layout input msg
     -> Card state layout input msg
-andThenRest ({ restCard, isInterval, restDuration, shouldRest, isFinish, resetSegmentStart, resetBlockStart, initialize } as args) f (Card card) =
+andThenRest ({ restCard, isInterval, restDuration, shouldRest, isFinish, resetSegmentStart, resetBlockStart, initialize } as args) f (Card tempCard) =
     let
         newLogic input =
-            case card.logic input of
+            case tempCard.logic input of
                 ( Complete state, cmd1 ) ->
                     let
                         updatedState =
@@ -125,7 +125,7 @@ andThenRest ({ restCard, isInterval, restDuration, shouldRest, isFinish, resetSe
                 ( Restart state _, cmd ) ->
                     ( Complete state, cmd )
     in
-    Card { card | logic = newLogic }
+    Card { tempCard | logic = newLogic }
 
 
 continuingFromRest :
@@ -152,7 +152,7 @@ continuingFromRest args cmd newCard f state =
             continuationCard continuation
     in
     case ( contCard, Maybe.map args.isInterval contCard ) of
-        ( Just card, Just True ) ->
+        ( Just tempCard, Just True ) ->
             let
                 ( nextContinuation, cmd3 ) =
                     step args.initialize (f (args.resetSegmentStart (unwrapContinuation continuation)))
@@ -173,8 +173,8 @@ continuingFromRest args cmd newCard f state =
 
 
 card : Maybe layout -> (input -> ( Continuation a layout input msg, Cmd msg )) -> Card a layout input msg
-card layout logic =
-    Card { layout = layout, logic = logic }
+card tempLayout logic =
+    Card { layout = tempLayout, logic = logic }
 
 
 complete : a -> Card a layout input msg
@@ -188,18 +188,18 @@ restart args a =
 
 
 layout : Card a layout input msg -> Maybe layout
-layout (Card card) =
-    card.layout
+layout (Card tempCard) =
+    tempCard.layout
 
 
 step : input -> Card a layout input msg -> ( Continuation a layout input msg, Cmd msg )
-step input (Card card) =
-    card.logic input
+step input (Card tempCard) =
+    tempCard.logic input
 
 
 unwrap : input -> Card a layout input msg -> a
-unwrap initialize card =
-    case card of
+unwrap initialize tempCard =
+    case tempCard of
         Card { logic } ->
             let
                 ( continuation, _ ) =
@@ -227,11 +227,11 @@ unwrapContinuation continuation =
 continuationCard : Continuation a layout input msg -> Maybe (Card a layout input msg)
 continuationCard continuation =
     case continuation of
-        Continue _ layout ->
-            Just layout
+        Continue _ tempLayout ->
+            Just tempLayout
 
-        Rest _ layout ->
-            Just layout
+        Rest _ tempLayout ->
+            Just tempLayout
 
         Complete _ ->
             Nothing
