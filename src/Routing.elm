@@ -4,7 +4,7 @@ import Html exposing (Attribute)
 import Html.Events exposing (custom)
 import Json.Decode as Decode
 import Url
-import Url.Parser exposing (Parser, (</>), s, map, oneOf, top, parse)
+import Url.Parser exposing (Parser, (</>), s, map, oneOf, top, parse, string)
 
 
 powerPaths : List String
