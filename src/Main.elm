@@ -5,13 +5,13 @@ import Browser.Events
 import Empty exposing (initialModel)
 import Game
 import Helpers
-import Keyboard
 import Model as M
 import Port
 import Routing as R
 import Task
 import Update
 import View
+import Model exposing (WindowSize)
 
 
 main : Program M.Flags M.Model M.Msg
@@ -26,11 +26,11 @@ main =
 subscriptions : M.Model -> Sub M.Msg
 subscriptions model =
     Sub.batch
-        [ Keyboard.downs M.Presses
+        [ Browser.Events.onKeyDown M.Presses
         , ticker model.gameState
         , Port.status M.SetStatus
         , Port.domLoaded M.DomLoaded
-        , Browser.Events.onResize M.WindowResize
+        , Browser.Events.onResize (\w h -> M.WindowResize getWindowSize w h)
         ]
 
 
@@ -82,15 +82,13 @@ init flags location key =
                 Cmd.batch
                     [ commands_
                     , cmd
-                    , Task.perform M.WindowResize getWindowSize
                     ]
             )
 
 
-getWindowSize : () -> M.WindowSize
-getWindowSize _ =
-    s = Browser.Dom.getViewport
-    (s.viewport.width, s.viewport.height)
+getWindowSize : Int -> Int -> WindowSize
+getWindowSize w h =
+    {width = w, height = h}
 
 
 servers : String -> ( String, String, String )
