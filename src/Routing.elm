@@ -1,7 +1,7 @@
 module Routing exposing (..)
 
 import Html exposing (Attribute)
-import Html.Events exposing (onWithOptions)
+import Html.Events exposing (custom)
 import Json.Decode as Decode
 import Url
 import Url.Parser exposing (Parser, (</>), s, map, oneOf, top, parse)
@@ -26,11 +26,12 @@ onLinkClick : msg -> Attribute msg
 onLinkClick message =
     let
         options =
-            { stopPropagation = False
+            { message = message
+            , stopPropagation = False
             , preventDefault = True
             }
     in
-    onWithOptions "click" options (Decode.succeed message)
+    custom "click" (Decode.succeed options)
 
 
 {-| Represents where I am in the application
