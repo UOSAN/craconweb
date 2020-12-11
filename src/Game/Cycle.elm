@@ -1,7 +1,7 @@
 module Game.Cycle exposing (generate)
 
 import Game
-import Time exposing (Time)
+import Time
 
 
 generate : String -> List Game.LogEntry -> List Game.Cycle
@@ -44,7 +44,7 @@ fillCycles sessionId logEntry cycles =
             timeout time cycles
 
 
-beginCycle : { sessionId : String, time : Time, sort : Int } -> List Game.Cycle -> List Game.Cycle
+beginCycle : { sessionId : String, time : Time.Posix, sort : Int } -> List Game.Cycle -> List Game.Cycle
 beginCycle { sessionId, time, sort } cycles =
     { id = Nothing
     , sessionId = sessionId
@@ -71,7 +71,7 @@ beginCycle { sessionId, time, sort } cycles =
         :: cycles
 
 
-beginDisplay : { sessionId : String, time : Time, maybeLayout : Maybe Game.Layout } -> List Game.Cycle -> List Game.Cycle
+beginDisplay : { sessionId : String, time : Time.Posix, maybeLayout : Maybe Game.Layout } -> List Game.Cycle -> List Game.Cycle
 beginDisplay { sessionId, time, maybeLayout } cycles =
     case ( maybeLayout, cycles ) of
         ( _, [] ) ->
@@ -226,7 +226,7 @@ beginDisplay { sessionId, time, maybeLayout } cycles =
             updatedCycle :: tail
 
 
-beginBorder : { borderType : Game.BorderType, time : Time } -> List Game.Cycle -> List Game.Cycle
+beginBorder : { borderType : Game.BorderType, time : Time.Posix } -> List Game.Cycle -> List Game.Cycle
 beginBorder { borderType, time } cycles =
     case ( borderType, cycles ) of
         ( _, [] ) ->
@@ -264,7 +264,7 @@ beginBorder { borderType, time } cycles =
                 cycles
 
 
-timeout : Time -> List Game.Cycle -> List Game.Cycle
+timeout : Time.Posix -> List Game.Cycle -> List Game.Cycle
 timeout time cycles =
     case cycles of
         [] ->
@@ -274,7 +274,7 @@ timeout time cycles =
             { cycle | timeout = Just time } :: tail
 
 
-acceptDirection : { desired : Game.Direction, actual : Game.Direction, time : Time } -> List Game.Cycle -> List Game.Cycle
+acceptDirection : { desired : Game.Direction, actual : Game.Direction, time : Time.Posix } -> List Game.Cycle -> List Game.Cycle
 acceptDirection { desired, actual, time } cycles =
     case cycles of
         [] ->
@@ -284,7 +284,7 @@ acceptDirection { desired, actual, time } cycles =
             { cycle | selection = Just time, selectedIndex = Game.directionToIndex actual } :: tail
 
 
-acceptIndication : { desired : Bool, time : Time } -> List Game.Cycle -> List Game.Cycle
+acceptIndication : { desired : Bool, time : Time.Posix } -> List Game.Cycle -> List Game.Cycle
 acceptIndication { desired, time } cycles =
     case cycles of
         [] ->
@@ -294,7 +294,7 @@ acceptIndication { desired, time } cycles =
             { cycle | selection = Just time, selectedIndex = 0 } :: tail
 
 
-acceptSelection : { desired : Int, actual : Int, time : Time } -> List Game.Cycle -> List Game.Cycle
+acceptSelection : { desired : Int, actual : Int, time : Time.Posix } -> List Game.Cycle -> List Game.Cycle
 acceptSelection { desired, actual, time } cycles =
     case cycles of
         [] ->

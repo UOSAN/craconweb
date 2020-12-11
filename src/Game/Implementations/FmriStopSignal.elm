@@ -1,5 +1,6 @@
 module Game.Implementations.FmriStopSignal exposing (init)
 
+import Duration exposing (Duration)
 import Game
     exposing
         ( BorderType(..)
@@ -26,23 +27,23 @@ import Game
         , trialFailed
         )
 import Random exposing (Generator)
-import Time exposing (Time)
+import Time
 
 
 init :
-    { borderDelay : Time
-    , totalDuration : Time
+    { borderDelay : Duration
+    , totalDuration : Duration
     , infoString : String
     , responseImages : List Image
     , nonResponseImages : List Image
     , seedInt : Int
-    , currentTime : Time
-    , redCrossDuration : Time
-    , blockDuration : Time
-    , restDuration : Time
+    , currentTime : Time.Posix
+    , redCrossDuration : Duration
+    , blockDuration : Duration
+    , restDuration : Duration
     , totalBlocks : Int
-    , intervalMin : Time
-    , intervalJitter : Time
+    , intervalMin : Duration
+    , intervalJitter : Duration
     }
     -> ( Game msg, Random.Seed )
 init ({ borderDelay, totalDuration, infoString, responseImages, nonResponseImages, seedInt, currentTime, blockDuration, redCrossDuration, totalBlocks, restDuration } as args) =
@@ -78,10 +79,10 @@ init ({ borderDelay, totalDuration, infoString, responseImages, nonResponseImage
 
 
 trial :
-    { borderDelay : Time
-    , totalDuration : Time
-    , blockDuration : Time
-    , redCrossDuration : Time
+    { borderDelay : Duration
+    , totalDuration : Duration
+    , blockDuration : Duration
+    , redCrossDuration : Duration
     , goTrial : Bool
     }
     -> Image

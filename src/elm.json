@@ -23,6 +23,7 @@
             "elm-explorations/markdown": "1.0.0",
             "elm-explorations/test": "1.2.2",
             "ggb/numeral-elm": "1.4.3",
+            "ianmackenzie/elm-units": "2.7.0",
             "krisajenkins/remotedata": "6.0.1",
             "simonh1000/elm-jwt": "7.1.0",
             "tiziano88/elm-protobuf": "3.0.0"

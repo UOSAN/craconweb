@@ -56,7 +56,7 @@ type alias Model =
     , adminModel : AdminModel
     , statements : Maybe (List MesAnswer)
     , request : Maybe String
-    , loadTime : Time.Time
+    , loadTime : Time.Posix
     , badgeRules : RemoteData.WebData (List BadgeRule)
     , domLoaded : Bool
     , badgesEarned : RemoteData.WebData (List String)
@@ -103,7 +103,7 @@ type Msg
     | InitGoNoGo
     | InitDotProbe
     | InitVisualSearch
-    | StartSession { gameId : String, game : Game.Game Msg, time : Time.Time, initialSeed : Int, nextSeed : Random.Seed }
+    | StartSession { gameId : String, game : Game.Game Msg, time : Time.Posix, initialSeed : Int, nextSeed : Random.Seed }
     | StartSessionResp Random.Seed (Game.Game Msg) (RemoteData.WebData Game.Session)
     | GameDataSaved Game.State Game.Session (RemoteData.WebData ( Game.Session, List Game.Cycle ))
     | ResendSession Game.State Game.Session

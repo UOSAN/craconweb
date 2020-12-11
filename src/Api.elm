@@ -37,7 +37,7 @@ import Model as M
 import RemoteData
 import Routing as R
 import Task exposing (Task)
-import Time exposing (Time)
+import Time
 
 
 
@@ -423,7 +423,7 @@ createUserRecord httpsrv token user =
         |> Http.toTask
 
 
-okyToky : Time.Time -> String -> Result String M.JwtPayload
+okyToky : Time.Posix -> String -> Result String M.JwtPayload
 okyToky now token =
     case Jwt.decodeToken M.jwtDecoder token of
         Ok decoded ->
@@ -446,7 +446,7 @@ jwtDecoded token =
     Jwt.decodeToken M.jwtDecoder token
 
 
-startSession : { token : String, userId : String, gameId : String, start : Time, httpsrv : String, initialSeed : Int, jitter : Bool } -> Task Never (RemoteData.WebData Game.Session)
+startSession : { token : String, userId : String, gameId : String, start : Time.Posix, httpsrv : String, initialSeed : Int, jitter : Bool } -> Task Never (RemoteData.WebData Game.Session)
 startSession { token, userId, gameId, start, httpsrv, initialSeed, jitter } =
     let
         json =

@@ -1,5 +1,6 @@
 module Game.Implementations.GoNoGo exposing (init)
 
+import Duration exposing (Duration)
 import Game
     exposing
         ( BorderType(..)
@@ -26,23 +27,23 @@ import Game
         , trialFailed
         )
 import Random exposing (Generator)
-import Time exposing (Time)
+import Time
 
 
 init :
-    { totalDuration : Time
+    { totalDuration : Duration
     , infoString : String
     , responseImages : List Image
     , nonResponseImages : List Image
     , fillerImages : List Image
     , seedInt : Int
-    , currentTime : Time
-    , blockDuration : Time
-    , redCrossDuration : Time
+    , currentTime : Time.Posix
+    , blockDuration : Duration
+    , redCrossDuration : Duration
     , totalBlocks : Int
-    , restDuration : Time
-    , intervalMin : Time
-    , intervalJitter : Time
+    , restDuration : Duration
+    , intervalMin : Duration
+    , intervalJitter : Duration
     }
     -> ( Game msg, Random.Seed )
 init ({ totalDuration, infoString, responseImages, nonResponseImages, fillerImages, seedInt, currentTime, redCrossDuration } as args) =
@@ -84,8 +85,8 @@ init ({ totalDuration, infoString, responseImages, nonResponseImages, fillerImag
 
 
 trial :
-    { totalDuration : Time
-    , redCrossDuration : Time
+    { totalDuration : Duration
+    , redCrossDuration : Duration
     , goTrial : Bool
     }
     -> Image

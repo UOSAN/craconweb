@@ -1,5 +1,6 @@
 module Game.Implementations.DotProbe exposing (init)
 
+import Duration exposing (Duration)
 import Game
     exposing
         ( BorderType(..)
@@ -21,23 +22,24 @@ import Game
         , startSession
         , timeout
         )
+import Quantity exposing (Quantity)
 import Random exposing (Generator)
-import Time exposing (Time)
+import Time
 
 
 init :
-    { fixationDuration : Time
-    , imageDuration : Time
+    { fixationDuration : Duration
+    , imageDuration : Duration
     , infoString : String
     , responseImages : List Image
     , nonResponseImages : List Image
     , seedInt : Int
-    , currentTime : Time
-    , blockDuration : Time
-    , restDuration : Time
+    , currentTime : Time.Posix
+    , blockDuration : Duration
+    , restDuration : Duration
     , totalBlocks : Int
-    , intervalMin : Time
-    , intervalJitter : Time
+    , intervalMin : Duration
+    , intervalJitter : Duration
     }
     -> ( Game msg, Random.Seed )
 init ({ fixationDuration, imageDuration, infoString, responseImages, nonResponseImages, seedInt, currentTime, blockDuration, restDuration, totalBlocks } as args) =
@@ -60,8 +62,8 @@ init ({ fixationDuration, imageDuration, infoString, responseImages, nonResponse
 
 
 trial :
-    { fixationDuration : Time
-    , imageDuration : Time
+    { fixationDuration : Duration
+    , imageDuration : Duration
     , goTrial : Bool
     , goImage : Image
     , noGoImage : Image
@@ -108,7 +110,7 @@ trial { fixationDuration, imageDuration, goTrial, goImage, noGoImage } state =
         |> andThen (log (BeginDisplay fixation))
         |> andThen (segment [ timeout fixationDuration ] fixation)
         |> andThen (log (BeginDisplay trial))
-        |> andThen (segment [ timeout (fixationDuration + imageDuration) ] trial)
+        |> andThen (segment [ timeout (Quantity.plus fixationDuration imageDuration) ] trial)
         |> andThen (log (BeginDisplay probe))
         |> andThen (log BeginInput)
         |> andThen (segment [ onDirection True direction ] probe)

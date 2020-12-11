@@ -19,7 +19,7 @@ import Json.Decode.Pipeline exposing (hardcoded, optional, required)
 import Json.Encode as JE exposing (object)
 import Model as M
 import String
-import Time exposing (Time)
+import Time
 
 
 sessionDecoder : Decoder Game.Session
@@ -88,7 +88,7 @@ stringToIntDecoder =
             )
 
 
-sessionEncoder : { a | userId : String, gameId : String, start : Time, end : Maybe Time, seed : Int, jitter : Bool } -> JE.Value
+sessionEncoder : { a | userId : String, gameId : String, start : Time.Posix, end : Maybe Time.Posix, seed : Int, jitter : Bool } -> JE.Value
 sessionEncoder { userId, gameId, start, end, seed, jitter } =
     object
         [ ( "userId", userId |> JE.string )

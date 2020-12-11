@@ -1,5 +1,6 @@
 module Game.Implementations.VisualSearch exposing (init)
 
+import Duration exposing (Duration)
 import Game
     exposing
         ( BorderType(..)
@@ -24,25 +25,26 @@ import Game
         , timeoutFromSegmentStart
         )
 import List.Extra
+import Quantity
 import Random exposing (Generator)
 import Random.List
-import Time exposing (Time)
+import Time
 
 
 init :
-    { fixationDuration : Time
-    , imageDuration : Time
+    { fixationDuration : Duration
+    , imageDuration : Duration
     , infoString : String
     , responseImages : List Image
     , nonResponseImages : List Image
     , seedInt : Int
-    , currentTime : Time
-    , blockDuration : Time
-    , zoomDuration : Time
+    , currentTime : Time.Posix
+    , blockDuration : Duration
+    , zoomDuration : Duration
     , totalBlocks : Int
-    , restDuration : Time
-    , intervalMin : Time
-    , intervalJitter : Time
+    , restDuration : Duration
+    , intervalMin : Duration
+    , intervalJitter : Duration
     }
     -> ( Game msg, Random.Seed )
 init ({ fixationDuration, imageDuration, zoomDuration, infoString, responseImages, nonResponseImages, seedInt, currentTime, blockDuration } as args) =
@@ -63,9 +65,9 @@ init ({ fixationDuration, imageDuration, zoomDuration, infoString, responseImage
 
 
 trial :
-    { fixationDuration : Time
-    , imageDuration : Time
-    , zoomDuration : Time
+    { fixationDuration : Duration
+    , imageDuration : Duration
+    , zoomDuration : Duration
     , goTrial : Bool
     , noGoImages : List Image
     }
@@ -99,6 +101,6 @@ trial { fixationDuration, imageDuration, zoomDuration, goTrial, noGoImages } goI
         |> andThen (segment [ timeout fixationDuration ] fixation)
         |> andThen (log (BeginDisplay trial))
         |> andThen (log BeginInput)
-        |> andThen (segment [ onSelect goIndex, selectTimeout (fixationDuration + imageDuration) ] trial)
+        |> andThen (segment [ onSelect goIndex, selectTimeout (Quantity.plus fixationDuration imageDuration) ] trial)
         |> andThen (segment [ timeoutFromSegmentStart zoomDuration ] trial)
         |> andThen (log EndTrial)

@@ -2,6 +2,7 @@ module Update exposing (update)
 
 import Api
 import Browser.Navigation exposing (pushUrl)
+import Duration
 import Empty
 import Entity
 import Game
@@ -22,7 +23,7 @@ import Random
 import RemoteData
 import Routing as R
 import Task exposing (Task)
-import Time exposing (Time)
+import Time
 import Url
 
 
@@ -792,8 +793,8 @@ initFmriStopSignal { user } model =
 
                 game time seed =
                     Game.Implementations.FmriStopSignal.init
-                        { borderDelay = 100 * Time.millisecond
-                        , totalDuration = 1000 * Time.millisecond
+                        { borderDelay = Duration.milliseconds 100
+                        , totalDuration = Duration.milliseconds 1000
                         , infoString = """
 <h3 class="title">Instructions</h3>
 You will see pictures presented in either a dark blue or light gray border. Press the space bar as quickly as you can. BUT only if you see a blue border around the picture. Do not press if you see a gray border. Go as fast as you can, but don't sacrifice accuracy for speed.
@@ -805,12 +806,12 @@ You will see pictures presented in either a dark blue or light gray border. Pres
                         , nonResponseImages = getFullImagePathsNew model.filesrv ugimages_i |> Maybe.withDefault []
                         , seedInt = seed
                         , currentTime = time
-                        , blockDuration = 150 * Time.second
-                        , restDuration = 5 * Time.second
+                        , blockDuration = Duration.seconds 150
+                        , restDuration = Duration.seconds 5
                         , totalBlocks = 4
-                        , redCrossDuration = 500 * Time.millisecond
-                        , intervalMin = 3 * Time.second
-                        , intervalJitter = 5 * Time.second
+                        , redCrossDuration = Duration.milliseconds 500
+                        , intervalMin = Duration.seconds 3
+                        , intervalJitter = Duration.seconds 5
                         }
 
                 gameCmd =
@@ -851,8 +852,8 @@ initStopSignal model =
 
                 game time seed =
                     Game.Implementations.StopSignal.init
-                        { borderDelay = 100 * Time.millisecond
-                        , totalDuration = 1000 * Time.millisecond
+                        { borderDelay = Duration.milliseconds 100
+                        , totalDuration = Duration.milliseconds 1000
                         , infoString = """
 <h3 class="title">Instructions</h3>
 You will see pictures presented in either a dark blue or light gray border. Press the space bar as quickly as you can. BUT only if you see a blue border around the picture. Do not press if you see a gray border. Go as fast as you can, but don't sacrifice accuracy for speed.
@@ -864,12 +865,12 @@ You will see pictures presented in either a dark blue or light gray border. Pres
                         , nonResponseImages = getFullImagePathsNew model.filesrv ugimages_i |> Maybe.withDefault []
                         , seedInt = seed
                         , currentTime = time
-                        , redCrossDuration = 500 * Time.millisecond
-                        , blockDuration = 1 * Time.minute
+                        , redCrossDuration = Duration.milliseconds 500
+                        , blockDuration = Duration.minutes 1
                         , totalBlocks = 5
-                        , restDuration = 10 * Time.second
-                        , intervalMin = 500 * Time.millisecond
-                        , intervalJitter = 0
+                        , restDuration = Duration.seconds 10
+                        , intervalMin = Duration.milliseconds 500
+                        , intervalJitter = Duration.milliseconds 0
                         }
 
                 gameCmd =
@@ -912,7 +913,7 @@ initGoNoGo model =
                         ( time
                         , seed
                         , Game.Implementations.GoNoGo.init
-                            { totalDuration = 1250 * Time.millisecond
+                            { totalDuration = Duration.milliseconds 1250
                             , infoString = """
 <h3 class="title">Instructions</h3>
 <p>You will see pictures either on the left or right side of the screen, surrounded by a solid or dashed border. Press <span class="highlight"><strong>c</strong></span> when the picture is on the left side of the screen or <span class="highlight"><strong>m</strong></span> when the picture is on the right side of the screen. BUT only if you see a <span style="border: 1px solid rgb(0, 0, 0); padding: 2px;">solid border</span> around the picture. Do not press if you see a <span style="border: 1px dashed rgb(0, 0, 0); padding: 2px;">dashed border</span>. Go as fast as you can, but don't sacrifice accuracy for speed.<div>
@@ -926,12 +927,12 @@ initGoNoGo model =
                             , fillerImages = getFullImagePathsNew model.filesrv model.ugimages_f |> Maybe.withDefault []
                             , seedInt = round time
                             , currentTime = time
-                            , redCrossDuration = 500 * Time.millisecond
-                            , blockDuration = 1 * Time.minute
+                            , redCrossDuration = Duration.milliseconds 500
+                            , blockDuration = Duration.minutes 1
                             , totalBlocks = 5
-                            , restDuration = 10 * Time.second
-                            , intervalMin = 500 * Time.millisecond
-                            , intervalJitter = 0
+                            , restDuration = Duration.seconds 10
+                            , intervalMin = Duration.milliseconds 500
+                            , intervalJitter = Duration.milliseconds 0
                             }
                         )
                     )
@@ -959,8 +960,8 @@ initDotProbe model =
                         ( time
                         , seed
                         , Game.Implementations.DotProbe.init
-                            { fixationDuration = 500 * Time.millisecond
-                            , imageDuration = 500 * Time.millisecond
+                            { fixationDuration = Duration.milliseconds 500
+                            , imageDuration = Duration.milliseconds 500
                             , infoString = """
 <h3 class="title">Instructions</h3>
 You will see pictures on the left and right side of the screen, followed by a dot on the left or right side of the screen. Press the <span class="highlight"><strong>c</strong></span> if the dot is on the left side of the screen or <span class="highlight"><strong>m</strong></span> when the dot is on the right side of the screen. Go as fast as you can, but don't sacrifice accuracy for speed.<div>
@@ -973,11 +974,11 @@ You will see pictures on the left and right side of the screen, followed by a do
                             , nonResponseImages = getFullImagePathsNew model.filesrv model.ugimages_i |> Maybe.withDefault []
                             , seedInt = round time
                             , currentTime = time
-                            , blockDuration = 1 * Time.minute
+                            , blockDuration = Duration.minutes 1
                             , totalBlocks = 5
-                            , restDuration = 10 * Time.second
-                            , intervalMin = 500 * Time.millisecond
-                            , intervalJitter = 0
+                            , restDuration = Duration.seconds 10
+                            , intervalMin = Duration.milliseconds 500
+                            , intervalJitter = Duration.milliseconds 0
                             }
                         )
                     )
@@ -1005,9 +1006,9 @@ initVisualSearch model =
                         ( time
                         , seed
                         , Game.Implementations.VisualSearch.init
-                            { fixationDuration = 500 * Time.millisecond
-                            , imageDuration = 3000 * Time.millisecond
-                            , zoomDuration = 1000 * Time.millisecond
+                            { fixationDuration = Duration.milliseconds 500
+                            , imageDuration = Duration.milliseconds 3000
+                            , zoomDuration = Duration.milliseconds 1000
                             , infoString = """
 <h3 class="title">Instructions</h3>
 You will see a grid of images. Select the target image as quickly as you can.
@@ -1020,11 +1021,11 @@ You will see a grid of images. Select the target image as quickly as you can.
                             , nonResponseImages = getFullImagePathsNew model.filesrv model.ugimages_i |> Maybe.withDefault []
                             , seedInt = round time
                             , currentTime = time
-                            , blockDuration = 1 * Time.minute
+                            , blockDuration = Duration.minutes 1
                             , totalBlocks = 5
-                            , restDuration = 10 * Time.second
-                            , intervalMin = 500 * Time.millisecond
-                            , intervalJitter = 0
+                            , restDuration = Duration.seconds 10
+                            , intervalMin = Duration.milliseconds 500
+                            , intervalJitter = Duration.milliseconds 0
                             }
                         )
                     )
@@ -1198,7 +1199,7 @@ missing ur =
         ]
 
 
-startSession : { gameId : String, game : Game.Game Msg, time : Time, initialSeed : Int, nextSeed : Random.Seed } -> Model -> ( Model, Cmd Msg )
+startSession : { gameId : String, game : Game.Game Msg, time : Time.Posix, initialSeed : Int, nextSeed : Random.Seed } -> Model -> ( Model, Cmd Msg )
 startSession { gameId, game, time, initialSeed, nextSeed } model =
     case model.visitor of
         Anon ->

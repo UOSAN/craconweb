@@ -11,8 +11,8 @@ module Game.Card exposing
     , unwrap
     )
 
+import Duration exposing (Duration)
 import Random
-import Time exposing (Time)
 
 
 type Card state layout input msg
@@ -29,8 +29,8 @@ type Continuation state layout input msg
     | Restart
         state
         { totalBlocks : Int
-        , blockDuration : Time
-        , restDuration : Time
+        , blockDuration : Duration
+        , restDuration : Duration
         , nextTrials : Random.Generator (List (state -> Card state layout input msg))
         }
 
@@ -73,12 +73,12 @@ andThen isTimeout resetSegmentStart initialize f (Card card) =
 
 andThenRest :
     { restCard : state -> Card state layout input msg
-    , restDuration : Time
+    , restDuration : Duration
     , shouldRest : state -> Bool
     , isFinish : state -> Bool
     , isInterval : Card state layout input msg -> Bool
     , resetSegmentStart : state -> state
-    , resetBlockStart : Time -> state -> state
+    , resetBlockStart : Duration -> state -> state
     , initialize : input
     }
     -> (state -> Card state layout input msg)
@@ -130,11 +130,11 @@ andThenRest ({ restCard, isInterval, restDuration, shouldRest, isFinish, resetSe
 
 continuingFromRest :
     { restCard : state -> Card state layout input msg
-    , restDuration : Time
+    , restDuration : Duration
     , initialize : input
     , isFinish : state -> Bool
     , isInterval : Card state layout input msg -> Bool
-    , resetBlockStart : Time -> state -> state
+    , resetBlockStart : Duration -> state -> state
     , resetSegmentStart : state -> state
     , shouldRest : state -> Bool
     }
@@ -182,7 +182,7 @@ complete x =
     Card { logic = always ( Complete x, Cmd.none ), layout = Nothing }
 
 
-restart : { totalBlocks : Int, blockDuration : Time, restDuration : Time, nextTrials : Random.Generator (List (a -> Card a layout input msg)) } -> a -> Card a layout input msg
+restart : { totalBlocks : Int, blockDuration : Duration, restDuration : Duration, nextTrials : Random.Generator (List (a -> Card a layout input msg)) } -> a -> Card a layout input msg
 restart args a =
     Card { logic = always ( Restart a args, Cmd.none ), layout = Nothing }
 
