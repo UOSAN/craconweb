@@ -66,7 +66,7 @@ andThen isTimeout resetSegmentStart initialize f (Card tempCard) =
                     )
 
                 ( Restart _ _, cmd ) ->
-                    Debug.crash "andThen"
+                    Debug.todo "andThen"
     in
     Card { tempCard | logic = newLogic }
 

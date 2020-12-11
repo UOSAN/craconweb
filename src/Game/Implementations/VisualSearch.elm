@@ -88,7 +88,7 @@ trial { fixationDuration, imageDuration, zoomDuration, goTrial, noGoImages } goI
                     index
 
                 Nothing ->
-                    Debug.crash "goImage is not in the list for some reason"
+                    Debug.todo "goImage is not in the list for some reason"
 
         trial =
             Just (SelectGrid None { columns = 4, images = images, goIndex = goIndex })
