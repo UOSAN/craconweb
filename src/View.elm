@@ -567,7 +567,7 @@ visSearchScale size =
 scaleStyleFromFloat : Float -> Attribute msg
 scaleStyleFromFloat scale =
     style
-        [ ( "transform", "scale(" ++ toString scale ++ ")" )
+        [ ( "transform", "scale(" ++ String.fromFloat scale ++ ")" )
         , ( "transform-origin", "50% 0" )
         ]
 

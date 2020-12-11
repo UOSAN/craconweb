@@ -60,12 +60,10 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
                     state.sessionStart
                         |> Maybe.map (\sessionStart -> state.currTime - sessionStart)
                         |> Maybe.map (\timer -> timer / 1000)
-                        |> Maybe.map toString
+                        |> Maybe.map String.fromFloat
                         |> Maybe.withDefault ""
             in
             div []
-                -- [ p [] [ text timer ]
-                -- , p [] [ text <| toString state.trialResult ]
                 [ case Game.Card.layout game of
                     Nothing ->
                         text ""
@@ -375,14 +373,14 @@ viewRest messages state =
         counter =
             state.blockStart
                 |> Maybe.map (\blockStart -> ceiling ((blockStart - state.currTime) / 1000))
-                |> Maybe.map (\countdown -> " in " ++ toString countdown ++ " seconds.")
+                |> Maybe.map (\countdown -> " in " ++ String.fromInt countdown ++ " seconds.")
                 |> Maybe.withDefault "."
 
         defaultMessage =
             "This concludes Block "
-                ++ toString state.blockCounter
+                ++ String.fromInt state.blockCounter
                 ++ ". Please stand by to begin Block "
-                ++ toString (state.blockCounter + 1)
+                ++ String.fromInt (state.blockCounter + 1)
                 ++ counter
 
         index =

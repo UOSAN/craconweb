@@ -595,7 +595,7 @@ update msg model =
                         Err err ->
                             ( { model
                                 | loading = Nothing
-                                , glitching = Just (toString err)
+                                , glitching = Just err
                               }
                             , Cmd.none
                             )
@@ -1061,7 +1061,7 @@ valuationsErrState model err =
     ( { model
         | loading = Nothing
         , glitching = Just (valuationsError err)
-        , httpErr = toString err
+        , httpErr = err
       }
     , Cmd.none
     )
@@ -1072,7 +1072,7 @@ httpErrorState model err =
     ( { model
         | loading = Nothing
         , glitching = Just (Helpers.httpHumanError err)
-        , httpErr = toString err
+        , httpErr = err
       }
     , Cmd.none
     )
