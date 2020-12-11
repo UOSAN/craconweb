@@ -7,6 +7,7 @@ import Random.Extra
 import Random.List
 import RemoteData
 import Time
+import Random.Extra
 
 
 type GameState msg
@@ -295,7 +296,7 @@ randomInterval min jitter =
 addIntervals : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
 addIntervals layout min jitter trials =
     trials
-        |> List.map Random.Extra.constant
+        |> List.map Random.constant
         |> List.intersperse (randomInterval min jitter)
         |> Random.Extra.combine
 
@@ -303,7 +304,7 @@ addIntervals layout min jitter trials =
 prependInterval : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
 prependInterval layout min jitter trials =
     randomInterval min jitter
-        :: List.map Random.Extra.constant trials
+        :: List.map Random.constant trials
         |> Random.Extra.combine
 
 
@@ -517,15 +518,7 @@ isPlaying gameState =
 
 leftOrRight : Generator Direction
 leftOrRight =
-    Random.bool
-        |> Random.map
-            (\bool ->
-                if bool then
-                    Left
-
-                else
-                    Right
-            )
+    Random.Extra.choice Left Right
 
 
 shouldRest : Duration -> State -> Bool
