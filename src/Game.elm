@@ -193,13 +193,13 @@ isTimeout gameDuration state =
         |> Maybe.withDefault False
 
 
-andThenRest : { restDuration : Duration, shouldRest : State -> Bool, isFinish : State -> Bool } -> (State -> Game msg) -> Game msg -> Game msg
-andThenRest { restDuration, shouldRest, isFinish } =
+andThenRest : { restDuration : Duration, tempShouldRest : State -> Bool, tempIsFinish : State -> Bool } -> (State -> Game msg) -> Game msg -> Game msg
+andThenRest { restDuration, tempShouldRest, tempIsFinish } =
     Card.andThenRest
         { restCard = rest restDuration
         , restDuration = restDuration
-        , shouldRest = shouldRest
-        , isFinish = isFinish
+        , shouldRest = tempShouldRest
+        , isFinish = tempIsFinish
         , isInterval = isInterval
         , resetSegmentStart = resetSegmentStart
         , resetBlockStart = resetBlockStart
@@ -454,7 +454,7 @@ trialFailed : Logic
 trialFailed state input =
     state
         |> isFailed
-        |> (\a -> (\a b -> ( a, b )) a state)
+        |> (\a -> (\b c -> ( b, c )) a state)
 
 
 showZoom : Logic
@@ -546,8 +546,8 @@ restart args state gameState =
                                     |> List.foldl
                                         (andThenRest
                                             { restDuration = args.restDuration
-                                            , isFinish = isFinish args.totalBlocks
-                                            , shouldRest = shouldRest args.blockDuration
+                                            , tempIsFinish = isFinish args.totalBlocks
+                                            , tempShouldRest = shouldRest args.blockDuration
                                             }
                                         )
                                         (Card.complete state)
@@ -598,8 +598,8 @@ shuffle { seedInt, totalBlocks, blockDuration, restDuration, currentTime, interv
                     |> List.foldl
                         (andThenRest
                             { restDuration = restDuration
-                            , shouldRest = shouldRest blockDuration
-                            , isFinish = isFinish totalBlocks
+                            , tempShouldRest = shouldRest blockDuration
+                            , tempIsFinish = isFinish totalBlocks
                             }
                         )
                         (Card.complete (emptyState seedInt currentTime))
