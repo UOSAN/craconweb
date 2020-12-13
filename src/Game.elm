@@ -8,6 +8,7 @@ import Random.List
 import RemoteData
 import Time
 import Random.Extra
+import Quantity
 
 
 type GameState msg
@@ -189,7 +190,7 @@ andThenCheckTimeout gameDuration =
 isTimeout : Duration -> State -> Bool
 isTimeout gameDuration state =
     state.sessionStart
-        |> Maybe.map (\sessionStart -> Duration.addTo sessionStart gameDuration < state.currTime)
+        |> Maybe.map (\sessionStart -> isBefore ( Duration.addTo sessionStart gameDuration) state.currTime)
         |> Maybe.withDefault False
 
 
@@ -287,23 +288,26 @@ interval expiration state =
         |> andThen (segment [ timeout expiration ] (Just Interval))
 
 
-randomInterval : Duration -> Duration -> Generator (State -> Game msg)
+randomInterval : Duration -> Duration -> Generator Duration
 randomInterval min jitter =
-    Random.float Duration.inMilliseconds min (Duration.inMilliseconds (Duration.addTo min jitter))
-        |> Random.map interval
+    Random.float (Duration.inMilliseconds min) (Duration.inMilliseconds (Quantity.plus min jitter))
+        |> Random.map (\jitterDuration -> Duration.milliseconds jitterDuration)
 
 
 addIntervals : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
 addIntervals layout min jitter trials =
+    let
+        randomDurationIntervals = Random.map interval ( randomInterval min jitter )
+    in
     trials
         |> List.map Random.constant
-        |> List.intersperse (randomInterval min jitter)
+        |> List.intersperse randomDurationIntervals
         |> Random.Extra.combine
 
 
 prependInterval : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
 prependInterval layout min jitter trials =
-    randomInterval min jitter
+    Random.map interval ( randomInterval min jitter )
         :: List.map Random.constant trials
         |> Random.Extra.combine
 
@@ -384,12 +388,12 @@ onDirection desired desiredDirection state input =
 
 timeout : Duration -> Logic
 timeout expiration state _ =
-    ( Duration.addTo state.trialStart expiration > state.currTime, state )
+    ( isAfter (Duration.addTo state.trialStart expiration) state.currTime, state )
 
 
 timeoutFromSegmentStart : Duration -> Logic
 timeoutFromSegmentStart expiration state _ =
-    ( Duration.addTo state.segmentStart expiration > state.currTime, state )
+    ( isAfter (Duration.addTo state.segmentStart expiration) state.currTime, state )
 
 
 selectTimeout : Duration -> Logic
@@ -524,7 +528,7 @@ leftOrRight =
 shouldRest : Duration -> State -> Bool
 shouldRest blockDuration state =
     state.blockStart
-        |> Maybe.map (\blockStart -> (Duration.addTo blockStart blockDuration) < state.currTime)
+        |> Maybe.map (\blockStart -> isBefore (Duration.addTo blockStart blockDuration) state.currTime)
         |> Maybe.withDefault False
 
 
@@ -605,3 +609,16 @@ shuffle { seedInt, totalBlocks, blockDuration, restDuration, currentTime, interv
                         (Card.complete (emptyState seedInt currentTime))
             )
         |> (\generator -> Random.step generator (Random.initialSeed seedInt))
+
+
+{-| Return if `a` is after `b`
+-}
+isAfter : Time.Posix -> Time.Posix -> Basics.Bool
+isAfter a b =
+    Time.posixToMillis a > Time.posixToMillis b
+
+{-| Return if `a` is before `b`
+-}
+isBefore : Time.Posix -> Time.Posix -> Basics.Bool
+isBefore a b =
+    Time.posixToMillis a < Time.posixToMillis b
