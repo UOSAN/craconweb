@@ -1,7 +1,7 @@
 module Helpers exposing (..)
 
 import Http
-import Model exposing (errorCodeEncoder)
+import Model
 import Routing as R
 
 
@@ -14,10 +14,10 @@ httpHumanError err =
         Http.NetworkError ->
             "Oops. There's been a network error."
 
-        Http.BadStatus s ->
-            .error (errorCodeEncoder s.body)
+        Http.BadStatus statusCode ->
+            "Bad status " ++ String.fromInt statusCode
 
-        Http.BadPayload str _ ->
+        Http.BadBody _ ->
             "Bad payload"
 
         _ ->
