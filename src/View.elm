@@ -300,8 +300,8 @@ homePageGrid model =
 homePageGameCards : Model -> List (Html Msg)
 homePageGameCards model =
     let
-        toCard game =
-            case game of
+        toCard gameArg =
+            case gameArg of
                 Just g ->
                     div [ class "column" ]
                         [ homePageGameCard g.slug (model.filesrv ++ "/repo/" ++ g.icon) g.name g.dscript ]
@@ -360,13 +360,13 @@ mesQueryModal q feedback =
         Nothing ->
             text ""
 
-        Just q ->
+        Just question ->
             Parts.modal
                 [ div
                     [ class "field" ]
                     [ label
                         [ class "label white title is-3" ]
-                        [ text q ]
+                        [ text question ]
                     , p
                         [ class "control" ]
                         [ textarea
@@ -776,8 +776,8 @@ statements groupsOfNum mesAnswers =
                 ]
             ]
 
-        Just mesAnswers ->
-            List.map statement mesAnswers
+        Just tempMesAnswers ->
+            List.map statement tempMesAnswers
                 |> List.Extra.greedyGroupsOf groupsOfNum
                 |> List.map (div [ class "columns" ])
 
