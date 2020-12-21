@@ -85,7 +85,7 @@ cyclesEncoder : Game.Session -> List Game.Cycle -> JE.Value
 cyclesEncoder session cycles =
     object
         [ ( "gsessionId", session.id |> JE.string )
-        , ( "gcycles", cycles |> List.map cycleEncoder |> JE.list )
+        , ( "gcycles", cycles |> JE.list cycleEncoder )
         ]
 
 
@@ -111,7 +111,7 @@ cycleEncoder cycle =
         , ( "targetIndex", cycle.targetIndex |> JE.int )
         , ( "selectedIndex", cycle.selectedIndex |> JE.int )
         , ( "startIndex", cycle.startIndex |> JE.int )
-        , ( "ugimageIds", cycle.images |> List.map JE.string |> JE.list )
+        , ( "ugimageIds", cycle.images |> JE.list JE.string )
         ]
 
 
