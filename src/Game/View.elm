@@ -59,7 +59,7 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
                 timer =
                     state.sessionStart
                         |> Maybe.map (\sessionStart -> state.currTime - sessionStart)
-                        |> Maybe.map (\timer -> timer / 1000)
+                        |> Maybe.map (\t -> t / 1000)
                         |> Maybe.map String.fromFloat
                         |> Maybe.withDefault ""
             in
@@ -286,11 +286,11 @@ viewSelectGridLayout { result, borderType, columns, images, goIndex } =
     div [ class "columns is-mobile" ]
         (List.Extra.groupsOf columns images
             |> List.indexedMap
-                (\col images ->
+                (\col tempImages ->
                     viewGridColumn
                         { result = result
                         , columnIndex = col
-                        , images = images
+                        , images = tempImages
                         , goIndex = goIndex
                         }
                 )
@@ -322,7 +322,7 @@ viewGridRow { result, columnIndex, goIndex } rowIndex image =
         , onClick (SelectInput index)
         , onTouch (SelectInput index)
         , case result of
-            Game.SelectResult { answer, result } ->
+            Game.SelectResult { answer } ->
                 if goIndex == index then
                     class "vsImg green-grow"
 
