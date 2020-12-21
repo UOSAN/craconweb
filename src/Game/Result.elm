@@ -39,19 +39,19 @@ averageResponseTimeInMillisecond state =
                         _ ->
                             ( Just beginTime, responseTimes )
 
-        responseTimes =
+        responseTimesList =
             state.log
                 |> List.foldr f ( Nothing, [] )
                 |> Tuple.second
 
         totalResponses =
-            responseTimes |> List.length
+            responseTimesList |> List.length
     in
     if totalResponses == 0 then
         Err "No Response"
 
     else
-        Ok <| List.sum responseTimes / toFloat totalResponses
+        Ok <| List.sum responseTimesList / toFloat totalResponses
 
 
 percentCorrect : { gameSlug : String } -> Game.State -> Float

@@ -92,7 +92,7 @@ trial { fixationDuration, imageDuration, goTrial, goImage, noGoImage } state =
         borderless =
             None
 
-        trial =
+        layout =
             case direction of
                 Game.Left ->
                     Just (LeftRight borderless direction goImage noGoImage)
@@ -109,8 +109,8 @@ trial { fixationDuration, imageDuration, goTrial, goImage, noGoImage } state =
     log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime, currentSeed = nextSeed }
         |> andThen (log (BeginDisplay fixation))
         |> andThen (segment [ timeout fixationDuration ] fixation)
-        |> andThen (log (BeginDisplay trial))
-        |> andThen (segment [ timeout (Quantity.plus fixationDuration imageDuration) ] trial)
+        |> andThen (log (BeginDisplay layout))
+        |> andThen (segment [ timeout (Quantity.plus fixationDuration imageDuration) ] layout)
         |> andThen (log (BeginDisplay probe))
         |> andThen (log BeginInput)
         |> andThen (segment [ onDirection True direction ] probe)

@@ -90,7 +90,7 @@ trial { fixationDuration, imageDuration, zoomDuration, goTrial, noGoImages } goI
                 Nothing ->
                     Debug.todo "goImage is not in the list for some reason"
 
-        trial =
+        layout =
             Just (SelectGrid None { columns = 4, images = images, goIndex = goIndex })
 
         fixation =
@@ -99,8 +99,8 @@ trial { fixationDuration, imageDuration, zoomDuration, goTrial, noGoImages } goI
     log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime, currentSeed = nextSeed }
         |> andThen (log (BeginDisplay fixation))
         |> andThen (segment [ timeout fixationDuration ] fixation)
-        |> andThen (log (BeginDisplay trial))
+        |> andThen (log (BeginDisplay layout))
         |> andThen (log BeginInput)
-        |> andThen (segment [ onSelect goIndex, selectTimeout (Quantity.plus fixationDuration imageDuration) ] trial)
-        |> andThen (segment [ timeoutFromSegmentStart zoomDuration ] trial)
+        |> andThen (segment [ onSelect goIndex, selectTimeout (Quantity.plus fixationDuration imageDuration) ] layout)
+        |> andThen (segment [ timeoutFromSegmentStart zoomDuration ] layout)
         |> andThen (log EndTrial)
