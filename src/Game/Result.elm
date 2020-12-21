@@ -7,6 +7,7 @@ module Game.Result exposing
 import Game
 import Game.Cycle
 import Maybe.Extra exposing (isJust, isNothing)
+import Time
 
 
 averageResponseTimeInMillisecond : Game.State -> Result String Float
@@ -17,7 +18,7 @@ averageResponseTimeInMillisecond state =
                 Nothing ->
                     case log of
                         Game.BeginInput timestamp ->
-                            ( Just timestamp, responseTimes )
+                            ( Just (Time.posixToMillis timestamp), responseTimes )
 
                         _ ->
                             ( Nothing, responseTimes )
@@ -25,13 +26,13 @@ averageResponseTimeInMillisecond state =
                 Just beginTime ->
                     case log of
                         Game.AcceptIndication _ responseTime ->
-                            ( Nothing, (responseTime - beginTime) :: responseTimes )
+                            ( Nothing, Time.posixToMillis responseTime - beginTime :: responseTimes )
 
                         Game.AcceptDirection _ responseTime ->
-                            ( Nothing, (responseTime - beginTime) :: responseTimes )
+                            ( Nothing, Time.posixToMillis responseTime - beginTime :: responseTimes )
 
                         Game.AcceptSelection _ responseTime ->
-                            ( Nothing, (responseTime - beginTime) :: responseTimes )
+                            ( Nothing, Time.posixToMillis responseTime - beginTime :: responseTimes )
 
                         Game.EndTrial _ ->
                             ( Nothing, responseTimes )
@@ -51,7 +52,7 @@ averageResponseTimeInMillisecond state =
         Err "No Response"
 
     else
-        Ok <| List.sum responseTimesList / toFloat totalResponses
+        Ok <| toFloat (List.sum responseTimesList) / toFloat totalResponses
 
 
 percentCorrect : { gameSlug : String } -> Game.State -> Float
