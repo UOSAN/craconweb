@@ -16,6 +16,7 @@ import RemoteData
 import Svg exposing (Svg, circle, svg)
 import Svg.Attributes as Svg exposing (cx, cy, r)
 import Ui.Parts
+import Time
 
 
 view :
@@ -58,8 +59,8 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
 
                 timer =
                     state.sessionStart
-                        |> Maybe.map (\sessionStart -> state.currTime - sessionStart)
-                        |> Maybe.map (\t -> t / 1000)
+                        |> Maybe.map (\sessionStart -> (Time.posixToMillis state.currTime) - (Time.posixToMillis sessionStart))
+                        |> Maybe.map (\t -> toFloat t / 1000)
                         |> Maybe.map String.fromFloat
                         |> Maybe.withDefault ""
             in
@@ -372,7 +373,7 @@ viewRest messages state =
     let
         counter =
             state.blockStart
-                |> Maybe.map (\blockStart -> ceiling ((blockStart - state.currTime) / 1000))
+                |> Maybe.map (\blockStart -> ceiling (toFloat (Time.posixToMillis blockStart - Time.posixToMillis state.currTime) / 1000))
                 |> Maybe.map (\countdown -> " in " ++ String.fromInt countdown ++ " seconds.")
                 |> Maybe.withDefault "."
 
