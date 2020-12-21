@@ -320,7 +320,7 @@ homePageGameCards model =
 homePageGameCard : String -> String -> String -> String -> Html Msg
 homePageGameCard gameSlug src_ title about =
     div
-        [ class "card", style <| toStyle "border-radius:1em;" ]
+        [ class "card", style "border-radius" "1em" ]
         [ div
             [ class "card-image" ]
             [ figure
@@ -564,15 +564,14 @@ visSearchScale size =
         1.0
 
 
-scaleStyleFromFloat : Float -> Attribute msg
+scaleStyleFromFloat : Float -> List (Attribute msg)
 scaleStyleFromFloat scale =
-    style
-        [ ( "transform", "scale(" ++ String.fromFloat scale ++ ")" )
-        , ( "transform-origin", "50% 0" )
-        ]
+    [ style "transform" ("scale(" ++ String.fromFloat scale ++ ")")
+    , style "transform-origin" "50% 0"
+    ]
 
 
-scaleStyle : R.Route -> Maybe WindowSize -> Attribute msg
+scaleStyle : R.Route -> Maybe WindowSize -> List (Attribute msg)
 scaleStyle route size =
     case route of
         R.GameRouteVs ->
@@ -581,10 +580,10 @@ scaleStyle route size =
                     scaleStyleFromFloat <| visSearchScale s
 
                 _ ->
-                    style []
+                    []
 
         _ ->
-            style []
+            []
 
 
 game : Model -> String -> Msg -> Html Msg
@@ -603,7 +602,7 @@ game model title initMsg =
     in
     basicPage model
         [ div
-            [ class "container ", scaleStyle model.activeRoute model.windowSize ]
+            ((class "container") :: (scaleStyle model.activeRoute model.windowSize))
             [ title_
             , case model.activeRoute of
                 R.GameRouteSs ->
@@ -724,12 +723,7 @@ instructionsPage model =
 
 marginS : Attribute msg
 marginS =
-    style [ ( "margin", ".7em" ) ]
-
-
-style_ : String -> Attribute msg
-style_ rawStyles =
-    style (toStyle rawStyles)
+    style "margin" ".7em"
 
 
 instBlock : String -> String -> Html Msg
@@ -738,23 +732,6 @@ instBlock title content =
         [ p [ class "title" ] [ text title ]
         , p [] [ text content ]
         ]
-
-
-toStyle : String -> List ( String, String )
-toStyle styles =
-    let
-        toTuple list =
-            case list of
-                [ a, b ] ->
-                    ( a, b )
-
-                _ ->
-                    ( "", "" )
-    in
-    String.split ";" styles
-        |> List.map (\s -> String.split ":" s)
-        |> List.filter (\e -> e /= [ "" ])
-        |> List.map toTuple
 
 
 statementsPage : Model -> Html Msg
@@ -859,7 +836,9 @@ view model =
                 R.FmriRoute userId ->
                     stopSignalGame model
     in
-    div [] [ page ]
+    { title = ""
+    , body = [ div [] [ page ] ]
+    }
 
 
 adminView : Model -> Html Msg
