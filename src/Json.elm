@@ -181,7 +181,7 @@ badgesDecoder =
 -- HELPERS
 
 
-numberToMaybe : number -> Maybe number
+numberToMaybe : Int -> Maybe Int
 numberToMaybe number =
     case number of
         0 ->
