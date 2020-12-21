@@ -472,4 +472,11 @@ instBlock text_ =
 
 onTouch : msg -> Html.Attribute msg
 onTouch msg =
-    onWithOptions "touchstart" { stopPropagation = True, preventDefault = True } (Json.Decode.succeed msg)
+    let
+        options =
+            { message = msg
+            , stopPropagation = True
+            , preventDefault = True
+            }
+    in
+    custom "touchstart" (Json.Decode.succeed options)
