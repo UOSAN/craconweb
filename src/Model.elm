@@ -63,7 +63,7 @@ type alias Model =
     , fmriUserData : RemoteData.RemoteData ValuationsError FmriUserData
     , statementsModal : Bool
     , windowSize : Maybe WindowSize
-    , key : Browser.Navigation.Key
+    , key : Maybe Browser.Navigation.Key
     }
 
 

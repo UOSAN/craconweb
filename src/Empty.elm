@@ -5,6 +5,7 @@ import Game
 import Model
 import RemoteData
 import Routing
+import Time
 
 
 initialModel : Model.Model
@@ -36,20 +37,20 @@ initialModel =
     , visualsearchGame = Nothing
     , gameState = Game.NotPlaying
     , ugimgsets = Nothing
-    , statements = Nothing
     , mesQuery = Nothing
     , mesQuerys = Nothing
     , mesAnswers = Nothing
     , mesAnswer = Nothing
-    , request = Nothing
     , adminModel =
         { tmpUserRecord = emptyUserRecord
         , mesAnswers = Nothing
         , tmpUserEdit = Nothing
         }
-    , loadTime = 0
-    , domLoaded = False
+    , statements = Nothing
+    , request = Nothing
+    , loadTime = Time.millisToPosix 0
     , badgeRules = RemoteData.NotAsked
+    , domLoaded = False
     , badgesEarned = RemoteData.NotAsked
     , fmriUserData = RemoteData.NotAsked
     , statementsModal = False

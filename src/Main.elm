@@ -73,7 +73,7 @@ init flags location key =
                 , activeRoute = route_
                 , visitor = visitor_
                 , loadTime = flags.time
-                , key = key
+                , key = Just key
             }
     in
     Api.fetchFmriUserData model_
