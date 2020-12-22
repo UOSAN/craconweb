@@ -2,7 +2,6 @@ module Main exposing (..)
 
 import Api
 import Browser.Events
-import Empty exposing (initialModel)
 import Game
 import Helpers
 import Model as M
@@ -65,16 +64,54 @@ init flags location key =
                     )
 
         model_ =
-            { initialModel
-                | httpsrv = httpsrv
-                , tasksrv = tasksrv
-                , filesrv = filesrv
-                , jwtencoded = flags.token
-                , activeRoute = route_
-                , visitor = visitor_
-                , loadTime = flags.time
-                , key = Just key
+            { httpsrv = httpsrv
+            , tasksrv = tasksrv
+            , filesrv = filesrv
+            , jwtencoded = flags.token
+            , activeRoute = route_
+            , visitor = visitor_
+            , isMenuActive = False
+            , user = Nothing
+            , login = { username = "", password = "" }
+            , ugimages_v = Nothing
+            , ugimages_i = Nothing
+            , ugimages_f = Nothing
+            , loading = Nothing
+            , glitching = Nothing
+            , informing = Nothing
+            , users = []
+            , userRole = emptyRole
+            , groupIdExp = Nothing
+            , groupIdCon = Nothing
+            , httpErr = ""
+            , gonogoGame = Nothing
+            , dotprobeGame = Nothing
+            , stopsignalGame = Nothing
+            , respondsignalGame = Nothing
+            , visualsearchGame = Nothing
+            , gameState = Game.NotPlaying
+            , ugimgsets = Nothing
+            , mesQuery = Nothing
+            , mesQuerys = Nothing
+            , mesAnswers = Nothing
+            , mesAnswer = Nothing
+            , adminModel =
+                { tmpUserRecord = emptyUserRecord
+                , mesAnswers = Nothing
+                , tmpUserEdit = Nothing
+                }
+            , statements = Nothing
+            , request = Nothing
+            , loadTime = flags.time
+            , badgeRules = RemoteData.NotAsked
+            , domLoaded = False
+            , badgesEarned = RemoteData.NotAsked
+            , fmriUserData = RemoteData.NotAsked
+            , statementsModal = False
+            , windowSize = Nothing
+            , key = key
             }
+
     in
     Api.fetchFmriUserData model_
         |> Tuple.mapSecond
