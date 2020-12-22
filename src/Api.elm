@@ -128,16 +128,14 @@ updateUser { url, token, sub } user =
 
 createMesAnswer : M.Base -> M.MesAnswer -> String -> Task Http.Error String
 createMesAnswer b answer sub =
-    Http.request
+    Http.task
         { method = "POST"
         , headers = defaultHeaders b.token
         , url = b.url ++ "/user/" ++ sub ++ "/mesquery/" ++ answer.queryId ++ "/mesanswer"
         , body = Http.jsonBody <| M.mesAnswerEncoder answer
-        , expect = Http.expectString
+        , resolver = Http.expectStringResponse
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
 fetchMesAnswers : M.Base -> Task Http.Error (List M.MesAnswer)
@@ -176,7 +174,7 @@ fetchBadgeRules { url, token, sub } =
         , body = Http.emptyBody
         , expect = Http.expectJson Json.badgeRulesDecoder
         , timeout = Nothing
-        , withCredentials = False
+        , tracker = Nothing
         }
         |> RemoteData.sendRequest
         |> Cmd.map M.BadgeRulesResp
@@ -191,7 +189,7 @@ fetchBadgesByUserId { url, token, sub } =
         , body = Http.emptyBody
         , expect = Http.expectJson Json.badgesDecoder
         , timeout = Nothing
-        , withCredentials = False
+        , tracker = Nothing
         }
         |> RemoteData.sendRequest
         |> Cmd.map M.BadgesResp
@@ -217,16 +215,14 @@ createAuthRecord :
     -> M.Login
     -> Task Http.Error String
 createAuthRecord httpsrv login =
-    Http.request
+    Http.task
         { method = "POST"
         , headers = []
         , url = httpsrv ++ "/auth"
         , body = Http.jsonBody <| Json.loginEncoder login
-        , expect = Http.expectJson Json.authDecoder
+        , resolver = Http.stringResolver <| handleJsonResponse <| Json.authDecoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
 fetchAllUgimgsets :
@@ -411,16 +407,14 @@ createUserRecord :
     -> Entity.UserRecord
     -> Task Http.Error Entity.User
 createUserRecord httpsrv token user =
-    Http.request
+    Http.task
         { method = "POST"
         , headers = defaultHeaders token
         , url = httpsrv ++ "/user"
         , body = Http.jsonBody <| Entity.userRecordEncoder user
-        , expect = Http.expectJson Entity.userDecoder
+        , resolver = Http.stringResolver <| handleJsonResponse <| Entity.userDecoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
 okyToky : Time.Posix -> String -> Result String M.JwtPayload
@@ -500,41 +494,62 @@ postCycles { session, cycles, token, httpsrv } =
 
 postRequest : { endpoint : String, token : String, decoder : JD.Decoder a, json : JE.Value } -> Task Http.Error a
 postRequest { endpoint, decoder, token, json } =
-    Http.request
+    Http.task
         { method = "POST"
         , headers = defaultHeaders token
         , url = endpoint
-        , body = json |> Http.jsonBody
-        , expect = Http.expectJson decoder
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| handleJsonResponse <| decoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
 putRequest : { endpoint : String, token : String, decoder : JD.Decoder a, json : JE.Value } -> Task Http.Error a
 putRequest { endpoint, decoder, token, json } =
-    Http.request
+    Http.task
         { method = "PUT"
         , headers = defaultHeaders token
         , url = endpoint
-        , body = json |> Http.jsonBody
-        , expect = Http.expectJson decoder
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| handleJsonResponse <| decoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
 getRequest : String -> String -> JD.Decoder a -> Task Http.Error a
-getRequest token endpoint jsonDecoder =
-    Http.request
+getRequest token endpoint decoder =
+    Http.task
         { method = "GET"
         , headers = defaultHeaders token
         , url = endpoint
         , body = Http.emptyBody
-        , expect = Http.expectJson jsonDecoder
+        , resolver = Http.stringResolver <| handleJsonResponse <| decoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
+
+
+-- HELPERS
+{-| Decode a JSON response, while handling possible errors.
+-}
+handleJsonResponse : JD.Decoder a -> Http.Response String -> Result Http.Error a
+handleJsonResponse decoder response =
+    case response of
+        Http.BadUrl_ url ->
+            Err (Http.BadUrl url)
+
+        Http.Timeout_ ->
+            Err Http.Timeout
+
+        Http.BadStatus_ { statusCode } _ ->
+            Err (Http.BadStatus statusCode)
+
+        Http.NetworkError_ ->
+            Err Http.NetworkError
+
+        Http.GoodStatus_ _ body ->
+            case JD.decodeString decoder body of
+                Ok result ->
+                    Ok result
+
+                Err err ->
+                    Err (Http.BadBody ((JD.errorToString err) ++ body))
