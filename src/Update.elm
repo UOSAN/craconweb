@@ -25,6 +25,7 @@ import Routing as R
 import Task exposing (Task)
 import Time
 import Url
+import Jwt
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -595,7 +596,7 @@ update msg model =
                         Err err ->
                             ( { model
                                 | loading = Nothing
-                                , glitching = Just err
+                                , glitching = Just (Jwt.errorToString err)
                               }
                             , Cmd.none
                             )
@@ -1061,7 +1062,7 @@ valuationsErrState model err =
     ( { model
         | loading = Nothing
         , glitching = Just (valuationsError err)
-        , httpErr = err
+        , httpErr = valuationsError err
       }
     , Cmd.none
     )
@@ -1072,7 +1073,7 @@ httpErrorState model err =
     ( { model
         | loading = Nothing
         , glitching = Just (Helpers.httpHumanError err)
-        , httpErr = err
+        , httpErr = Helpers.httpHumanError err
       }
     , Cmd.none
     )
