@@ -11,6 +11,7 @@ import Task
 import Update
 import View
 import Model exposing (WindowSize)
+import Time
 
 
 main : Program M.Flags M.Model M.Msg
@@ -50,7 +51,7 @@ init flags location key =
 
         -- based on location and jwt
         ( route_, visitor_, commands_ ) =
-            case Api.okyToky flags.time flags.token of
+            case Api.okyToky (Time.millisToPosix flags.time) flags.token of
                 Ok jwt ->
                     ( Helpers.checkAccess (R.parseLocation location) jwt
                     , M.LoggedIn jwt
@@ -96,13 +97,13 @@ init flags location key =
             , mesAnswers = Nothing
             , mesAnswer = Nothing
             , adminModel =
-                { tmpUserRecord = emptyUserRecord
+                { tmpUserRecord = Empty.emptyUserRecord
                 , mesAnswers = Nothing
                 , tmpUserEdit = Nothing
                 }
             , statements = Nothing
             , request = Nothing
-            , loadTime = flags.time
+            , loadTime = Time.millisToPosix flags.time
             , badgeRules = RemoteData.NotAsked
             , domLoaded = False
             , badgesEarned = RemoteData.NotAsked

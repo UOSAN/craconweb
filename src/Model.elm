@@ -17,7 +17,7 @@ import Url
 
 type alias Flags =
     { token : String
-    , time : Float
+    , time : Int
     }
 
 
