@@ -1,6 +1,7 @@
 module Update exposing (update)
 
 import Api
+import Browser
 import Browser.Navigation exposing (pushUrl)
 import Duration
 import Empty
@@ -26,6 +27,7 @@ import Task exposing (Task)
 import Time
 import Url
 import Jwt
+import Browser.Navigation
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -768,6 +770,21 @@ update msg model =
 
         PutMesResp (Err err) ->
             httpErrorState model err
+
+        ClickedLink urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model
+                    , Browser.Navigation.pushUrl model.key (Url.toString url)
+                    )
+
+                Browser.External href ->
+                    ( model
+                    , Browser.Navigation.load href
+                    )
+
+        ChangedUrl url ->
+            onUpdateLocation url model
 
 
 initFmriStopSignal : { user : Entity.User } -> Model -> ( Model, Cmd Msg )

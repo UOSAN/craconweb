@@ -1,14 +1,20 @@
 module Main exposing (..)
 
 import Api
+import Browser
 import Browser.Events
+import Browser.Navigation
+import Empty
 import Game
 import Helpers
+import Json.Decode
 import Model as M
 import Port
+import RemoteData
 import Routing as R
 import Task
 import Update
+import Url
 import View
 import Model exposing (WindowSize)
 import Time
@@ -16,17 +22,19 @@ import Time
 
 main : Program M.Flags M.Model M.Msg
 main =
-    Browser.application M.OnUpdateLocation
+    Browser.application
         { init = init
         , view = View.view
         , update = Update.update
         , subscriptions = subscriptions
+        , onUrlChange = M.ChangedUrl
+        , onUrlRequest = M.ClickedLink
         }
 
 subscriptions : M.Model -> Sub M.Msg
 subscriptions model =
     Sub.batch
-        [ Browser.Events.onKeyDown Helpers.keyDecoder M.Presses
+        [ Browser.Events.onKeyDown (Json.Decode.map M.Presses Helpers.keyDecoder)
         , ticker model.gameState
         , Port.status M.SetStatus
         , Port.domLoaded M.DomLoaded
@@ -81,7 +89,7 @@ init flags location key =
             , glitching = Nothing
             , informing = Nothing
             , users = []
-            , userRole = emptyRole
+            , userRole = Empty.emptyRole
             , groupIdExp = Nothing
             , groupIdCon = Nothing
             , httpErr = ""

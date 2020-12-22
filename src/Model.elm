@@ -1,5 +1,6 @@
 module Model exposing (..)
 
+import Browser
 import Browser.Navigation
 import Entity
 import Game
@@ -84,6 +85,8 @@ type alias WindowSize =
 type Msg
     = UpdateLocation String
     | OnUpdateLocation Url.Url
+    | ChangedUrl Url.Url
+    | ClickedLink Browser.UrlRequest
     | FillTmpUserEdit String
     | GroupChanged (Maybe String)
     | SetStatus String
