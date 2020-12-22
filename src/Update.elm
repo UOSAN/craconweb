@@ -879,8 +879,7 @@ You will see pictures presented in either a dark blue or light gray border. Pres
                         |> Task.map
                             (\time ->
                                 let
-                                    seed =
-                                        round time
+                                    seed = Time.posixToMillis time
                                 in
                                 ( time
                                 , seed
@@ -908,8 +907,7 @@ initGoNoGo model =
                 |> Task.map
                     (\time ->
                         let
-                            seed =
-                                round time
+                            seed = Time.posixToMillis time
                         in
                         ( time
                         , seed
@@ -926,7 +924,7 @@ initGoNoGo model =
                             , responseImages = getFullImagePathsNew model.filesrv model.ugimages_v |> Maybe.withDefault []
                             , nonResponseImages = getFullImagePathsNew model.filesrv model.ugimages_i |> Maybe.withDefault []
                             , fillerImages = getFullImagePathsNew model.filesrv model.ugimages_f |> Maybe.withDefault []
-                            , seedInt = round time
+                            , seedInt = seed
                             , currentTime = time
                             , redCrossDuration = Duration.milliseconds 500
                             , blockDuration = Duration.minutes 1
@@ -955,8 +953,7 @@ initDotProbe model =
                 |> Task.map
                     (\time ->
                         let
-                            seed =
-                                round time
+                            seed = Time.posixToMillis time
                         in
                         ( time
                         , seed
@@ -973,7 +970,7 @@ You will see pictures on the left and right side of the screen, followed by a do
         """
                             , responseImages = getFullImagePathsNew model.filesrv model.ugimages_v |> Maybe.withDefault []
                             , nonResponseImages = getFullImagePathsNew model.filesrv model.ugimages_i |> Maybe.withDefault []
-                            , seedInt = round time
+                            , seedInt = seed
                             , currentTime = time
                             , blockDuration = Duration.minutes 1
                             , totalBlocks = 5
@@ -1001,8 +998,7 @@ initVisualSearch model =
                 |> Task.map
                     (\time ->
                         let
-                            seed =
-                                round time
+                            seed = Time.posixToMillis time
                         in
                         ( time
                         , seed
@@ -1020,7 +1016,7 @@ You will see a grid of images. Select the target image as quickly as you can.
 """
                             , responseImages = getFullImagePathsNew model.filesrv model.ugimages_v |> Maybe.withDefault []
                             , nonResponseImages = getFullImagePathsNew model.filesrv model.ugimages_i |> Maybe.withDefault []
-                            , seedInt = round time
+                            , seedInt = seed
                             , currentTime = time
                             , blockDuration = Duration.minutes 1
                             , totalBlocks = 5
