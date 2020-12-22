@@ -94,7 +94,7 @@ type Msg
     | ResetNotifications
     | MainMenuToggle
     | NewCurrentTime Time.Posix
-    | Presses Int
+    | Presses String
     | SelectInput Int
     | DirectionInput Game.Direction
     | IndicationInput

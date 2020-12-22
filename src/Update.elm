@@ -1299,23 +1299,33 @@ getFullImagePathsNew prefix maybeUgimages =
     Maybe.map toImages maybeUgimages
 
 
-presses : number -> Model -> ( Model, Cmd Msg )
+presses : String -> Model -> ( Model, Cmd Msg )
 presses keyCode model =
     let
         ( newModel1, cmd1 ) =
-            if keyCode == 32 {- space -} || (keyCode >= 48 && keyCode <= 57) {- numeric -} then
-                handleInput Game.Indication model
+            if keyCode == " " {- space -}
+                || keyCode == "0"
+                || keyCode == "1"
+                || keyCode == "2"
+                || keyCode == "3"
+                || keyCode == "4"
+                || keyCode == "5"
+                || keyCode == "6"
+                || keyCode == "7"
+                || keyCode == "8"
+                || keyCode == "9" {- numeric -} then
+                    handleInput Game.Indication model
 
-            else
-                ( model, Cmd.none )
+                else
+                    ( model, Cmd.none )
 
         ( newModel2, cmd2 ) =
             case keyCode of
-                67 ->
+                "c" ->
                     {- c -}
                     handleInput (Game.Direction Game.Left) newModel1
 
-                77 ->
+                "m" ->
                     {- m -}
                     handleInput (Game.Direction Game.Right) newModel1
 
@@ -1324,7 +1334,7 @@ presses keyCode model =
 
         cmd3 =
             case ( keyCode, newModel2.gameState, RemoteData.toMaybe newModel2.fmriUserData ) of
-                ( 222 {- ' -}, Game.NotPlaying, Just { user } ) ->
+                ( "'" {- ' -}, Game.NotPlaying, Just { user } ) ->
                     Task.perform InitFmriStopSignal (Task.succeed { user = user })
 
                 _ ->

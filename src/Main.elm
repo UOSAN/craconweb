@@ -25,7 +25,7 @@ main =
 subscriptions : M.Model -> Sub M.Msg
 subscriptions model =
     Sub.batch
-        [ Browser.Events.onKeyDown M.Presses
+        [ Browser.Events.onKeyDown Helpers.keyDecoder M.Presses
         , ticker model.gameState
         , Port.status M.SetStatus
         , Port.domLoaded M.DomLoaded

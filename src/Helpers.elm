@@ -1,6 +1,7 @@
 module Helpers exposing (..)
 
 import Http
+import Json.Decode as Decode
 import Model
 import Routing as R
 
@@ -105,3 +106,8 @@ isAdmin jwt =
 isStaff : Model.JwtPayload -> Bool
 isStaff jwt =
     List.map .name jwt.roles |> List.member "staff"
+
+
+keyDecoder : Decode.Decoder String
+keyDecoder =
+  Decode.field "key" Decode.string
