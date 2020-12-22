@@ -29,7 +29,7 @@ subscriptions model =
         , ticker model.gameState
         , Port.status M.SetStatus
         , Port.domLoaded M.DomLoaded
-        , Browser.Events.onResize (\w h -> M.WindowResize getWindowSize w h)
+        , Browser.Events.onResize (\w h -> M.WindowResize (getWindowSize w h))
         ]
 
 
