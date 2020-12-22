@@ -52,7 +52,7 @@ update msg model =
                 adminModel_ =
                     model.adminModel
 
-                tue_ =
+                tempUserEdit_ =
                     case model.adminModel.tmpUserEdit of
                         Nothing ->
                             Nothing
@@ -77,7 +77,7 @@ update msg model =
                                 _ ->
                                     Just tue_
             in
-            ( { model | adminModel = { adminModel_ | tmpUserEdit = tue_ } }
+            ( { model | adminModel = { adminModel_ | tmpUserEdit = tempUserEdit_ } }
             , Cmd.none
             )
 
@@ -86,7 +86,7 @@ update msg model =
                 adminModel_ =
                     model.adminModel
 
-                tue_ =
+                tempUserEdit_ =
                     case model.adminModel.tmpUserEdit of
                         Nothing ->
                             Nothing
@@ -94,7 +94,7 @@ update msg model =
                         Just tue_ ->
                             Just { tue_ | mesOptin = not tue_.mesOptin }
             in
-            ( { model | adminModel = { adminModel_ | tmpUserEdit = tue_ } }
+            ( { model | adminModel = { adminModel_ | tmpUserEdit = tempUserEdit_ } }
             , Cmd.none
             )
 
@@ -572,8 +572,8 @@ update msg model =
                                     List.member "staff" roles
                                         || List.member "admin" roles
 
-                                skipToAdmin jwt =
-                                    if isPowerful (List.map .name jwt.roles) then
+                                skipToAdmin jsonWebTokenArg =
+                                    if isPowerful (List.map .name jsonWebTokenArg.roles) then
                                         pushUrl model.key R.adminPath
 
                                     else
@@ -779,13 +779,13 @@ initFmriStopSignal { user } model =
 
         Just gameEntity ->
             let
-                ugimages_v =
+                images_v =
                     model.fmriUserData
                         |> RemoteData.toMaybe
                         |> Maybe.map (\{ ugimages_v } -> Just ugimages_v)
                         |> Maybe.withDefault model.ugimages_v
 
-                ugimages_i =
+                images_i =
                     model.fmriUserData
                         |> RemoteData.toMaybe
                         |> Maybe.map (\{ ugimages_i } -> Just ugimages_i)
@@ -802,8 +802,8 @@ You will see pictures presented in either a dark blue or light gray border. Pres
 <br>
 **Press any key to continue.**
 """
-                        , responseImages = getFullImagePathsNew model.filesrv ugimages_v |> Maybe.withDefault []
-                        , nonResponseImages = getFullImagePathsNew model.filesrv ugimages_i |> Maybe.withDefault []
+                        , responseImages = getFullImagePathsNew model.filesrv images_v |> Maybe.withDefault []
+                        , nonResponseImages = getFullImagePathsNew model.filesrv images_i |> Maybe.withDefault []
                         , seedInt = seed
                         , currentTime = time
                         , blockDuration = Duration.seconds 150
@@ -827,7 +827,7 @@ You will see pictures presented in either a dark blue or light gray border. Pres
                                 , game time seed
                                 )
                             )
-                        |> Task.perform (\( time, seed, ( game, nextSeed ) ) -> StartSession { gameId = gameEntity.id, game = game, time = time, initialSeed = seed, nextSeed = nextSeed })
+                        |> Task.perform (\( time, seed, ( tempGame, nextSeed ) ) -> StartSession { gameId = gameEntity.id, game = tempGame, time = time, initialSeed = seed, nextSeed = nextSeed })
             in
             ( model
             , gameCmd
@@ -886,7 +886,7 @@ You will see pictures presented in either a dark blue or light gray border. Pres
                                 , game time seed
                                 )
                             )
-                        |> Task.perform (\( time, seed, ( game, nextSeed ) ) -> StartSession { gameId = gameEntity.id, game = game, time = time, initialSeed = seed, nextSeed = nextSeed })
+                        |> Task.perform (\( time, seed, ( tempGame, nextSeed ) ) -> StartSession { gameId = gameEntity.id, game = tempGame, time = time, initialSeed = seed, nextSeed = nextSeed })
             in
             ( model
             , gameCmd
@@ -1385,9 +1385,9 @@ gameDataSaved state session remoteData model =
             { model | gameState = Game.Saving state session remoteData }
     in
     case remoteData of
-        RemoteData.Success ( session, cycles ) ->
+        RemoteData.Success ( tempSession, cycles ) ->
             ( { model
-                | gameState = Game.Saved state { session = session, cycles = cycles }
+                | gameState = Game.Saved state { session = tempSession, cycles = cycles }
                 , fmriUserData = RemoteData.NotAsked
               }
             , Cmd.none
@@ -1442,7 +1442,7 @@ saveGameDataCmd state session model =
             Game.Cycle.generate session.id state.log
     in
     Task.map2 (\a b -> ( a, b )) endSessionTask postCyclesTask
-        |> Task.map (\( a, b ) -> RemoteData.map2 (\a b -> ( a, b )) a b)
+        |> Task.map (\( a, b ) -> RemoteData.map2 (\c d -> ( c, d )) a b)
         |> Task.perform (GameDataSaved state session)
 
 
