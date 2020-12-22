@@ -133,7 +133,7 @@ createMesAnswer b answer sub =
         , headers = defaultHeaders b.token
         , url = b.url ++ "/user/" ++ sub ++ "/mesquery/" ++ answer.queryId ++ "/mesanswer"
         , body = Http.jsonBody <| M.mesAnswerEncoder answer
-        , resolver = Http.expectStringResponse
+        , resolver = Http.stringResolver <| responseToResult
         , timeout = Nothing
         }
 
@@ -172,12 +172,10 @@ fetchBadgeRules { url, token, sub } =
         , headers = defaultHeaders token
         , url = url ++ "/badgerules?sortEach=true"
         , body = Http.emptyBody
-        , expect = Http.expectJson Json.badgeRulesDecoder
+        , expect = Http.expectJson (RemoteData.fromResult >> M.BadgeRulesResp) Json.badgeRulesDecoder
         , timeout = Nothing
         , tracker = Nothing
         }
-        |> RemoteData.sendRequest
-        |> Cmd.map M.BadgeRulesResp
 
 
 fetchBadgesByUserId : M.Base -> Cmd M.Msg
@@ -187,12 +185,10 @@ fetchBadgesByUserId { url, token, sub } =
         , headers = defaultHeaders token
         , url = url ++ "/user/" ++ sub ++ "/badges"
         , body = Http.emptyBody
-        , expect = Http.expectJson Json.badgesDecoder
+        , expect = Http.expectJson (RemoteData.fromResult >> M.BadgesResp) Json.badgesDecoder
         , timeout = Nothing
         , tracker = Nothing
         }
-        |> RemoteData.sendRequest
-        |> Cmd.map M.BadgesResp
 
 
 fetchPublicMesAnswers : M.Base -> Task Http.Error (List M.MesAnswer)
@@ -553,3 +549,24 @@ handleJsonResponse decoder response =
 
                 Err err ->
                     Err (Http.BadBody ((JD.errorToString err) ++ body))
+
+
+{-| Handle a string response, while handling possible errors.
+-}
+responseToResult : Http.Response a -> Result Http.Error a
+responseToResult response =
+    case response of
+        Http.BadUrl_ url ->
+            Err (Http.BadUrl url)
+
+        Http.Timeout_ ->
+            Err Http.Timeout
+
+        Http.BadStatus_ { statusCode } _ ->
+            Err (Http.BadStatus statusCode)
+
+        Http.NetworkError_ ->
+            Err Http.NetworkError
+
+        Http.GoodStatus_ _ body ->
+            Ok body
