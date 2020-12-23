@@ -1,43 +1,45 @@
 module Game.Implementations.DotProbe exposing (init)
 
+import Duration exposing (Duration)
 import Game
     exposing
-        ( Game
+        ( BorderType(..)
+        , Game
         , Image
         , Layout(..)
-        , BorderType(..)
         , LogEntry(..)
         , State
-        , onDirection
+        , addIntervals
         , andThen
         , emptyState
-        , segment
-        , log
-        , addIntervals
         , info
-        , onIndication
-        , timeout
-        , resultTimeout
-        , startSession
         , leftOrRight
+        , log
+        , onDirection
+        , onIndication
+        , resultTimeout
+        , segment
+        , startSession
+        , timeout
         )
+import Quantity exposing (Quantity)
 import Random exposing (Generator)
-import Time exposing (Time)
+import Time
 
 
 init :
-    { fixationDuration : Time
-    , imageDuration : Time
+    { fixationDuration : Duration
+    , imageDuration : Duration
     , infoString : String
     , responseImages : List Image
     , nonResponseImages : List Image
     , seedInt : Int
-    , currentTime : Time
-    , blockDuration : Time
-    , restDuration : Time
+    , currentTime : Time.Posix
+    , blockDuration : Duration
+    , restDuration : Duration
     , totalBlocks : Int
-    , intervalMin : Time
-    , intervalJitter : Time
+    , intervalMin : Duration
+    , intervalJitter : Duration
     }
     -> ( Game msg, Random.Seed )
 init ({ fixationDuration, imageDuration, infoString, responseImages, nonResponseImages, seedInt, currentTime, blockDuration, restDuration, totalBlocks } as args) =
@@ -56,12 +58,12 @@ init ({ fixationDuration, imageDuration, infoString, responseImages, nonResponse
                 responseImages
                 nonResponseImages
     in
-        Game.shuffle args trials
+    Game.shuffle args trials
 
 
 trial :
-    { fixationDuration : Time
-    , imageDuration : Time
+    { fixationDuration : Duration
+    , imageDuration : Duration
     , goTrial : Bool
     , goImage : Image
     , noGoImage : Image
@@ -79,6 +81,7 @@ trial { fixationDuration, imageDuration, goTrial, goImage, noGoImage } state =
                     (\n ->
                         if n < 0.9 then
                             direction
+
                         else
                             Game.flipDirection direction
                     )
@@ -89,7 +92,7 @@ trial { fixationDuration, imageDuration, goTrial, goImage, noGoImage } state =
         borderless =
             None
 
-        trial =
+        layout =
             case direction of
                 Game.Left ->
                     Just (LeftRight borderless direction goImage noGoImage)
@@ -103,12 +106,12 @@ trial { fixationDuration, imageDuration, goTrial, goImage, noGoImage } state =
         probe =
             Just (Probe borderless probeDirection)
     in
-        log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime, currentSeed = nextSeed }
-            |> andThen (log (BeginDisplay fixation))
-            |> andThen (segment [ timeout fixationDuration ] fixation)
-            |> andThen (log (BeginDisplay trial))
-            |> andThen (segment [ timeout (fixationDuration + imageDuration) ] trial)
-            |> andThen (log (BeginDisplay probe))
-            |> andThen (log BeginInput)
-            |> andThen (segment [ onDirection True direction ] probe)
-            |> andThen (log EndTrial)
+    log BeginTrial { state | trialResult = Game.NoResult, trialStart = state.currTime, currentSeed = nextSeed }
+        |> andThen (log (BeginDisplay fixation))
+        |> andThen (segment [ timeout fixationDuration ] fixation)
+        |> andThen (log (BeginDisplay layout))
+        |> andThen (segment [ timeout (Quantity.plus fixationDuration imageDuration) ] layout)
+        |> andThen (log (BeginDisplay probe))
+        |> andThen (log BeginInput)
+        |> andThen (segment [ onDirection True direction ] probe)
+        |> andThen (log EndTrial)

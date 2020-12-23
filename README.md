@@ -1,13 +1,19 @@
+
 # Crave Control Frontend
 
-To run in development, first ensure `craconapi` is running, then compile:
+## Prerequisites
+[Elm](https://elm-lang.org/docs)
 
+## How to build
  - cd `src/`
- - `elm make Main.elm --output ../public/js/app.js --debug --warn`
- - Then `cd ../public` and run `alfred` or something to serve the files
- - visit http://localhost:4001/
+ - `elm make Main.elm --output ../public/js/app.js --debug`
 
-This can be nice: `while :; do clear; your_command; sleep 2; done`
-Or this if you have `elm-live` installed:
+## How to run in development mode
+- From the `public` directory, run a web server locally
+  - For example, [`python3 -m http.server 8000`](https://docs.python.org/3/library/http.server.html#http.server.SimpleHTTPRequestHandler) will run a local web server that serves on port 8000
+- Visit http://localhost:8000 in your browser
 
-`elm-live Main.elm --output=../public/js/app.js --dir=../public --open --pushstate --debug --warn`
+Another option is to use [elm-live](https://www.elm-live.com/) as a dev server with live reload.
+- From the `src` directory, run
+`elm-live Main.elm --open --pushstate --dir=../public -- --output=../public/js/app.js --debug`
+- Visit http://localhost:8000 in your browser

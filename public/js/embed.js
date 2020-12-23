@@ -1,9 +1,9 @@
 var flags = {
-    "token": token(),
-    "time": Date.now()
+    token: token(),
+    time: Date.now()
 }
 
-var app = Elm.Main.fullscreen(flags)
+var app = Elm.Main.init({flags : flags})
 
 // Ports
 
@@ -17,10 +17,6 @@ document.onreadystatechange = function () {
 app.ports.set.subscribe(function(keyValue) {
     var [key, value] = keyValue
     setLocalStorageItem(key, value)
-})
-
-app.ports.remove.subscribe(function(key) {
-    localStorage.removeItem(key)
 })
 
 app.ports.clear.subscribe(function(i) {

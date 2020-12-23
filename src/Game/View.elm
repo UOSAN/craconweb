@@ -16,6 +16,7 @@ import RemoteData
 import Svg exposing (Svg, circle, svg)
 import Svg.Attributes as Svg exposing (cx, cy, r)
 import Ui.Parts
+import Time
 
 
 view :
@@ -58,62 +59,60 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
 
                 timer =
                     state.sessionStart
-                        |> Maybe.map (\sessionStart -> state.currTime - sessionStart)
-                        |> Maybe.map (\timer -> timer / 1000)
-                        |> Maybe.map toString
+                        |> Maybe.map (\sessionStart -> (Time.posixToMillis state.currTime) - (Time.posixToMillis sessionStart))
+                        |> Maybe.map (\t -> toFloat t / 1000)
+                        |> Maybe.map String.fromFloat
                         |> Maybe.withDefault ""
             in
-                div []
-                    -- [ p [] [ text timer ]
-                    -- , p [] [ text <| toString state.trialResult ]
-                    [ case Game.Card.layout game of
-                        Nothing ->
-                            text ""
+            div []
+                [ case Game.Card.layout game of
+                    Nothing ->
+                        text ""
 
-                        Just (Game.Info borderType string) ->
-                            Ui.Parts.middleBlock [ Markdown.toHtml [ onClick IndicationInput ] string ]
+                    Just (Game.Info borderType string) ->
+                        Ui.Parts.middleBlock [ Markdown.toHtml [ onClick IndicationInput ] string ]
 
-                        Just (Game.Single borderType image) ->
-                            viewSingleLayout borderType image
+                    Just (Game.Single borderType image) ->
+                        viewSingleLayout borderType image
 
-                        Just (Game.LeftRight borderType direction lImage rImage) ->
-                            viewLeftRightLayout
-                                { borderType = borderType
-                                , lImage = lImage
-                                , rImage = rImage
-                                }
+                    Just (Game.LeftRight borderType direction lImage rImage) ->
+                        viewLeftRightLayout
+                            { borderType = borderType
+                            , lImage = lImage
+                            , rImage = rImage
+                            }
 
-                        Just (Game.LeftOrRight borderType direction image) ->
-                            viewLeftOrRightLayout
-                                { borderType = borderType
-                                , direction = direction
-                                , image = image
-                                }
+                    Just (Game.LeftOrRight borderType direction image) ->
+                        viewLeftOrRightLayout
+                            { borderType = borderType
+                            , direction = direction
+                            , image = image
+                            }
 
-                        Just (Game.SelectGrid borderType { columns, images, goIndex }) ->
-                            viewSelectGridLayout
-                                { borderType = borderType
-                                , columns = columns
-                                , images = images
-                                , result = state.trialResult
-                                , goIndex = goIndex
-                                }
+                    Just (Game.SelectGrid borderType { columns, images, goIndex }) ->
+                        viewSelectGridLayout
+                            { borderType = borderType
+                            , columns = columns
+                            , images = images
+                            , result = state.trialResult
+                            , goIndex = goIndex
+                            }
 
-                        Just (Game.RedCross borderType) ->
-                            viewRedCross borderType
+                    Just (Game.RedCross borderType) ->
+                        viewRedCross borderType
 
-                        Just (Game.Fixation borderType) ->
-                            viewFixation borderType
+                    Just (Game.Fixation borderType) ->
+                        viewFixation borderType
 
-                        Just (Game.Probe borderType direction) ->
-                            viewProbe borderType direction
+                    Just (Game.Probe borderType direction) ->
+                        viewProbe borderType direction
 
-                        Just (Game.Rest) ->
-                            viewRest restMessages state
+                    Just Game.Rest ->
+                        viewRest restMessages state
 
-                        Just (Game.Interval) ->
-                            Html.text ""
-                    ]
+                    Just Game.Interval ->
+                        Html.text ""
+                ]
 
         Game.Saving state session remoteData ->
             viewResult state
@@ -172,37 +171,37 @@ viewResult state session { percentCorrect, averageResponseTimeResult, savingStat
                 Ok result ->
                     Numeral.format "0.00" result ++ " milliseconds"
     in
-        Ui.Parts.middleBlock
-            [ h1 [ class "title" ] [ text "Results" ]
-            , ul []
-                [ li [] [ text <| "Average Response Time: " ++ averageResponseTime ]
-                , li [] [ text <| "Percent Correct: " ++ Numeral.format "0.00" percentCorrect ++ "%" ]
-                ]
-            , br [] []
-            , case savingStatus of
-                RemoteData.Failure _ ->
-                    button
-                        [ class "button is-info is-large"
-                        , onClick (ResendSession state session)
-                        , type_ "button"
-                        ]
-                        [ text "Resend Data" ]
-
-                RemoteData.Loading ->
-                    button [ class "button is-info is-large is-loading" ]
-                        [ text "Resend Data" ]
-
-                RemoteData.NotAsked ->
-                    text ""
-
-                RemoteData.Success _ ->
-                    button
-                        [ class "button is-info is-large"
-                        , onClick (UpdateLocation "/")
-                        , type_ "button"
-                        ]
-                        [ text "Done" ]
+    Ui.Parts.middleBlock
+        [ h1 [ class "title" ] [ text "Results" ]
+        , ul []
+            [ li [] [ text <| "Average Response Time: " ++ averageResponseTime ]
+            , li [] [ text <| "Percent Correct: " ++ Numeral.format "0.00" percentCorrect ++ "%" ]
             ]
+        , br [] []
+        , case savingStatus of
+            RemoteData.Failure _ ->
+                button
+                    [ class "button is-info is-large"
+                    , onClick (ResendSession state session)
+                    , type_ "button"
+                    ]
+                    [ text "Resend Data" ]
+
+            RemoteData.Loading ->
+                button [ class "button is-info is-large is-loading" ]
+                    [ text "Resend Data" ]
+
+            RemoteData.NotAsked ->
+                text ""
+
+            RemoteData.Success _ ->
+                button
+                    [ class "button is-info is-large"
+                    , onClick (UpdateLocation "/")
+                    , type_ "button"
+                    ]
+                    [ text "Done" ]
+        ]
 
 
 border : BorderType -> List (Attribute msg) -> List (Html msg) -> Html msg
@@ -288,11 +287,11 @@ viewSelectGridLayout { result, borderType, columns, images, goIndex } =
     div [ class "columns is-mobile" ]
         (List.Extra.groupsOf columns images
             |> List.indexedMap
-                (\col images ->
+                (\col tempImages ->
                     viewGridColumn
                         { result = result
                         , columnIndex = col
-                        , images = images
+                        , images = tempImages
                         , goIndex = goIndex
                         }
                 )
@@ -319,29 +318,30 @@ viewGridRow { result, columnIndex, goIndex } rowIndex image =
         index =
             (columnIndex * 4) + rowIndex
     in
-        img
-            [ src image.url
-            , onClick (SelectInput index)
-            , onTouch (SelectInput index)
-            , case result of
-                Game.SelectResult { answer, result } ->
-                    if goIndex == index then
-                        class "vsImg green-grow"
-                    else
-                        case Maybe.map ((==) index) answer of
-                            Just True ->
-                                class "vsImg red-shrink"
+    img
+        [ src image.url
+        , onClick (SelectInput index)
+        , onTouch (SelectInput index)
+        , case result of
+            Game.SelectResult { answer } ->
+                if goIndex == index then
+                    class "vsImg green-grow"
 
-                            Just False ->
-                                class "vsImg"
+                else
+                    case Maybe.map ((==) index) answer of
+                        Just True ->
+                            class "vsImg red-shrink"
 
-                            Nothing ->
-                                class "vsImg"
+                        Just False ->
+                            class "vsImg"
 
-                _ ->
-                    class "vsImg"
-            ]
-            []
+                        Nothing ->
+                            class "vsImg"
+
+            _ ->
+                class "vsImg"
+        ]
+        []
 
 
 
@@ -373,29 +373,30 @@ viewRest messages state =
     let
         counter =
             state.blockStart
-                |> Maybe.map (\blockStart -> ceiling ((blockStart - state.currTime) / 1000))
-                |> Maybe.map (\countdown -> " in " ++ toString countdown ++ " seconds.")
+                |> Maybe.map (\blockStart -> ceiling (toFloat (Time.posixToMillis blockStart - Time.posixToMillis state.currTime) / 1000))
+                |> Maybe.map (\countdown -> " in " ++ String.fromInt countdown ++ " seconds.")
                 |> Maybe.withDefault "."
 
         defaultMessage =
             "This concludes Block "
-                ++ toString (state.blockCounter)
+                ++ String.fromInt state.blockCounter
                 ++ ". Please stand by to begin Block "
-                ++ toString (state.blockCounter + 1)
+                ++ String.fromInt (state.blockCounter + 1)
                 ++ counter
 
         index =
             if List.length messages == 0 then
                 0
+
             else
-                ((state.blockCounter - 1) % (List.length messages))
+                modBy (List.length messages) (state.blockCounter - 1)
 
         message =
             messages |> List.Extra.getAt index |> Maybe.withDefault defaultMessage
     in
-        Ui.Parts.middleBlock
-            [ text <| message
-            ]
+    Ui.Parts.middleBlock
+        [ text <| message
+        ]
 
 
 viewProbe : BorderType -> Game.Direction -> Html Msg
@@ -472,4 +473,11 @@ instBlock text_ =
 
 onTouch : msg -> Html.Attribute msg
 onTouch msg =
-    onWithOptions "touchstart" { stopPropagation = True, preventDefault = True } (Json.Decode.succeed msg)
+    let
+        options =
+            { message = msg
+            , stopPropagation = True
+            , preventDefault = True
+            }
+    in
+    custom "touchstart" (Json.Decode.succeed options)

@@ -1,5 +1,6 @@
 module View exposing (view)
 
+import Browser exposing (Document)
 import Entity
 import Game
 import Game.View as Game
@@ -10,19 +11,17 @@ import List.Extra
 import Model exposing (..)
 import RemoteData
 import Routing as R
-import Entity
 import Ui.Admin as Admin
 import Ui.Parts as Parts
-import Window as W
 
 
 bigLogo : String -> Html Msg
 bigLogo filesrv =
-    p [ style [ ( "text-align", "center" ) ] ]
+    p [ style "text-align" "center" ]
         [ img
             [ class "logo is-vcentered"
             , src (filesrv ++ "/repo/logo.svg")
-            , style [ ( "max-width", "300px" ) ]
+            , style "max-width" "300px"
             ]
             []
         ]
@@ -61,7 +60,7 @@ loginPage model =
                     [ bigLogo model.filesrv
                     , loginPageBoxForm model
                     , Parts.notification model.glitching "is-warning"
-                    , h4 [ class "is-4 subtitle is-centered", style [ ( "text-align", "center" ) ] ]
+                    , h4 [ class "is-4 subtitle is-centered", style "text-align" "center" ]
                         [ strong [] [ text "Not already a member of the CraveControl study?" ]
                         , br [] []
                         , text "Click "
@@ -69,7 +68,7 @@ loginPage model =
                         , text " to see if you're eligible to participate!"
                         , br [] []
                         ]
-                    , div [ class "is-centered", style [ ( "text-align", "center" ) ] ]
+                    , div [ class "is-centered", style "text-align" "center" ]
                         [ button
                             [ class <| statementsModalButtonClass model.statementsModal
                             , onClick ToggleStatementsModal
@@ -134,10 +133,8 @@ navBar model =
     case model.activeRoute of
         R.FmriRoute _ ->
             div
-                [ style
-                    [ ( "min-height", "15vh" )
-                    , ( "cursor", "none" )
-                    ]
+                [ style "min-height" "15vh"
+                , style "cursor" "none"
                 ]
                 []
 
@@ -209,11 +206,12 @@ navLink text_ path active =
         class_ =
             if active then
                 "nav-item is-tab is-active"
+
             else
                 "nav-item is-tab"
     in
-        a ([ class class_ ] ++ Parts.linkAttrs path)
-            [ text text_ ]
+    a ([ class class_ ] ++ Parts.linkAttrs path)
+        [ text text_ ]
 
 
 tinyLogo : String -> Html Msg
@@ -230,6 +228,7 @@ isActive : Bool -> String
 isActive active =
     if active then
         " is-active"
+
     else
         ""
 
@@ -301,8 +300,8 @@ homePageGrid model =
 homePageGameCards : Model -> List (Html Msg)
 homePageGameCards model =
     let
-        toCard game =
-            case game of
+        toCard gameArg =
+            case gameArg of
                 Just g ->
                     div [ class "column" ]
                         [ homePageGameCard g.slug (model.filesrv ++ "/repo/" ++ g.icon) g.name g.dscript ]
@@ -310,18 +309,18 @@ homePageGameCards model =
                 Nothing ->
                     div [] []
     in
-        List.map toCard
-            [ model.gonogoGame
-            , model.dotprobeGame
-            , model.stopsignalGame
-            , model.visualsearchGame
-            ]
+    List.map toCard
+        [ model.gonogoGame
+        , model.dotprobeGame
+        , model.stopsignalGame
+        , model.visualsearchGame
+        ]
 
 
 homePageGameCard : String -> String -> String -> String -> Html Msg
 homePageGameCard gameSlug src_ title about =
     div
-        [ class "card", style <| toStyle "border-radius:1em;" ]
+        [ class "card", style "border-radius" "1em" ]
         [ div
             [ class "card-image" ]
             [ figure
@@ -361,13 +360,13 @@ mesQueryModal q feedback =
         Nothing ->
             text ""
 
-        Just q ->
+        Just question ->
             Parts.modal
                 [ div
                     [ class "field" ]
                     [ label
                         [ class "label white title is-3" ]
-                        [ text q ]
+                        [ text question ]
                     , p
                         [ class "control" ]
                         [ textarea
@@ -448,12 +447,12 @@ tryUnlock ids b =
         b_ =
             { name = b.name, dscript = b.dscript, unlocked = True, fg = "#000", bg = "#eee" }
     in
-        case List.member b.id ids of
-            True ->
-                { b_ | unlocked = True, bg = "#F2E86B" }
+    case List.member b.id ids of
+        True ->
+            { b_ | unlocked = True, bg = "#F2E86B" }
 
-            False ->
-                { b_ | unlocked = False }
+        False ->
+            { b_ | unlocked = False }
 
 
 rules :
@@ -489,13 +488,14 @@ badgeBox b =
         ( wobble, icon ) =
             if b.unlocked then
                 ( "wobble-hor-bottom", i [ class "fa fa-unlock" ] [] )
+
             else
                 ( "", i [ class "fa fa-lock" ] [] )
     in
-        div [ class <| "box " ++ wobble, style [ ( "background-color", b.bg ), ( "color", b.fg ) ] ]
-            [ h1 [ class "title is-1", style [ ( "color", b.fg ) ] ] [ text <| b.name ++ " ", icon ]
-            , p [] [ text b.dscript ]
-            ]
+    div [ class <| "box " ++ wobble, style "background-color" b.bg, style "color" b.fg ]
+        [ h1 [ class "title is-1", style "color" b.fg ] [ text <| b.name ++ " ", icon ]
+        , p [] [ text b.dscript ]
+        ]
 
 
 settingsPage : Model -> Html Msg
@@ -515,12 +515,14 @@ easeIOTransform curr base mod =
         m =
             if mod >= 1.0 then
                 2.125
+
             else if mod <= 0.0 then
                 1.125
+
             else
                 mod + 1.125
     in
-        (curr ^ m) / ((curr ^ m) + ((base - curr) ^ m))
+    (curr ^ m) / ((curr ^ m) + ((base - curr) ^ m))
 
 
 easeInTransform : Float -> Float -> Float -> Float
@@ -529,15 +531,17 @@ easeInTransform curr base mod =
         m =
             if mod > 1.0 then
                 1.0
+
             else if mod < 0.0 then
                 0.0
+
             else
                 mod
     in
-        (curr - (base - curr) * (m * (curr / base))) / base
+    (curr - (base - curr) * (m * (curr / base))) / base
 
 
-visSearchScale : W.Size -> Float
+visSearchScale : WindowSize -> Float
 visSearchScale size =
     let
         baseRatio =
@@ -546,26 +550,28 @@ visSearchScale size =
         currRatio =
             toFloat size.height / toFloat size.width
     in
-        if baseRatio > currRatio then
-            if size.width < 955 then
-                easeInTransform currRatio baseRatio 0.5
-            else if size.width < 1384 then
-                easeInTransform currRatio baseRatio 0.25
-            else
-                easeIOTransform currRatio baseRatio 0.5
+    if baseRatio > currRatio then
+        if size.width < 955 then
+            easeInTransform currRatio baseRatio 0.5
+
+        else if size.width < 1384 then
+            easeInTransform currRatio baseRatio 0.25
+
         else
-            1.0
+            easeIOTransform currRatio baseRatio 0.5
+
+    else
+        1.0
 
 
-scaleStyleFromFloat : Float -> Attribute msg
+scaleStyleFromFloat : Float -> List (Attribute msg)
 scaleStyleFromFloat scale =
-    style
-        [ ( "transform", "scale(" ++ (toString scale) ++ ")" )
-        , ( "transform-origin", "50% 0" )
-        ]
+    [ style "transform" ("scale(" ++ String.fromFloat scale ++ ")")
+    , style "transform-origin" "50% 0"
+    ]
 
 
-scaleStyle : R.Route -> Maybe W.Size -> Attribute msg
+scaleStyle : R.Route -> Maybe WindowSize -> List (Attribute msg)
 scaleStyle route size =
     case route of
         R.GameRouteVs ->
@@ -574,10 +580,10 @@ scaleStyle route size =
                     scaleStyleFromFloat <| visSearchScale s
 
                 _ ->
-                    style []
+                    []
 
         _ ->
-            style []
+            []
 
 
 game : Model -> String -> Msg -> Html Msg
@@ -594,64 +600,64 @@ game model title initMsg =
                 _ ->
                     text ""
     in
-        basicPage model
-            [ div
-                [ class "container ", (scaleStyle model.activeRoute model.windowSize) ]
-                [ title_
-                , case model.activeRoute of
-                    R.GameRouteSs ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.stopsignalGame |> Maybe.map .slug |> Maybe.withDefault "stopsignal"
-                            , fmriUser = Nothing
-                            , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
-                            }
+    basicPage model
+        [ div
+            ((class "container") :: (scaleStyle model.activeRoute model.windowSize))
+            [ title_
+            , case model.activeRoute of
+                R.GameRouteSs ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.stopsignalGame |> Maybe.map .slug |> Maybe.withDefault "stopsignal"
+                        , fmriUser = Nothing
+                        , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
+                        }
 
-                    R.GameRouteGn ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.gonogoGame |> Maybe.map .slug |> Maybe.withDefault "gonogo"
-                            , fmriUser = Nothing
-                            , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
-                            }
+                R.GameRouteGn ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.gonogoGame |> Maybe.map .slug |> Maybe.withDefault "gonogo"
+                        , fmriUser = Nothing
+                        , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
+                        }
 
-                    R.GameRouteDp ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.dotprobeGame |> Maybe.map .slug |> Maybe.withDefault "dotprobe"
-                            , fmriUser = Nothing
-                            , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
-                            }
+                R.GameRouteDp ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.dotprobeGame |> Maybe.map .slug |> Maybe.withDefault "dotprobe"
+                        , fmriUser = Nothing
+                        , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
+                        }
 
-                    R.GameRouteVs ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.visualsearchGame |> Maybe.map .slug |> Maybe.withDefault "visualsearch"
-                            , fmriUser = Nothing
-                            , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
-                            }
+                R.GameRouteVs ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.visualsearchGame |> Maybe.map .slug |> Maybe.withDefault "visualsearch"
+                        , fmriUser = Nothing
+                        , restMessages = [ "Great job! We’re going to take a quick 10 second break before we move on to the next section." ]
+                        }
 
-                    R.FmriRoute _ ->
-                        Game.view
-                            { gameState = model.gameState
-                            , initMsg = initMsg
-                            , gameSlug = model.stopsignalGame |> Maybe.map .slug |> Maybe.withDefault "stopsignal"
-                            , fmriUser =
-                                model.fmriUserData
-                                    |> RemoteData.toMaybe
-                                    |> Maybe.map (\fmriUserData -> fmriUserData.user)
-                            , restMessages = []
-                            }
+                R.FmriRoute _ ->
+                    Game.view
+                        { gameState = model.gameState
+                        , initMsg = initMsg
+                        , gameSlug = model.stopsignalGame |> Maybe.map .slug |> Maybe.withDefault "stopsignal"
+                        , fmriUser =
+                            model.fmriUserData
+                                |> RemoteData.toMaybe
+                                |> Maybe.map (\fmriUserData -> fmriUserData.user)
+                        , restMessages = []
+                        }
 
-                    _ ->
-                        text "Invalid Game"
-                ]
-            , loading_screen (RemoteData.isLoading model.fmriUserData)
+                _ ->
+                    text "Invalid Game"
             ]
+        , loading_screen (RemoteData.isLoading model.fmriUserData)
+        ]
 
 
 visualSearchGame : Model -> Html Msg
@@ -717,12 +723,7 @@ instructionsPage model =
 
 marginS : Attribute msg
 marginS =
-    style [ ( "margin", ".7em" ) ]
-
-
-style_ : String -> Attribute msg
-style_ rawStyles =
-    style (toStyle rawStyles)
+    style "margin" ".7em"
 
 
 instBlock : String -> String -> Html Msg
@@ -733,28 +734,11 @@ instBlock title content =
         ]
 
 
-toStyle : String -> List ( String, String )
-toStyle styles =
-    let
-        toTuple list =
-            case list of
-                [ a, b ] ->
-                    ( a, b )
-
-                _ ->
-                    ( "", "" )
-    in
-        String.split ";" styles
-            |> List.map (\s -> String.split ":" s)
-            |> List.filter (\e -> e /= [ "" ])
-            |> List.map toTuple
-
-
 statementsPage : Model -> Html Msg
 statementsPage model =
     basicPage model
         ([ h1 [ class "title has-text-centered" ] [ text "Statements" ] ]
-            ++ (statements 4 model.statements)
+            ++ statements 4 model.statements
         )
 
 
@@ -769,8 +753,8 @@ statements groupsOfNum mesAnswers =
                 ]
             ]
 
-        Just mesAnswers ->
-            List.map statement mesAnswers
+        Just tempMesAnswers ->
+            List.map statement tempMesAnswers
                 |> List.Extra.greedyGroupsOf groupsOfNum
                 |> List.map (div [ class "columns" ])
 
@@ -796,7 +780,7 @@ statement mes =
 -}
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
     let
         page =
@@ -852,7 +836,9 @@ view model =
                 R.FmriRoute userId ->
                     stopSignalGame model
     in
-        div [] [ page ]
+    { title = ""
+    , body = [ div [] [ page ] ]
+    }
 
 
 adminView : Model -> Html Msg

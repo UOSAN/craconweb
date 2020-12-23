@@ -1,11 +1,14 @@
 module Game exposing (..)
 
-import Game.Card as Card exposing (Continuation(Complete, Continue))
+import Duration exposing (Duration)
+import Game.Card as Card exposing (Continuation(..))
 import Random exposing (Generator)
 import Random.Extra
-import RemoteData
-import Time exposing (Time)
 import Random.List
+import RemoteData
+import Time
+import Random.Extra
+import Quantity
 
 
 type GameState msg
@@ -21,8 +24,8 @@ type alias Session =
     , userId : String
     , gameId : String
     , seed : Int
-    , start : Time
-    , end : Maybe Time
+    , start : Time.Posix
+    , end : Maybe Time.Posix
     , jitter : Bool
     }
 
@@ -31,15 +34,15 @@ type alias Cycle =
     { id : Maybe String
     , sessionId : String
     , sort : Int
-    , fixation : Maybe Time
-    , selection : Maybe Time
-    , pictures : Maybe Time
-    , redcross : Maybe Time
-    , probe : Maybe Time
-    , border : Maybe Time
-    , timeout : Maybe Time
-    , rest : Maybe Time
-    , interval : Maybe Time
+    , fixation : Maybe Time.Posix
+    , selection : Maybe Time.Posix
+    , pictures : Maybe Time.Posix
+    , redcross : Maybe Time.Posix
+    , probe : Maybe Time.Posix
+    , border : Maybe Time.Posix
+    , timeout : Maybe Time.Posix
+    , rest : Maybe Time.Posix
+    , interval : Maybe Time.Posix
     , width : Maybe Int
     , height : Maybe Int
     , blue : Bool
@@ -62,7 +65,7 @@ type alias Continuation msg =
 
 type Input
     = Initialize
-    | Tick Time
+    | Tick Time.Posix
     | Indication
     | Select Int
     | Direction Direction
@@ -121,24 +124,24 @@ type alias Image =
 
 
 type LogEntry
-    = BeginSession { seed : Int } Time
-    | EndSession Time
-    | BeginTrial Time
-    | EndTrial Time
-    | BeginDisplay (Maybe Layout) Time
-    | BeginInput Time
-    | AcceptIndication { desired : Bool } Time
-    | AcceptDirection { desired : Direction, actual : Direction } Time
-    | AcceptSelection { desired : Int, actual : Int } Time
-    | Timeout { desired : Bool } Time
+    = BeginSession { seed : Int } Time.Posix
+    | EndSession Time.Posix
+    | BeginTrial Time.Posix
+    | EndTrial Time.Posix
+    | BeginDisplay (Maybe Layout) Time.Posix
+    | BeginInput Time.Posix
+    | AcceptIndication { desired : Bool } Time.Posix
+    | AcceptDirection { desired : Direction, actual : Direction } Time.Posix
+    | AcceptSelection { desired : Int, actual : Int } Time.Posix
+    | Timeout { desired : Bool } Time.Posix
 
 
 type alias State =
-    { sessionStart : Maybe Time
-    , blockStart : Maybe Time
-    , trialStart : Time
-    , segmentStart : Time
-    , currTime : Time
+    { sessionStart : Maybe Time.Posix
+    , blockStart : Maybe Time.Posix
+    , trialStart : Time.Posix
+    , segmentStart : Time.Posix
+    , currTime : Time.Posix
     , log : List LogEntry
     , trialResult : Result
     , currentSeed : Random.Seed
@@ -167,37 +170,37 @@ segment logics layout state =
         combined =
             oneOf (updateCurrTime :: logics) state
     in
-        Card.card
-            layout
-            (\input ->
-                case combined input of
-                    ( True, newState ) ->
-                        ( Continue newState (segment logics layout newState), Cmd.none )
+    Card.card
+        layout
+        (\input ->
+            case combined input of
+                ( True, newState ) ->
+                    ( Continue newState (segment logics layout newState), Cmd.none )
 
-                    ( False, newState ) ->
-                        ( Complete newState, Cmd.none )
-            )
+                ( False, newState ) ->
+                    ( Complete newState, Cmd.none )
+        )
 
 
-andThenCheckTimeout : Time -> (State -> Game msg) -> Game msg -> Game msg
+andThenCheckTimeout : Duration -> (State -> Game msg) -> Game msg -> Game msg
 andThenCheckTimeout gameDuration =
     Card.andThen (isTimeout gameDuration) resetSegmentStart Initialize
 
 
-isTimeout : Time -> State -> Bool
+isTimeout : Duration -> State -> Bool
 isTimeout gameDuration state =
     state.sessionStart
-        |> Maybe.map (\sessionStart -> sessionStart + gameDuration < state.currTime)
+        |> Maybe.map (\sessionStart -> isBefore ( Duration.addTo sessionStart gameDuration) state.currTime)
         |> Maybe.withDefault False
 
 
-andThenRest : { restDuration : Time, shouldRest : State -> Bool, isFinish : State -> Bool } -> (State -> Game msg) -> Game msg -> Game msg
-andThenRest { restDuration, shouldRest, isFinish } =
+andThenRest : { restDuration : Duration, tempShouldRest : State -> Bool, tempIsFinish : State -> Bool } -> (State -> Game msg) -> Game msg -> Game msg
+andThenRest { restDuration, tempShouldRest, tempIsFinish } =
     Card.andThenRest
         { restCard = rest restDuration
         , restDuration = restDuration
-        , shouldRest = shouldRest
-        , isFinish = isFinish
+        , shouldRest = tempShouldRest
+        , isFinish = tempIsFinish
         , isInterval = isInterval
         , resetSegmentStart = resetSegmentStart
         , resetBlockStart = resetBlockStart
@@ -225,10 +228,10 @@ resetSegmentStart state =
     { state | segmentStart = state.currTime }
 
 
-resetBlockStart : Time -> State -> State
+resetBlockStart : Duration -> State -> State
 resetBlockStart restDuration state =
     { state
-        | blockStart = Just (state.currTime + restDuration)
+        | blockStart = Just (Duration.addTo state.currTime restDuration)
         , blockCounter = state.blockCounter + 1
     }
 
@@ -239,6 +242,7 @@ oneOf logics state input =
         (\logic ( continue, newState ) ->
             if continue then
                 logic newState input
+
             else
                 ( continue, newState )
         )
@@ -246,12 +250,12 @@ oneOf logics state input =
         logics
 
 
-log : (Time -> LogEntry) -> State -> Game msg
+log : (Time.Posix -> LogEntry) -> State -> Game msg
 log =
     logWithCondition (always True)
 
 
-logWithCondition : (State -> Bool) -> (Time -> LogEntry) -> State -> Game msg
+logWithCondition : (State -> Bool) -> (Time.Posix -> LogEntry) -> State -> Game msg
 logWithCondition enabled logEntry originalState =
     Card.card
         Nothing
@@ -260,47 +264,51 @@ logWithCondition enabled logEntry originalState =
                 ( _, updatedState ) =
                     updateCurrTime originalState input
             in
-                ( Complete
-                    (if enabled updatedState then
-                        { updatedState | log = logEntry updatedState.currTime :: updatedState.log }
-                     else
-                        updatedState
-                    )
-                , Cmd.none
+            ( Complete
+                (if enabled updatedState then
+                    { updatedState | log = logEntry updatedState.currTime :: updatedState.log }
+
+                 else
+                    updatedState
                 )
+            , Cmd.none
+            )
         )
 
 
-rest : Time -> State -> Game msg
+rest : Duration -> State -> Game msg
 rest duration state =
     log (BeginDisplay (Just Rest)) (startTrial state)
         |> andThen (segment [ timeoutFromSegmentStart duration ] (Just Rest))
 
 
-interval : Time -> State -> Game msg
+interval : Duration -> State -> Game msg
 interval expiration state =
     log (BeginDisplay (Just Interval)) (startTrial state)
         |> andThen (segment [ timeout expiration ] (Just Interval))
 
 
-randomInterval : Time -> Time -> Generator (State -> Game msg)
+randomInterval : Duration -> Duration -> Generator Duration
 randomInterval min jitter =
-    Random.float min (min + jitter)
-        |> Random.map interval
+    Random.float (Duration.inMilliseconds min) (Duration.inMilliseconds (Quantity.plus min jitter))
+        |> Random.map (\jitterDuration -> Duration.milliseconds jitterDuration)
 
 
-addIntervals : Maybe Layout -> Time -> Time -> List (State -> Game msg) -> Generator (List (State -> Game msg))
+addIntervals : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
 addIntervals layout min jitter trials =
+    let
+        randomDurationIntervals = Random.map interval ( randomInterval min jitter )
+    in
     trials
-        |> List.map Random.Extra.constant
-        |> List.intersperse (randomInterval min jitter)
+        |> List.map Random.constant
+        |> List.intersperse randomDurationIntervals
         |> Random.Extra.combine
 
 
-prependInterval : Maybe Layout -> Time -> Time -> List (State -> Game msg) -> Generator (List (State -> Game msg))
+prependInterval : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
 prependInterval layout min jitter trials =
-    (randomInterval min jitter)
-        :: (List.map Random.Extra.constant trials)
+    Random.map interval ( randomInterval min jitter )
+        :: List.map Random.constant trials
         |> Random.Extra.combine
 
 
@@ -378,17 +386,17 @@ onDirection desired desiredDirection state input =
             ( True, state )
 
 
-timeout : Time -> Logic
+timeout : Duration -> Logic
 timeout expiration state _ =
-    ( state.trialStart + expiration > state.currTime, state )
+    ( isAfter (Duration.addTo state.trialStart expiration) state.currTime, state )
 
 
-timeoutFromSegmentStart : Time -> Logic
+timeoutFromSegmentStart : Duration -> Logic
 timeoutFromSegmentStart expiration state _ =
-    ( state.segmentStart + expiration > state.currTime, state )
+    ( isAfter (Duration.addTo state.segmentStart expiration) state.currTime, state )
 
 
-selectTimeout : Time -> Logic
+selectTimeout : Duration -> Logic
 selectTimeout expiration state input =
     case ( state.trialResult, timeout expiration state input ) of
         ( NoResult, ( False, newState ) ) ->
@@ -409,7 +417,7 @@ selectTimeout expiration state input =
             ( True, newState )
 
 
-resultTimeout : Bool -> Time -> Logic
+resultTimeout : Bool -> Duration -> Logic
 resultTimeout desired expiration state input =
     case ( state.trialResult, timeout expiration state input ) of
         ( NoResult, ( False, newState ) ) ->
@@ -450,7 +458,7 @@ trialFailed : Logic
 trialFailed state input =
     state
         |> isFailed
-        |> flip (,) state
+        |> (\a -> (\b c -> ( b, c )) a state)
 
 
 showZoom : Logic
@@ -479,7 +487,7 @@ updateCurrTime state input =
             ( True, state )
 
 
-emptyState : Int -> Time -> State
+emptyState : Int -> Time.Posix -> State
 emptyState initialSeed time =
     { sessionStart = Nothing
     , blockStart = Nothing
@@ -514,20 +522,13 @@ isPlaying gameState =
 
 leftOrRight : Generator Direction
 leftOrRight =
-    Random.bool
-        |> Random.map
-            (\bool ->
-                if bool then
-                    Left
-                else
-                    Right
-            )
+    Random.Extra.choice Left Right
 
 
-shouldRest : Time -> State -> Bool
+shouldRest : Duration -> State -> Bool
 shouldRest blockDuration state =
     state.blockStart
-        |> Maybe.map (\blockStart -> blockStart + blockDuration < state.currTime)
+        |> Maybe.map (\blockStart -> isBefore (Duration.addTo blockStart blockDuration) state.currTime)
         |> Maybe.withDefault False
 
 
@@ -536,33 +537,32 @@ isFinish totalBlocks state =
     state.blockCounter + 1 >= totalBlocks
 
 
-restart : { totalBlocks : Int, blockDuration : Time, restDuration : Time, nextTrials : Generator (List (State -> Game msg)) } -> State -> GameState msg -> GameState msg
+restart : { totalBlocks : Int, blockDuration : Duration, restDuration : Duration, nextTrials : Generator (List (State -> Game msg)) } -> State -> GameState msg -> GameState msg
 restart args state gameState =
     case gameState of
         Playing { game, session, nextSeed } ->
             let
                 ( newGame, newSeed ) =
-                    (args.nextTrials
+                    args.nextTrials
                         |> Random.map
                             (\trials ->
                                 (trials ++ [ Card.restart args ])
                                     |> List.foldl
                                         (andThenRest
                                             { restDuration = args.restDuration
-                                            , isFinish = isFinish args.totalBlocks
-                                            , shouldRest = shouldRest args.blockDuration
+                                            , tempIsFinish = isFinish args.totalBlocks
+                                            , tempShouldRest = shouldRest args.blockDuration
                                             }
                                         )
                                         (Card.complete state)
                             )
                         |> (\generator -> Random.step generator nextSeed)
-                    )
             in
-                Playing
-                    { game = newGame
-                    , session = session
-                    , nextSeed = newSeed
-                    }
+            Playing
+                { game = newGame
+                , session = session
+                , nextSeed = newSeed
+                }
 
         Loading _ _ ->
             gameState
@@ -577,7 +577,7 @@ restart args state gameState =
             gameState
 
 
-shuffle : { a | blockDuration : Time, currentTime : Time, intervalJitter : Time, intervalMin : Time, restDuration : Time, seedInt : Int, totalBlocks : Int } -> List (State -> Game msg) -> ( Game msg, Random.Seed )
+shuffle : { a | blockDuration : Duration, currentTime : Time.Posix, intervalJitter : Duration, intervalMin : Duration, restDuration : Duration, seedInt : Int, totalBlocks : Int } -> List (State -> Game msg) -> ( Game msg, Random.Seed )
 shuffle { seedInt, totalBlocks, blockDuration, restDuration, currentTime, intervalMin, intervalJitter } trials =
     Random.List.shuffle trials
         |> Random.andThen (addIntervals Nothing intervalMin intervalJitter)
@@ -602,10 +602,23 @@ shuffle { seedInt, totalBlocks, blockDuration, restDuration, currentTime, interv
                     |> List.foldl
                         (andThenRest
                             { restDuration = restDuration
-                            , shouldRest = shouldRest blockDuration
-                            , isFinish = isFinish totalBlocks
+                            , tempShouldRest = shouldRest blockDuration
+                            , tempIsFinish = isFinish totalBlocks
                             }
                         )
                         (Card.complete (emptyState seedInt currentTime))
             )
         |> (\generator -> Random.step generator (Random.initialSeed seedInt))
+
+
+{-| Return if `a` is after `b`
+-}
+isAfter : Time.Posix -> Time.Posix -> Basics.Bool
+isAfter a b =
+    Time.posixToMillis a > Time.posixToMillis b
+
+{-| Return if `a` is before `b`
+-}
+isBefore : Time.Posix -> Time.Posix -> Basics.Bool
+isBefore a b =
+    Time.posixToMillis a < Time.posixToMillis b

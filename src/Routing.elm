@@ -1,10 +1,10 @@
 module Routing exposing (..)
 
 import Html exposing (Attribute)
-import Html.Events exposing (onWithOptions)
+import Html.Events exposing (custom)
 import Json.Decode as Decode
-import Navigation
-import UrlParser exposing (..)
+import Url
+import Url.Parser exposing (Parser, (</>), s, map, oneOf, top, parse, string)
 
 
 powerPaths : List String
@@ -12,9 +12,9 @@ powerPaths =
     [ adminPath, registerPath, mesPath ]
 
 
-parseLocation : Navigation.Location -> Route
+parseLocation : Url.Url -> Route
 parseLocation location =
-    case (parsePath matchers location) of
+    case parse matchers location of
         Just route ->
             route
 
@@ -26,11 +26,12 @@ onLinkClick : msg -> Attribute msg
 onLinkClick message =
     let
         options =
-            { stopPropagation = False
+            { message = message
+            , stopPropagation = False
             , preventDefault = True
             }
     in
-        onWithOptions "click" options (Decode.succeed message)
+    custom "click" (Decode.succeed options)
 
 
 {-| Represents where I am in the application

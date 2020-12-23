@@ -1,45 +1,44 @@
-module Api
-    exposing
-        ( fetchAll
-        , fetchGame
-        , fetchUser
-        , fetchUsers
-        , fetchUsers_
-        , fetchGroup
-        , fetchRole
-        , fetchMesAuthors
-        , fetchPublicMesAnswers
-        , fetchMesQuerys
-        , createUserRecord
-        , createAuthRecord
-        , createMesAnswer
-        , updateMesStatus
-        , updateUser
-        , jwtDecoded
-        , okyToky
-        , startSession
-        , endSession
-        , postCycles
-        , fetchFiller
-        , fetchValid
-        , fetchInvalid
-        , fetchFmriUserData
-        )
+module Api exposing
+    ( createAuthRecord
+    , createMesAnswer
+    , createUserRecord
+    , endSession
+    , fetchAll
+    , fetchFiller
+    , fetchFmriUserData
+    , fetchGame
+    , fetchGroup
+    , fetchInvalid
+    , fetchMesAuthors
+    , fetchMesQuerys
+    , fetchPublicMesAnswers
+    , fetchRole
+    , fetchUser
+    , fetchUsers
+    , fetchUsers_
+    , fetchValid
+    , jwtDecoded
+    , okyToky
+    , postCycles
+    , startSession
+    , updateMesStatus
+    , updateUser
+    )
 
 import Entity
+import Game
+import Helpers exposing (isAdmin, isStaff)
 import Http
-import Task exposing (Task)
-import Jwt
-import Time
-import Model as M
+import Json
 import Json.Decode as JD
 import Json.Encode as JE
+import Jwt
+import Model as M
 import RemoteData
 import Routing as R
-import Game
-import Time exposing (Time)
-import Json
-import Helpers exposing (isAdmin, isStaff)
+import Task exposing (Task)
+import Time
+
 
 
 {-
@@ -51,11 +50,11 @@ import Helpers exposing (isAdmin, isStaff)
 
 fetchAll : String -> M.JwtPayload -> String -> Cmd M.Msg
 fetchAll httpsrv jwt token =
-    case (isAdmin jwt) || (isStaff jwt) of
+    case isAdmin jwt || isStaff jwt of
         True ->
             Cmd.batch <|
-                (adminOnly httpsrv token)
-                    ++ (shared httpsrv token jwt.sub)
+                adminOnly httpsrv token
+                    ++ shared httpsrv token jwt.sub
 
         False ->
             Cmd.batch <|
@@ -74,8 +73,8 @@ shared httpsrv token sub =
     , Task.attempt M.ValidResp (fetchValid httpsrv token sub)
     , Task.attempt M.InvalidResp (fetchInvalid httpsrv token sub)
     , Task.attempt M.MesAnswersResp (fetchMesAnswersByUser { url = httpsrv, token = token, sub = sub })
-    , (fetchBadgeRules { url = httpsrv, token = token, sub = sub })
-    , (fetchBadgesByUserId { url = httpsrv, token = token, sub = sub })
+    , fetchBadgeRules { url = httpsrv, token = token, sub = sub }
+    , fetchBadgesByUserId { url = httpsrv, token = token, sub = sub }
     , Task.attempt M.MesQuerysResp (fetchMesQuerys { url = httpsrv, token = token, sub = sub })
     ]
 
@@ -102,43 +101,41 @@ defaultHeaders jwtencoded =
                     headers
 
                 _ ->
-                    (Http.header "Authorization" ("Bearer " ++ jwtencoded)) :: headers
+                    Http.header "Authorization" ("Bearer " ++ jwtencoded) :: headers
     in
-        authHeaders
+    authHeaders
 
 
 updateMesStatus : M.Base -> String -> M.MesAnswer -> Task Http.Error String
 updateMesStatus { url, token, sub } id updatedMes =
     putRequest
-        { endpoint = (url ++ "/mesanswer/" ++ id)
-        , decoder = (JD.succeed "Saved.")
+        { endpoint = url ++ "/mesanswer/" ++ id
+        , decoder = JD.succeed "Saved."
         , token = token
-        , json = (Json.mesEncoder updatedMes sub)
+        , json = Json.mesEncoder updatedMes sub
         }
 
 
 updateUser : M.Base -> M.UserEdit -> Task Http.Error String
 updateUser { url, token, sub } user =
     putRequest
-        { endpoint = (url ++ "/user/" ++ user.id)
-        , decoder = (JD.succeed "Saved.")
+        { endpoint = url ++ "/user/" ++ user.id
+        , decoder = JD.succeed "Saved."
         , token = token
-        , json = (Json.userEncoder user)
+        , json = Json.userEncoder user
         }
 
 
 createMesAnswer : M.Base -> M.MesAnswer -> String -> Task Http.Error String
 createMesAnswer b answer sub =
-    Http.request
+    Http.task
         { method = "POST"
         , headers = defaultHeaders b.token
         , url = b.url ++ "/user/" ++ sub ++ "/mesquery/" ++ answer.queryId ++ "/mesanswer"
         , body = Http.jsonBody <| M.mesAnswerEncoder answer
-        , expect = Http.expectString
+        , resolver = Http.stringResolver <| responseToResult
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
 fetchMesAnswers : M.Base -> Task Http.Error (List M.MesAnswer)
@@ -163,7 +160,7 @@ fetchMesAuthors b answers groupId =
             ++ "/mesauthors?groupId="
             ++ groupId
             ++ "&"
-            ++ (answersToParams answers)
+            ++ answersToParams answers
         )
         M.mesAuthorsDecoder
 
@@ -173,14 +170,12 @@ fetchBadgeRules { url, token, sub } =
     Http.request
         { method = "GET"
         , headers = defaultHeaders token
-        , url = (url ++ "/badgerules?sortEach=true")
+        , url = url ++ "/badgerules?sortEach=true"
         , body = Http.emptyBody
-        , expect = Http.expectJson Json.badgeRulesDecoder
+        , expect = Http.expectJson (RemoteData.fromResult >> M.BadgeRulesResp) Json.badgeRulesDecoder
         , timeout = Nothing
-        , withCredentials = False
+        , tracker = Nothing
         }
-        |> RemoteData.sendRequest
-        |> Cmd.map M.BadgeRulesResp
 
 
 fetchBadgesByUserId : M.Base -> Cmd M.Msg
@@ -188,14 +183,12 @@ fetchBadgesByUserId { url, token, sub } =
     Http.request
         { method = "GET"
         , headers = defaultHeaders token
-        , url = (url ++ "/user/" ++ sub ++ "/badges")
+        , url = url ++ "/user/" ++ sub ++ "/badges"
         , body = Http.emptyBody
-        , expect = Http.expectJson Json.badgesDecoder
+        , expect = Http.expectJson (RemoteData.fromResult >> M.BadgesResp) Json.badgesDecoder
         , timeout = Nothing
-        , withCredentials = False
+        , tracker = Nothing
         }
-        |> RemoteData.sendRequest
-        |> Cmd.map M.BadgesResp
 
 
 fetchPublicMesAnswers : M.Base -> Task Http.Error (List M.MesAnswer)
@@ -218,16 +211,14 @@ createAuthRecord :
     -> M.Login
     -> Task Http.Error String
 createAuthRecord httpsrv login =
-    Http.request
+    Http.task
         { method = "POST"
         , headers = []
         , url = httpsrv ++ "/auth"
         , body = Http.jsonBody <| Json.loginEncoder login
-        , expect = Http.expectJson Json.authDecoder
+        , resolver = Http.stringResolver <| handleJsonResponse <| Json.authDecoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
 fetchAllUgimgsets :
@@ -362,14 +353,13 @@ fetchUsers httpsrv token =
 fetchUserImages : String -> String -> String -> Cmd M.Msg
 fetchUserImages httpsrv token userId =
     fetchUser httpsrv token userId
-        |> Task.mapError (M.ReqFail)
+        |> Task.mapError M.ReqFail
         |> Task.andThen
             (\user ->
-                (Task.map3 (\f v i -> { user = user, ugimages_f = f, ugimages_v = v, ugimages_i = i })
+                Task.map3 (\f v i -> { user = user, ugimages_f = f, ugimages_v = v, ugimages_i = i })
                     (fetchFiller httpsrv token userId)
                     (fetchValid httpsrv token userId)
                     (fetchInvalid httpsrv token userId)
-                )
             )
         |> Task.attempt (RemoteData.fromResult >> M.FmriImagesResp)
 
@@ -413,19 +403,17 @@ createUserRecord :
     -> Entity.UserRecord
     -> Task Http.Error Entity.User
 createUserRecord httpsrv token user =
-    Http.request
+    Http.task
         { method = "POST"
         , headers = defaultHeaders token
         , url = httpsrv ++ "/user"
         , body = Http.jsonBody <| Entity.userRecordEncoder user
-        , expect = Http.expectJson Entity.userDecoder
+        , resolver = Http.stringResolver <| handleJsonResponse <| Entity.userDecoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
-okyToky : Time.Time -> String -> Result String M.JwtPayload
+okyToky : Time.Posix -> String -> Result String M.JwtPayload
 okyToky now token =
     case Jwt.decodeToken M.jwtDecoder token of
         Ok decoded ->
@@ -448,7 +436,7 @@ jwtDecoded token =
     Jwt.decodeToken M.jwtDecoder token
 
 
-startSession : { token : String, userId : String, gameId : String, start : Time, httpsrv : String, initialSeed : Int, jitter : Bool } -> Task Never (RemoteData.WebData Game.Session)
+startSession : { token : String, userId : String, gameId : String, start : Time.Posix, httpsrv : String, initialSeed : Int, jitter : Bool } -> Task Never (RemoteData.WebData Game.Session)
 startSession { token, userId, gameId, start, httpsrv, initialSeed, jitter } =
     let
         json =
@@ -461,13 +449,13 @@ startSession { token, userId, gameId, start, httpsrv, initialSeed, jitter } =
                 , jitter = jitter
                 }
     in
-        postRequest
-            { endpoint = httpsrv ++ "/user/" ++ userId ++ "/gsession"
-            , decoder = Json.sessionDecoder
-            , token = token
-            , json = json
-            }
-            |> RemoteData.fromTask
+    postRequest
+        { endpoint = httpsrv ++ "/user/" ++ userId ++ "/gsession"
+        , decoder = Json.sessionDecoder
+        , token = token
+        , json = json
+        }
+        |> RemoteData.fromTask
 
 
 endSession : { session : Game.Session, token : String, httpsrv : String } -> Task Never (RemoteData.WebData Game.Session)
@@ -476,13 +464,13 @@ endSession { session, token, httpsrv } =
         json =
             Json.putSessionEncoder session
     in
-        putRequest
-            { endpoint = httpsrv ++ "/gsession/" ++ session.id
-            , decoder = Json.sessionDecoder
-            , token = token
-            , json = json
-            }
-            |> RemoteData.fromTask
+    putRequest
+        { endpoint = httpsrv ++ "/gsession/" ++ session.id
+        , decoder = Json.sessionDecoder
+        , token = token
+        , json = json
+        }
+        |> RemoteData.fromTask
 
 
 postCycles : { session : Game.Session, cycles : List Game.Cycle, token : String, httpsrv : String } -> Task Never (RemoteData.WebData (List Game.Cycle))
@@ -491,52 +479,94 @@ postCycles { session, cycles, token, httpsrv } =
         json =
             Json.cyclesEncoder session cycles
     in
-        postRequest
-            { endpoint = httpsrv ++ "/gsession/" ++ session.id ++ "/gcycles"
-            , decoder = JD.at [ "gcycles" ] (JD.list Json.cycleDecoder)
-            , token = token
-            , json = json
-            }
-            |> RemoteData.fromTask
+    postRequest
+        { endpoint = httpsrv ++ "/gsession/" ++ session.id ++ "/gcycles"
+        , decoder = JD.at [ "gcycles" ] (JD.list Json.cycleDecoder)
+        , token = token
+        , json = json
+        }
+        |> RemoteData.fromTask
 
 
 postRequest : { endpoint : String, token : String, decoder : JD.Decoder a, json : JE.Value } -> Task Http.Error a
 postRequest { endpoint, decoder, token, json } =
-    Http.request
+    Http.task
         { method = "POST"
         , headers = defaultHeaders token
         , url = endpoint
-        , body = json |> Http.jsonBody
-        , expect = Http.expectJson decoder
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| handleJsonResponse <| decoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
 putRequest : { endpoint : String, token : String, decoder : JD.Decoder a, json : JE.Value } -> Task Http.Error a
 putRequest { endpoint, decoder, token, json } =
-    Http.request
+    Http.task
         { method = "PUT"
         , headers = defaultHeaders token
         , url = endpoint
-        , body = json |> Http.jsonBody
-        , expect = Http.expectJson decoder
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver <| handleJsonResponse <| decoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
 
 
 getRequest : String -> String -> JD.Decoder a -> Task Http.Error a
-getRequest token endpoint jsonDecoder =
-    Http.request
+getRequest token endpoint decoder =
+    Http.task
         { method = "GET"
         , headers = defaultHeaders token
         , url = endpoint
         , body = Http.emptyBody
-        , expect = Http.expectJson jsonDecoder
+        , resolver = Http.stringResolver <| handleJsonResponse <| decoder
         , timeout = Nothing
-        , withCredentials = False
         }
-        |> Http.toTask
+
+
+-- HELPERS
+{-| Decode a JSON response, while handling possible errors.
+-}
+handleJsonResponse : JD.Decoder a -> Http.Response String -> Result Http.Error a
+handleJsonResponse decoder response =
+    case response of
+        Http.BadUrl_ url ->
+            Err (Http.BadUrl url)
+
+        Http.Timeout_ ->
+            Err Http.Timeout
+
+        Http.BadStatus_ { statusCode } _ ->
+            Err (Http.BadStatus statusCode)
+
+        Http.NetworkError_ ->
+            Err Http.NetworkError
+
+        Http.GoodStatus_ _ body ->
+            case JD.decodeString decoder body of
+                Ok result ->
+                    Ok result
+
+                Err err ->
+                    Err (Http.BadBody ((JD.errorToString err) ++ body))
+
+
+{-| Handle a string response, while handling possible errors.
+-}
+responseToResult : Http.Response a -> Result Http.Error a
+responseToResult response =
+    case response of
+        Http.BadUrl_ url ->
+            Err (Http.BadUrl url)
+
+        Http.Timeout_ ->
+            Err Http.Timeout
+
+        Http.BadStatus_ { statusCode } _ ->
+            Err (Http.BadStatus statusCode)
+
+        Http.NetworkError_ ->
+            Err Http.NetworkError
+
+        Http.GoodStatus_ _ body ->
+            Ok body

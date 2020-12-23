@@ -1,19 +1,18 @@
-module Ui.Admin
-    exposing
-        ( adminPage
-        , registerPage
-        , editUserPage
-        , mesPage
-        )
+module Ui.Admin exposing
+    ( adminPage
+    , editUserPage
+    , mesPage
+    , registerPage
+    )
 
+import Dropdown exposing (Options)
 import Entity
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onSubmit, onCheck, onInput)
-import Model exposing (Model, Msg(..), AdminModel)
+import Html.Events exposing (onCheck, onClick, onInput, onSubmit)
+import Model exposing (AdminModel, Model, Msg(..))
 import Routing as R
 import Ui.Parts as Parts
-import Dropdown exposing (Options)
 
 
 adminPage : Model -> Html Msg
@@ -173,8 +172,10 @@ userRows ( expId, conId ) users request =
         groupToString id =
             if id == expId then
                 "Experimental"
+
             else if id == conId then
                 "Control"
+
             else
                 "?"
 
@@ -214,8 +215,8 @@ userRows ( expId, conId ) users request =
                     ]
                 ]
     in
-        users
-            |> List.map row
+    users
+        |> List.map row
 
 
 iconButton : String -> String -> String -> String -> Html Msg
@@ -571,10 +572,10 @@ dropdownOptions groupIdExp groupIdCon =
                 _ ->
                     []
     in
-        { defaultOptions
-            | items = items_
-            , emptyItem = Just { value = "0", text = "Select a group...", enabled = True }
-        }
+    { defaultOptions
+        | items = items_
+        , emptyItem = Just { value = "0", text = "Select a group...", enabled = True }
+    }
 
 
 groupsDropDown : Maybe String -> Maybe String -> String -> Html Msg
@@ -619,15 +620,15 @@ regButtons loading =
                 Nothing ->
                     "button is-primary"
     in
-        div
-            [ class "field is-grouped" ]
-            [ button
-                [ class class_ ]
-                [ text "Submit" ]
-            , button
-                ([ class "button is-link" ] ++ (Parts.linkAttrs R.adminPath))
-                [ text "Cancel" ]
-            ]
+    div
+        [ class "field is-grouped" ]
+        [ button
+            [ class class_ ]
+            [ text "Submit" ]
+        , button
+            ([ class "button is-link" ] ++ Parts.linkAttrs R.adminPath)
+            [ text "Cancel" ]
+        ]
 
 
 primaryButton : String -> String -> Html Msg
@@ -643,5 +644,5 @@ primaryButton title path =
 backButton : Html Msg
 backButton =
     button
-        ([ class "button is-link" ] ++ (Parts.linkAttrs R.adminPath))
+        ([ class "button is-link" ] ++ Parts.linkAttrs R.adminPath)
         [ text "Go back" ]

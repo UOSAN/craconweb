@@ -1,8 +1,8 @@
 module Entity exposing (..)
 
-import Protobuf exposing (..)
 import Json.Decode as JD
 import Json.Encode as JE
+import Protobuf exposing (..)
 
 
 type alias Group =
@@ -197,15 +197,15 @@ userRecordEncoder : UserRecord -> JE.Value
 userRecordEncoder v =
     JE.object <|
         List.filterMap identity <|
-            [ (requiredFieldEncoder "username" JE.string "" v.username)
-            , (requiredFieldEncoder "email" JE.string "" v.email)
-            , (requiredFieldEncoder "firstName" JE.string "" v.firstName)
-            , (requiredFieldEncoder "lastName" JE.string "" v.lastName)
-            , (requiredFieldEncoder "avatar" JE.string "" v.avatar)
-            , (requiredFieldEncoder "groupId" JE.string "" v.groupId)
-            , (requiredFieldEncoder "mesOptin" JE.bool False v.mesOptin)
-            , (repeatedFieldEncoder "roles" JE.string v.roles)
-            , (requiredFieldEncoder "password" JE.string "" v.password)
+            [ requiredFieldEncoder "username" JE.string "" v.username
+            , requiredFieldEncoder "email" JE.string "" v.email
+            , requiredFieldEncoder "firstName" JE.string "" v.firstName
+            , requiredFieldEncoder "lastName" JE.string "" v.lastName
+            , requiredFieldEncoder "avatar" JE.string "" v.avatar
+            , requiredFieldEncoder "groupId" JE.string "" v.groupId
+            , requiredFieldEncoder "mesOptin" JE.bool False v.mesOptin
+            , repeatedFieldEncoder "roles" JE.string v.roles
+            , requiredFieldEncoder "password" JE.string "" v.password
             ]
 
 

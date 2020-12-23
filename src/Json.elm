@@ -1,55 +1,55 @@
-module Json
-    exposing
-        ( sessionDecoder
-        , sessionEncoder
-        , cyclesEncoder
-        , cycleEncoder
-        , putSessionEncoder
-        , mesEncoder
-        , userEncoder
-        , cycleDecoder
-        , badgeRulesDecoder
-        , badgesDecoder
-        , loginEncoder
-        , authDecoder
-        )
+module Json exposing
+    ( authDecoder
+    , badgeRulesDecoder
+    , badgesDecoder
+    , cycleDecoder
+    , cycleEncoder
+    , cyclesEncoder
+    , loginEncoder
+    , mesEncoder
+    , putSessionEncoder
+    , sessionDecoder
+    , sessionEncoder
+    , userEncoder
+    )
 
-import Json.Decode as JD exposing (Decoder)
-import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
-import Json.Encode as JE exposing (object)
 import Game
-import Time exposing (Time)
-import String
+import Json.Decode as JD exposing (Decoder)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
+import Json.Encode as JE exposing (object)
+import Json.Encode.Extra
 import Model as M
+import String
+import Time
 
 
 sessionDecoder : Decoder Game.Session
 sessionDecoder =
-    decode Game.Session
+    JD.succeed Game.Session
         |> required "id" JD.string
         |> required "userId" JD.string
         |> required "gameId" JD.string
-        |> optional "seed" stringToIntDecoder 0
-        |> required "start" stringToFloatDecoder
-        |> optional "end" (JD.maybe JD.float) Nothing
+        |> optional "seed" JD.int 0
+        |> required "start" decodeTime
+        |> optional "end" (JD.map Just decodeTime) Nothing
         |> optional "jitter" JD.bool False
 
 
 cycleDecoder : Decoder Game.Cycle
 cycleDecoder =
-    decode Game.Cycle
+    JD.succeed Game.Cycle
         |> required "id" (JD.maybe JD.string)
         |> required "gsessionId" JD.string
         |> optional "sort" JD.int 0
-        |> optional "fixation" (stringToFloatDecoder |> JD.map numberToMaybe) Nothing
-        |> optional "selection" (stringToFloatDecoder |> JD.map numberToMaybe) Nothing
-        |> optional "pictures" (stringToFloatDecoder |> JD.map numberToMaybe) Nothing
-        |> optional "redcross" (stringToFloatDecoder |> JD.map numberToMaybe) Nothing
-        |> optional "probe" (stringToFloatDecoder |> JD.map numberToMaybe) Nothing
-        |> optional "border" (stringToFloatDecoder |> JD.map numberToMaybe) Nothing
-        |> optional "timeout" (stringToFloatDecoder |> JD.map numberToMaybe) Nothing
-        |> optional "rest" (stringToFloatDecoder |> JD.map numberToMaybe) Nothing
-        |> optional "interval" (stringToFloatDecoder |> JD.map numberToMaybe) Nothing
+        |> optional "fixation" (JD.map Just decodeTime) Nothing
+        |> optional "selection" (JD.map Just decodeTime) Nothing
+        |> optional "pictures" (JD.map Just decodeTime) Nothing
+        |> optional "redcross" (JD.map Just decodeTime) Nothing
+        |> optional "probe" (JD.map Just decodeTime) Nothing
+        |> optional "border" (JD.map Just decodeTime) Nothing
+        |> optional "timeout" (JD.map Just decodeTime) Nothing
+        |> optional "rest" (JD.map Just decodeTime) Nothing
+        |> optional "interval" (JD.map Just decodeTime) Nothing
         |> optional "width" (JD.int |> JD.map numberToMaybe) Nothing
         |> optional "height" (JD.int |> JD.map numberToMaybe) Nothing
         |> optional "blue" JD.bool False
@@ -61,42 +61,14 @@ cycleDecoder =
         |> optional "ugimageIds" (JD.list JD.string) []
 
 
-stringToFloatDecoder : Decoder Float
-stringToFloatDecoder =
-    JD.string
-        |> JD.andThen
-            (\str ->
-                case String.toFloat str of
-                    Ok float ->
-                        JD.succeed float
-
-                    Err err ->
-                        JD.fail err
-            )
-
-
-stringToIntDecoder : Decoder Int
-stringToIntDecoder =
-    JD.string
-        |> JD.andThen
-            (\str ->
-                case String.toInt str of
-                    Ok int ->
-                        JD.succeed int
-
-                    Err err ->
-                        JD.fail err
-            )
-
-
-sessionEncoder : { a | userId : String, gameId : String, start : Time, end : Maybe Time, seed : Int, jitter : Bool } -> JE.Value
+sessionEncoder : { a | userId : String, gameId : String, start : Time.Posix, end : Maybe Time.Posix, seed : Int, jitter : Bool } -> JE.Value
 sessionEncoder { userId, gameId, start, end, seed, jitter } =
     object
         [ ( "userId", userId |> JE.string )
         , ( "gameId", gameId |> JE.string )
-        , ( "seed", seed |> toString |> JE.string )
-        , ( "start", start |> toString |> JE.string )
-        , ( "end", end |> Maybe.map (toString >> JE.string) |> Maybe.withDefault JE.null )
+        , ( "seed", seed |> String.fromInt |> JE.string )
+        , ( "start", start |> Time.posixToMillis |> String.fromInt |> JE.string )
+        , ( "end", end |> Json.Encode.Extra.maybe encodeTime )
         , ( "jitter", jitter |> JE.bool )
         ]
 
@@ -113,7 +85,7 @@ cyclesEncoder : Game.Session -> List Game.Cycle -> JE.Value
 cyclesEncoder session cycles =
     object
         [ ( "gsessionId", session.id |> JE.string )
-        , ( "gcycles", cycles |> List.map cycleEncoder |> JE.list )
+        , ( "gcycles", cycles |> JE.list cycleEncoder )
         ]
 
 
@@ -122,15 +94,15 @@ cycleEncoder cycle =
     object
         [ ( "gsessionId", cycle.sessionId |> JE.string )
         , ( "sort", cycle.sort |> JE.int )
-        , ( "fixation", cycle.fixation |> Maybe.withDefault 0 |> (toString >> JE.string) )
-        , ( "selection", cycle.selection |> Maybe.withDefault 0 |> (toString >> JE.string) )
-        , ( "pictures", cycle.pictures |> Maybe.withDefault 0 |> (toString >> JE.string) )
-        , ( "redcross", cycle.redcross |> Maybe.withDefault 0 |> (toString >> JE.string) )
-        , ( "probe", cycle.probe |> Maybe.withDefault 0 |> (toString >> JE.string) )
-        , ( "border", cycle.border |> Maybe.withDefault 0 |> (toString >> JE.string) )
-        , ( "timeout", cycle.timeout |> Maybe.withDefault 0 |> (toString >> JE.string) )
-        , ( "rest", cycle.rest |> Maybe.withDefault 0 |> (toString >> JE.string) )
-        , ( "interval", cycle.interval |> Maybe.withDefault 0 |> (toString >> JE.string) )
+        , ( "fixation", cycle.fixation |> Json.Encode.Extra.maybe encodeTime )
+        , ( "selection", cycle.selection |> Json.Encode.Extra.maybe encodeTime )
+        , ( "pictures", cycle.pictures |> Json.Encode.Extra.maybe encodeTime )
+        , ( "redcross", cycle.redcross |> Json.Encode.Extra.maybe encodeTime )
+        , ( "probe", cycle.probe |> Json.Encode.Extra.maybe encodeTime )
+        , ( "border", cycle.border |> Json.Encode.Extra.maybe encodeTime )
+        , ( "timeout", cycle.timeout |> Json.Encode.Extra.maybe encodeTime )
+        , ( "rest", cycle.rest |> Json.Encode.Extra.maybe encodeTime )
+        , ( "interval", cycle.interval |> Json.Encode.Extra.maybe encodeTime )
         , ( "width", cycle.width |> Maybe.withDefault 1 |> JE.int )
         , ( "height", cycle.height |> Maybe.withDefault 1 |> JE.int )
         , ( "blue", cycle.blue |> JE.bool )
@@ -139,7 +111,7 @@ cycleEncoder cycle =
         , ( "targetIndex", cycle.targetIndex |> JE.int )
         , ( "selectedIndex", cycle.selectedIndex |> JE.int )
         , ( "startIndex", cycle.startIndex |> JE.int )
-        , ( "ugimageIds", cycle.images |> List.map JE.string |> JE.list )
+        , ( "ugimageIds", cycle.images |> JE.list JE.string )
         ]
 
 
@@ -194,7 +166,7 @@ badgeRulesDecoder =
 
 badgeRuleDecoder : Decoder M.BadgeRule
 badgeRuleDecoder =
-    decode M.BadgeRule
+    JD.succeed M.BadgeRule
         |> required "id" JD.string
         |> required "name" JD.string
         |> required "dscript" JD.string
@@ -209,7 +181,7 @@ badgesDecoder =
 -- HELPERS
 
 
-numberToMaybe : number -> Maybe number
+numberToMaybe : Int -> Maybe Int
 numberToMaybe number =
     case number of
         0 ->
@@ -217,3 +189,20 @@ numberToMaybe number =
 
         _ ->
             Just number
+
+
+decodeTime : Decoder Time.Posix
+decodeTime =
+    JD.string
+        |> JD.andThen
+            (\val ->
+                case String.toInt val of
+                    Just ms ->
+                        JD.succeed <| Time.millisToPosix ms
+                    Nothing ->
+                        JD.fail ("Failed to decode as Time.Posix : \"" ++ val ++ "\"")
+            )
+
+encodeTime : Time.Posix -> JE.Value
+encodeTime =
+    Time.posixToMillis >> JE.int

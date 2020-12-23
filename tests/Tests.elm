@@ -1,11 +1,11 @@
 module Tests exposing (..)
 
-import Test exposing (..)
-import Expect
-import Fuzz exposing (list, int, tuple, string)
-import String
 import CycleTests
+import Expect
+import Fuzz exposing (int, list, string, tuple)
 import ResultTests
+import String
+import Test exposing (..)
 import UpdateTests
 
 

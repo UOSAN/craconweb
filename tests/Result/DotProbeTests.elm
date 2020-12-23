@@ -1,8 +1,8 @@
 module Result.DotProbeTests exposing (all)
 
-import Test exposing (..)
 import Expect
 import Game.Result
+import Test exposing (..)
 
 
 all : Test

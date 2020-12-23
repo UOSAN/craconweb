@@ -1,7 +1,8 @@
 module Helpers exposing (..)
 
 import Http
-import Model exposing (errorCodeEncoder)
+import Json.Decode as Decode
+import Model
 import Routing as R
 
 
@@ -14,10 +15,10 @@ httpHumanError err =
         Http.NetworkError ->
             "Oops. There's been a network error."
 
-        Http.BadStatus s ->
-            .error (errorCodeEncoder s.body)
+        Http.BadStatus statusCode ->
+            "Bad status " ++ String.fromInt statusCode
 
-        Http.BadPayload str _ ->
+        Http.BadBody _ ->
             "Bad payload"
 
         _ ->
@@ -66,6 +67,7 @@ checkAccess route jwt =
         R.AdminRoute ->
             if isAdmin jwt || isStaff jwt then
                 route
+
             else
                 R.AccessDeniedRoute
 
@@ -81,6 +83,7 @@ checkAccess route jwt =
         R.FmriRoute _ ->
             if isAdmin jwt || isStaff jwt then
                 route
+
             else
                 R.AccessDeniedRoute
 
@@ -103,3 +106,8 @@ isAdmin jwt =
 isStaff : Model.JwtPayload -> Bool
 isStaff jwt =
     List.map .name jwt.roles |> List.member "staff"
+
+
+keyDecoder : Decode.Decoder String
+keyDecoder =
+  Decode.field "key" Decode.string

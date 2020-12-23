@@ -1,5 +1,7 @@
 module Model exposing (..)
 
+import Browser
+import Browser.Navigation
 import Entity
 import Game
 import Http
@@ -7,17 +9,16 @@ import Json.Decode as JD
 import Json.Decode.Pipeline as JP
 import Json.Encode as JE
 import List.Extra as LE
-import Navigation
+import Random
 import RemoteData
 import Routing
 import Time
-import Window as W
-import Random
+import Url
 
 
 type alias Flags =
     { token : String
-    , time : Float
+    , time : Int
     }
 
 
@@ -56,13 +57,14 @@ type alias Model =
     , adminModel : AdminModel
     , statements : Maybe (List MesAnswer)
     , request : Maybe String
-    , loadTime : Time.Time
+    , loadTime : Time.Posix
     , badgeRules : RemoteData.WebData (List BadgeRule)
     , domLoaded : Bool
     , badgesEarned : RemoteData.WebData (List String)
     , fmriUserData : RemoteData.RemoteData ValuationsError FmriUserData
     , statementsModal : Bool
-    , windowSize : Maybe W.Size
+    , windowSize : Maybe WindowSize
+    , key : Browser.Navigation.Key
     }
 
 
@@ -74,9 +76,17 @@ type alias FmriUserData =
     }
 
 
+type alias WindowSize =
+    { width : Int
+    , height : Int
+    }
+
+
 type Msg
     = UpdateLocation String
-    | OnUpdateLocation Navigation.Location
+    | OnUpdateLocation Url.Url
+    | ChangedUrl Url.Url
+    | ClickedLink Browser.UrlRequest
     | FillTmpUserEdit String
     | GroupChanged (Maybe String)
     | SetStatus String
@@ -86,8 +96,8 @@ type Msg
     | Logout
     | ResetNotifications
     | MainMenuToggle
-    | NewCurrentTime Time.Time
-    | Presses Int
+    | NewCurrentTime Time.Posix
+    | Presses String
     | SelectInput Int
     | DirectionInput Game.Direction
     | IndicationInput
@@ -96,7 +106,7 @@ type Msg
     | InitGoNoGo
     | InitDotProbe
     | InitVisualSearch
-    | StartSession { gameId : String, game : Game.Game Msg, time : Time.Time, initialSeed : Int, nextSeed : Random.Seed }
+    | StartSession { gameId : String, game : Game.Game Msg, time : Time.Posix, initialSeed : Int, nextSeed : Random.Seed }
     | StartSessionResp Random.Seed (Game.Game Msg) (RemoteData.WebData Game.Session)
     | GameDataSaved Game.State Game.Session (RemoteData.WebData ( Game.Session, List Game.Cycle ))
     | ResendSession Game.State Game.Session
@@ -136,7 +146,7 @@ type Msg
     | ToggleTmpUserEditMesOptin
     | DomLoaded Bool
     | FmriImagesResp (RemoteData.RemoteData ValuationsError FmriUserData)
-    | WindowResize W.Size
+    | WindowResize WindowSize
 
 
 type alias Login =
@@ -209,7 +219,7 @@ mesAuthorsDecoder =
 
 mesAuthorDecoder : JD.Decoder MesAuthor
 mesAuthorDecoder =
-    JP.decode MesAuthor
+    JD.succeed MesAuthor
         |> JP.required "mesanswerId" JD.string
         |> JP.required "userName" JD.string
 
@@ -249,7 +259,7 @@ mesAnswersDecoder =
 
 mesAnswerDecoder : JD.Decoder MesAnswer
 mesAnswerDecoder =
-    JP.decode MesAnswer
+    JD.succeed MesAnswer
         |> JP.required "id" JD.string
         |> JP.required "content" JD.string
         |> JP.optional "public" JD.bool False
@@ -272,7 +282,7 @@ type alias MesQuery =
 
 mesQueryDecoder : JD.Decoder MesQuery
 mesQueryDecoder =
-    JP.decode MesQuery
+    JD.succeed MesQuery
         |> JP.required "id" JD.string
         |> JP.required "content" JD.string
 
@@ -347,14 +357,14 @@ tokenEncoder token =
 
 errorCodeDecoder : JD.Decoder ErrorCode
 errorCodeDecoder =
-    JP.decode ErrorCode
+    JD.succeed ErrorCode
         |> JP.required "error" JD.string
         |> JP.required "code" JD.int
 
 
 jwtDecoder : JD.Decoder JwtPayload
 jwtDecoder =
-    JP.decode JwtPayload
+    JD.succeed JwtPayload
         |> JP.required "aud" JD.string
         |> JP.required "exp" JD.float
         |> JP.required "iat" JD.int

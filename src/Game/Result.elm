@@ -1,13 +1,13 @@
-module Game.Result
-    exposing
-        ( averageResponseTimeInMillisecond
-        , percentCorrect
-        , isCorrect
-        )
+module Game.Result exposing
+    ( averageResponseTimeInMillisecond
+    , isCorrect
+    , percentCorrect
+    )
 
 import Game
 import Game.Cycle
 import Maybe.Extra exposing (isJust, isNothing)
+import Time
 
 
 averageResponseTimeInMillisecond : Game.State -> Result String Float
@@ -18,7 +18,7 @@ averageResponseTimeInMillisecond state =
                 Nothing ->
                     case log of
                         Game.BeginInput timestamp ->
-                            ( Just timestamp, responseTimes )
+                            ( Just (Time.posixToMillis timestamp), responseTimes )
 
                         _ ->
                             ( Nothing, responseTimes )
@@ -26,13 +26,13 @@ averageResponseTimeInMillisecond state =
                 Just beginTime ->
                     case log of
                         Game.AcceptIndication _ responseTime ->
-                            ( Nothing, (responseTime - beginTime) :: responseTimes )
+                            ( Nothing, Time.posixToMillis responseTime - beginTime :: responseTimes )
 
                         Game.AcceptDirection _ responseTime ->
-                            ( Nothing, (responseTime - beginTime) :: responseTimes )
+                            ( Nothing, Time.posixToMillis responseTime - beginTime :: responseTimes )
 
                         Game.AcceptSelection _ responseTime ->
-                            ( Nothing, (responseTime - beginTime) :: responseTimes )
+                            ( Nothing, Time.posixToMillis responseTime - beginTime :: responseTimes )
 
                         Game.EndTrial _ ->
                             ( Nothing, responseTimes )
@@ -40,18 +40,19 @@ averageResponseTimeInMillisecond state =
                         _ ->
                             ( Just beginTime, responseTimes )
 
-        responseTimes =
+        responseTimesList =
             state.log
                 |> List.foldr f ( Nothing, [] )
                 |> Tuple.second
 
         totalResponses =
-            responseTimes |> List.length
+            responseTimesList |> List.length
     in
-        if totalResponses == 0 then
-            Err "No Response"
-        else
-            Ok <| List.sum responseTimes / toFloat totalResponses
+    if totalResponses == 0 then
+        Err "No Response"
+
+    else
+        Ok <| toFloat (List.sum responseTimesList) / toFloat totalResponses
 
 
 percentCorrect : { gameSlug : String } -> Game.State -> Float
@@ -68,7 +69,7 @@ percentCorrect gameSlug state =
                 |> List.filter (isCorrect gameSlug)
                 |> List.length
     in
-        (toFloat correctAnswers / toFloat totalAnswer) * 100
+    (toFloat correctAnswers / toFloat totalAnswer) * 100
 
 
 isCorrect : { gameSlug : String } -> Game.Cycle -> Bool
@@ -98,15 +99,17 @@ isDotProbeCorrect cycle =
 isGoNoGoCorrect : Game.Cycle -> Bool
 isGoNoGoCorrect cycle =
     if not cycle.dash then
-        (isNothing cycle.timeout) && (cycle.selectedIndex == cycle.targetIndex)
+        isNothing cycle.timeout && (cycle.selectedIndex == cycle.targetIndex)
+
     else
-        (isJust cycle.timeout)
+        isJust cycle.timeout
 
 
 isStopSignalCorrect : Game.Cycle -> Bool
 isStopSignalCorrect cycle =
     if cycle.blue then
         isNothing cycle.timeout
+
     else
         isJust cycle.timeout
 
