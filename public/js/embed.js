@@ -1,9 +1,9 @@
 var flags = {
-    "token": token(),
-    "time": Date.now()
+    token: token(),
+    time: Date.now()
 }
 
-var app = Elm.Main.fullscreen(flags)
+var app = Elm.Main.init({flags : flags})
 
 // Ports
 
