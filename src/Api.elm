@@ -494,7 +494,7 @@ postRequest { endpoint, decoder, token, json } =
         { method = "POST"
         , headers = defaultHeaders token
         , url = endpoint
-        , body = Http.emptyBody
+        , body = json |> Http.jsonBody
         , resolver = Http.stringResolver <| handleJsonResponse <| decoder
         , timeout = Nothing
         }
@@ -506,7 +506,7 @@ putRequest { endpoint, decoder, token, json } =
         { method = "PUT"
         , headers = defaultHeaders token
         , url = endpoint
-        , body = Http.emptyBody
+        , body = json |> Http.jsonBody
         , resolver = Http.stringResolver <| handleJsonResponse <| decoder
         , timeout = Nothing
         }
