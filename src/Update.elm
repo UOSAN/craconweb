@@ -2,7 +2,7 @@ module Update exposing (update)
 
 import Api
 import Browser
-import Browser.Navigation exposing (pushUrl)
+import Browser.Navigation exposing (pushUrl, load)
 import Duration
 import Empty
 import Entity
@@ -511,12 +511,7 @@ update msg model =
             )
 
         UpdateLocation path ->
-            let
-                cmds =
-                    [ pushUrl model.key path
-                    ]
-            in
-            ( model, Cmd.batch cmds )
+            ( model, pushUrl model.key path )
 
         OnUpdateLocation location ->
             onUpdateLocation location model
@@ -577,10 +572,10 @@ update msg model =
 
                                 skipToAdmin jsonWebTokenArg =
                                     if isPowerful (List.map .name jsonWebTokenArg.roles) then
-                                        pushUrl model.key R.adminPath
+                                        load R.adminPath
 
                                     else
-                                        pushUrl model.key R.homePath
+                                        load R.homePath
                             in
                             ( { model
                                 | loading = Nothing
@@ -771,17 +766,8 @@ update msg model =
         PutMesResp (Err err) ->
             httpErrorState model err
 
-        ClickedLink urlRequest ->
-            case urlRequest of
-                Browser.Internal url ->
-                    ( model
-                    , Browser.Navigation.pushUrl model.key (Url.toString url)
-                    )
-
-                Browser.External href ->
-                    ( model
-                    , Browser.Navigation.load href
-                    )
+        ClickedLink _ ->
+            (model, Cmd.none)
 
         ChangedUrl url ->
             onUpdateLocation url model
