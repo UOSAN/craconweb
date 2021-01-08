@@ -534,32 +534,6 @@ getRequest token endpoint decoder =
 
 
 -- HELPERS
-{-| Decode a JSON response, while handling possible errors.
--}
-handleJsonResponse : JD.Decoder a -> Http.Response String -> Result Http.Error a
-handleJsonResponse decoder response =
-    case response of
-        Http.BadUrl_ url ->
-            Err (Http.BadUrl url)
-
-        Http.Timeout_ ->
-            Err Http.Timeout
-
-        Http.BadStatus_ { statusCode } _ ->
-            Err (Http.BadStatus statusCode)
-
-        Http.NetworkError_ ->
-            Err Http.NetworkError
-
-        Http.GoodStatus_ _ body ->
-            case JD.decodeString decoder body of
-                Ok result ->
-                    Ok result
-
-                Err err ->
-                    Err (Http.BadBody ((JD.errorToString err) ++ body))
-
-
 {-| Handle a string response, while handling possible errors.
 -}
 responseToResult : Http.Response a -> Result Http.Error a
