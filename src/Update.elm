@@ -133,16 +133,6 @@ update msg model =
             , cmd
             )
 
-        EditUserResp (Ok user) ->
-            ( model
-            , Cmd.none
-            )
-
-        EditUserResp (Err err) ->
-            ( model
-            , Cmd.none
-            )
-
         SetRequestNothing ->
             ( { model | request = Nothing }, Cmd.none )
 

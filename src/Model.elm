@@ -118,7 +118,6 @@ type Msg
     | GameResp (Result (Http.Detailed.Error String) (Http.Detailed.Success Entity.Game))
     | UsersResp (Result (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User)))
     | RegisterUserResp (Result (Http.Detailed.Error String) (Http.Detailed.Success Entity.User))
-    | EditUserResp (Result Http.Error Entity.User)
     | GroupResp (Result (Http.Detailed.Error String) (Http.Detailed.Success Entity.Group))
     | MesResp (Result (Http.Detailed.Error String) (Http.Detailed.Success (List MesAnswer)))
     | MesPostResp (Result Http.Error String)
