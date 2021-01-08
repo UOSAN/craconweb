@@ -5,7 +5,6 @@ module Ui.Parts exposing
     , modal
     , modalCard
     , notification
-    , notificationRemoteData
     )
 
 import Helpers
@@ -30,22 +29,6 @@ notification notifText mods =
 
         Nothing ->
             text ""
-
-
-notificationRemoteData : RemoteData.WebData a -> Html Msg
-notificationRemoteData remoteData =
-    case remoteData of
-        RemoteData.Loading ->
-            notification (Just "Saving game data...") "is-info"
-
-        RemoteData.Success _ ->
-            notification (Just "Game data saved") "is-info"
-
-        RemoteData.NotAsked ->
-            text ""
-
-        RemoteData.Failure error ->
-            notification (Just <| Helpers.httpHumanError error) "is-danger"
 
 
 linkAttrs : String -> List (Attribute Msg)

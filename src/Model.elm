@@ -5,6 +5,7 @@ import Browser.Navigation
 import Entity
 import Game
 import Http
+import Http.Detailed
 import Json.Decode as JD
 import Json.Decode.Pipeline as JP
 import Json.Encode as JE
@@ -107,28 +108,28 @@ type Msg
     | InitDotProbe
     | InitVisualSearch
     | StartSession { gameId : String, game : Game.Game Msg, time : Time.Posix, initialSeed : Int, nextSeed : Random.Seed }
-    | StartSessionResp Random.Seed (Game.Game Msg) (RemoteData.WebData Game.Session)
-    | GameDataSaved Game.State Game.Session (RemoteData.WebData ( Game.Session, List Game.Cycle ))
+    | StartSessionResp Random.Seed (Game.Game Msg) (RemoteData.RemoteData (Http.Detailed.Error String) (Http.Detailed.Success Game.Session))
+    | GameDataSaved Game.State Game.Session (RemoteData.RemoteData (Http.Detailed.Error String) ( (Http.Detailed.Success Game.Session), (Http.Detailed.Success (List Game.Cycle) )))
     | ResendSession Game.State Game.Session
-    | AuthResp (Result Http.Error String)
-    | PublicMesResp (Result Http.Error (List MesAnswer))
-    | MesAuthorsResp (Result Http.Error (List MesAuthor))
-    | UserResp (Result Http.Error Entity.User)
-    | GameResp (Result Http.Error Entity.Game)
-    | UsersResp (Result Http.Error (List Entity.User))
-    | RegisterUserResp (Result Http.Error Entity.User)
+    | AuthResp (Result (Http.Detailed.Error String) (Http.Detailed.Success String))
+    | PublicMesResp (Result (Http.Detailed.Error String) (Http.Detailed.Success (List MesAnswer)))
+    | MesAuthorsResp (Result (Http.Detailed.Error String) (Http.Detailed.Success (List MesAuthor)))
+    | UserResp (Result (Http.Detailed.Error String) (Http.Detailed.Success Entity.User))
+    | GameResp (Result (Http.Detailed.Error String) (Http.Detailed.Success Entity.Game))
+    | UsersResp (Result (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User)))
+    | RegisterUserResp (Result (Http.Detailed.Error String) (Http.Detailed.Success Entity.User))
     | EditUserResp (Result Http.Error Entity.User)
-    | GroupResp (Result Http.Error Entity.Group)
-    | MesResp (Result Http.Error (List MesAnswer))
+    | GroupResp (Result (Http.Detailed.Error String) (Http.Detailed.Success Entity.Group))
+    | MesResp (Result (Http.Detailed.Error String) (Http.Detailed.Success (List MesAnswer)))
     | MesPostResp (Result Http.Error String)
-    | PutMesResp (Result Http.Error String)
-    | UserEditResp (Result Http.Error String)
-    | MesQuerysResp (Result Http.Error (List MesQuery))
-    | MesAnswersResp (Result Http.Error (List MesAnswer))
-    | RoleResp (Result Http.Error Entity.Role)
-    | FillerResp (Result ValuationsError (List Entity.Ugimage))
-    | ValidResp (Result ValuationsError (List Entity.Ugimage))
-    | InvalidResp (Result ValuationsError (List Entity.Ugimage))
+    | PutMesResp (Result (Http.Detailed.Error String) (Http.Detailed.Success String))
+    | UserEditResp (Result (Http.Detailed.Error String) (Http.Detailed.Success String))
+    | MesQuerysResp (Result (Http.Detailed.Error String) (Http.Detailed.Success (List MesQuery)))
+    | MesAnswersResp (Result (Http.Detailed.Error String) (Http.Detailed.Success (List MesAnswer)))
+    | RoleResp (Result (Http.Detailed.Error String) (Http.Detailed.Success Entity.Role))
+    | FillerResp (Result ValuationsError (Http.Detailed.Success (List Entity.Ugimage)))
+    | ValidResp (Result ValuationsError (Http.Detailed.Success (List Entity.Ugimage)))
+    | InvalidResp (Result ValuationsError (Http.Detailed.Success (List Entity.Ugimage)))
     | BadgeRulesResp (RemoteData.WebData (List BadgeRule))
     | BadgesResp (RemoteData.WebData (List String))
     | ToggleStatementsModal
@@ -300,7 +301,7 @@ type alias Base =
 
 
 type ValuationsError
-    = ReqFail Http.Error
+    = ReqFail (Http.Detailed.Error String)
     | MissingValuations
 
 

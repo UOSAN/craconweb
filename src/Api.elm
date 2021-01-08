@@ -29,6 +29,7 @@ import Entity
 import Game
 import Helpers exposing (isAdmin, isStaff)
 import Http
+import Http.Detailed
 import Json
 import Json.Decode as JD
 import Json.Encode as JE
@@ -38,6 +39,7 @@ import RemoteData
 import Routing as R
 import Task exposing (Task)
 import Time
+
 
 
 
@@ -106,7 +108,7 @@ defaultHeaders jwtencoded =
     authHeaders
 
 
-updateMesStatus : M.Base -> String -> M.MesAnswer -> Task Http.Error String
+updateMesStatus : M.Base -> String -> M.MesAnswer -> Task (Http.Detailed.Error String) (Http.Detailed.Success String)
 updateMesStatus { url, token, sub } id updatedMes =
     putRequest
         { endpoint = url ++ "/mesanswer/" ++ id
@@ -116,7 +118,7 @@ updateMesStatus { url, token, sub } id updatedMes =
         }
 
 
-updateUser : M.Base -> M.UserEdit -> Task Http.Error String
+updateUser : M.Base -> M.UserEdit -> Task (Http.Detailed.Error String) (Http.Detailed.Success String)
 updateUser { url, token, sub } user =
     putRequest
         { endpoint = url ++ "/user/" ++ user.id
@@ -138,7 +140,7 @@ createMesAnswer b answer sub =
         }
 
 
-fetchMesAnswers : M.Base -> Task Http.Error (List M.MesAnswer)
+fetchMesAnswers : M.Base -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List M.MesAnswer))
 fetchMesAnswers b =
     getRequest b.token (b.url ++ "/mesanswers?userEach=true&groupEach=true&createdEach=true&optin=true&public=false") M.mesAnswersDecoder
 
@@ -153,7 +155,7 @@ answersToParams answers =
            )
 
 
-fetchMesAuthors : M.Base -> List M.MesAnswer -> String -> Task Http.Error (List M.MesAuthor)
+fetchMesAuthors : M.Base -> List M.MesAnswer -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List M.MesAuthor))
 fetchMesAuthors b answers groupId =
     getRequest b.token
         (b.url
@@ -191,17 +193,17 @@ fetchBadgesByUserId { url, token, sub } =
         }
 
 
-fetchPublicMesAnswers : M.Base -> Task Http.Error (List M.MesAnswer)
+fetchPublicMesAnswers : M.Base -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List M.MesAnswer))
 fetchPublicMesAnswers b =
     getRequest b.token (b.url ++ "/mesanswers?userEach=true&groupEach=true&createdEach=true&public=true&optin=true") M.mesAnswersDecoder
 
 
-fetchMesAnswersByUser : M.Base -> Task Http.Error (List M.MesAnswer)
+fetchMesAnswersByUser : M.Base -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List M.MesAnswer))
 fetchMesAnswersByUser { url, token, sub } =
     getRequest token (url ++ "/mesanswers?userId=" ++ sub ++ "&groupEach=true&createdEach=true&optinEach=true&publicEach=true&createdDesc=true") M.mesAnswersDecoder
 
 
-fetchMesQuerys : M.Base -> Task Http.Error (List M.MesQuery)
+fetchMesQuerys : M.Base -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List M.MesQuery))
 fetchMesQuerys b =
     getRequest b.token (b.url ++ "/mesquerys?sortEach=true") M.mesQuerysDecoder
 
@@ -209,14 +211,14 @@ fetchMesQuerys b =
 createAuthRecord :
     String
     -> M.Login
-    -> Task Http.Error String
+    -> Task (Http.Detailed.Error String) (Http.Detailed.Success String)
 createAuthRecord httpsrv login =
     Http.task
         { method = "POST"
         , headers = []
         , url = httpsrv ++ "/auth"
         , body = Http.jsonBody <| Json.loginEncoder login
-        , resolver = Http.stringResolver <| handleJsonResponse <| Json.authDecoder
+        , resolver = Json.authDecoder |> Http.Detailed.responseToJsonRecord |> Http.stringResolver
         , timeout = Nothing
         }
 
@@ -225,7 +227,7 @@ fetchAllUgimgsets :
     String
     -> String
     -> String
-    -> Task Http.Error (List Entity.Ugimgset)
+    -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.Ugimgset))
 fetchAllUgimgsets httpsrv token sub =
     getRequest token
         (httpsrv
@@ -236,17 +238,18 @@ fetchAllUgimgsets httpsrv token sub =
         M.ugimgsetsDecoder
 
 
-fetchUsers_ : String -> String -> Task Http.Error (List Entity.User)
+fetchUsers_ : String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
 fetchUsers_ httpsrv token =
     fetchRole httpsrv token "user"
-        |> Task.andThen (fetchUsersInRole httpsrv token << .id)
+        |> Task.andThen (\result ->
+            fetchUsersInRole httpsrv token result.body.id)
 
 
 fetchFiller :
     String
     -> String
     -> String
-    -> Task M.ValuationsError (List Entity.Ugimage)
+    -> Task M.ValuationsError (Http.Detailed.Success (List Entity.Ugimage))
 fetchFiller httpsrv token sub =
     fetchImages httpsrv token sub "40" "filler"
 
@@ -255,7 +258,7 @@ fetchValid :
     String
     -> String
     -> String
-    -> Task M.ValuationsError (List Entity.Ugimage)
+    -> Task M.ValuationsError (Http.Detailed.Success (List Entity.Ugimage))
 fetchValid httpsrv token sub =
     fetchImages httpsrv token sub "80" "valid"
 
@@ -264,7 +267,7 @@ fetchInvalid :
     String
     -> String
     -> String
-    -> Task M.ValuationsError (List Entity.Ugimage)
+    -> Task M.ValuationsError (Http.Detailed.Success (List Entity.Ugimage))
 fetchInvalid httpsrv token sub =
     fetchImages httpsrv token sub "80" "invalid"
 
@@ -275,19 +278,22 @@ fetchImages :
     -> String
     -> String
     -> String
-    -> Task M.ValuationsError (List Entity.Ugimage)
+    -> Task M.ValuationsError (Http.Detailed.Success (List Entity.Ugimage))
 fetchImages httpsrv token sub count kind =
     fetchUgimgsets httpsrv token sub
         |> Task.mapError M.ReqFail
         |> Task.andThen
-            (\ugimgsets ->
-                case ugimsetsToString ugimgsets of
-                    Just id ->
-                        fetchUgimages httpsrv token count kind id
-                            |> Task.mapError M.ReqFail
+            (\result ->
+                let
+                    ugimgsets = result.body
+                in
+                    case ugimsetsToString ugimgsets of
+                        Just id ->
+                            fetchUgimages httpsrv token count kind id
+                                |> Task.mapError M.ReqFail
 
-                    Nothing ->
-                        Task.fail M.MissingValuations
+                        Nothing ->
+                            Task.fail M.MissingValuations
             )
 
 
@@ -304,7 +310,7 @@ fetchUgimages :
     -> String
     -> String
     -> String
-    -> Task Http.Error (List Entity.Ugimage)
+    -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.Ugimage))
 fetchUgimages httpsrv token limit gimgtypeSlug ugimgsetId =
     getRequest token
         (httpsrv
@@ -322,7 +328,7 @@ fetchUgimgsets :
     String
     -> String
     -> String
-    -> Task Http.Error (List Entity.Ugimgset)
+    -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.Ugimgset))
 fetchUgimgsets httpsrv token sub =
     getRequest token
         (httpsrv
@@ -333,17 +339,17 @@ fetchUgimgsets httpsrv token sub =
         M.ugimgsetsDecoder
 
 
-fetchGame : String -> String -> String -> Task Http.Error Entity.Game
+fetchGame : String -> String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success Entity.Game)
 fetchGame httpsrv token slug =
     getRequest token (httpsrv ++ "/game/" ++ slug) Entity.gameDecoder
 
 
-fetchUser : String -> String -> String -> Task Http.Error Entity.User
+fetchUser : String -> String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success Entity.User)
 fetchUser httpsrv token sub =
     getRequest token (httpsrv ++ "/user/" ++ sub) Entity.userDecoder
 
 
-fetchUsers : String -> String -> Task Http.Error (List Entity.User)
+fetchUsers : String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
 fetchUsers httpsrv token =
     getRequest token
         (httpsrv ++ "/users?createdEach=true")
@@ -355,8 +361,8 @@ fetchUserImages httpsrv token userId =
     fetchUser httpsrv token userId
         |> Task.mapError M.ReqFail
         |> Task.andThen
-            (\user ->
-                Task.map3 (\f v i -> { user = user, ugimages_f = f, ugimages_v = v, ugimages_i = i })
+            (\result ->
+                Task.map3 (\f v i -> { user = result.body, ugimages_f = f.body, ugimages_v = v.body, ugimages_i = i.body })
                     (fetchFiller httpsrv token userId)
                     (fetchValid httpsrv token userId)
                     (fetchInvalid httpsrv token userId)
@@ -380,19 +386,19 @@ fetchUsersInRole :
     String
     -> String
     -> String
-    -> Task Http.Error (List Entity.User)
+    -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
 fetchUsersInRole httpsrv token roleId =
     getRequest token
         (httpsrv ++ "/users?createdEach=true&roleId=" ++ roleId)
         (JD.field "users" (JD.list Entity.userDecoder))
 
 
-fetchGroup : String -> String -> String -> Task Http.Error Entity.Group
+fetchGroup : String -> String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success Entity.Group)
 fetchGroup httpsrv token slug =
     getRequest token (httpsrv ++ "/group/" ++ slug) Entity.groupDecoder
 
 
-fetchRole : String -> String -> String -> Task Http.Error Entity.Role
+fetchRole : String -> String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success Entity.Role)
 fetchRole httpsrv token slug =
     getRequest token (httpsrv ++ "/role/" ++ slug) Entity.roleDecoder
 
@@ -401,14 +407,14 @@ createUserRecord :
     String
     -> String
     -> Entity.UserRecord
-    -> Task Http.Error Entity.User
+    -> Task (Http.Detailed.Error String) (Http.Detailed.Success Entity.User)
 createUserRecord httpsrv token user =
     Http.task
         { method = "POST"
         , headers = defaultHeaders token
         , url = httpsrv ++ "/user"
         , body = Http.jsonBody <| Entity.userRecordEncoder user
-        , resolver = Http.stringResolver <| handleJsonResponse <| Entity.userDecoder
+        , resolver = Entity.userDecoder |> Http.Detailed.responseToJsonRecord |> Http.stringResolver
         , timeout = Nothing
         }
 
@@ -436,7 +442,8 @@ jwtDecoded token =
     Jwt.decodeToken M.jwtDecoder token
 
 
-startSession : { token : String, userId : String, gameId : String, start : Time.Posix, httpsrv : String, initialSeed : Int, jitter : Bool } -> Task Never (RemoteData.WebData Game.Session)
+startSession : { token : String, userId : String, gameId : String, start : Time.Posix, httpsrv : String, initialSeed : Int, jitter : Bool }
+    -> Task Never (RemoteData.RemoteData (Http.Detailed.Error String) (Http.Detailed.Success Game.Session))
 startSession { token, userId, gameId, start, httpsrv, initialSeed, jitter } =
     let
         json =
@@ -458,7 +465,8 @@ startSession { token, userId, gameId, start, httpsrv, initialSeed, jitter } =
         |> RemoteData.fromTask
 
 
-endSession : { session : Game.Session, token : String, httpsrv : String } -> Task Never (RemoteData.WebData Game.Session)
+endSession : { session : Game.Session, token : String, httpsrv : String }
+    -> Task Never (RemoteData.RemoteData (Http.Detailed.Error String) (Http.Detailed.Success Game.Session))
 endSession { session, token, httpsrv } =
     let
         json =
@@ -473,7 +481,8 @@ endSession { session, token, httpsrv } =
         |> RemoteData.fromTask
 
 
-postCycles : { session : Game.Session, cycles : List Game.Cycle, token : String, httpsrv : String } -> Task Never (RemoteData.WebData (List Game.Cycle))
+postCycles : { session : Game.Session, cycles : List Game.Cycle, token : String, httpsrv : String }
+    -> Task Never (RemoteData.RemoteData (Http.Detailed.Error String) (Http.Detailed.Success (List Game.Cycle)))
 postCycles { session, cycles, token, httpsrv } =
     let
         json =
@@ -488,38 +497,38 @@ postCycles { session, cycles, token, httpsrv } =
         |> RemoteData.fromTask
 
 
-postRequest : { endpoint : String, token : String, decoder : JD.Decoder a, json : JE.Value } -> Task Http.Error a
+postRequest : { endpoint : String, token : String, decoder : JD.Decoder a, json : JE.Value } -> Task (Http.Detailed.Error String) (Http.Detailed.Success a)
 postRequest { endpoint, decoder, token, json } =
     Http.task
         { method = "POST"
         , headers = defaultHeaders token
         , url = endpoint
         , body = json |> Http.jsonBody
-        , resolver = Http.stringResolver <| handleJsonResponse <| decoder
+        , resolver = decoder |> Http.Detailed.responseToJsonRecord |> Http.stringResolver
         , timeout = Nothing
         }
 
 
-putRequest : { endpoint : String, token : String, decoder : JD.Decoder a, json : JE.Value } -> Task Http.Error a
+putRequest : { endpoint : String, token : String, decoder : JD.Decoder a, json : JE.Value } -> Task (Http.Detailed.Error String) (Http.Detailed.Success a)
 putRequest { endpoint, decoder, token, json } =
     Http.task
         { method = "PUT"
         , headers = defaultHeaders token
         , url = endpoint
         , body = json |> Http.jsonBody
-        , resolver = Http.stringResolver <| handleJsonResponse <| decoder
+        , resolver = decoder |> Http.Detailed.responseToJsonRecord |> Http.stringResolver
         , timeout = Nothing
         }
 
 
-getRequest : String -> String -> JD.Decoder a -> Task Http.Error a
+getRequest : String -> String -> JD.Decoder a -> Task (Http.Detailed.Error String) (Http.Detailed.Success a)
 getRequest token endpoint decoder =
     Http.task
         { method = "GET"
         , headers = defaultHeaders token
         , url = endpoint
         , body = Http.emptyBody
-        , resolver = Http.stringResolver <| handleJsonResponse <| decoder
+        , resolver = decoder |> Http.Detailed.responseToJsonRecord |> Http.stringResolver
         , timeout = Nothing
         }
 

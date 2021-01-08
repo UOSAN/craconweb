@@ -2,6 +2,7 @@ module Game exposing (..)
 
 import Duration exposing (Duration)
 import Game.Card as Card exposing (Continuation(..))
+import Http.Detailed
 import Random exposing (Generator)
 import Random.Extra
 import Random.List
@@ -13,9 +14,9 @@ import Quantity
 
 type GameState msg
     = NotPlaying
-    | Loading (Game msg) (RemoteData.WebData Session)
+    | Loading (Game msg) (RemoteData.RemoteData (Http.Detailed.Error String) (Http.Detailed.Success Session))
     | Playing { game : Game msg, session : Session, nextSeed : Random.Seed }
-    | Saving State Session (RemoteData.WebData ( Session, List Cycle ))
+    | Saving State Session (RemoteData.RemoteData (Http.Detailed.Error String) ( (Http.Detailed.Success Session), (Http.Detailed.Success (List Cycle) )))
     | Saved State { session : Session, cycles : List Cycle }
 
 
