@@ -29,7 +29,7 @@ sessionDecoder =
         |> required "id" JD.string
         |> required "userId" JD.string
         |> required "gameId" JD.string
-        |> optional "seed" JD.int 0
+        |> optional "seed" stringToIntDecoder 0
         |> required "start" decodeTime
         |> optional "end" (JD.map Just decodeTime) Nothing
         |> optional "jitter" JD.bool False
@@ -206,3 +206,16 @@ decodeTime =
 encodeTime : Time.Posix -> JE.Value
 encodeTime =
     Time.posixToMillis >> JE.int
+
+stringToIntDecoder : Decoder Int
+stringToIntDecoder =
+    JD.string
+        |> JD.andThen
+            (\str ->
+                case String.toInt str of
+                    Just int ->
+                        JD.succeed int
+
+                    Nothing ->
+                        JD.fail ("Failed to decode as integer : \"" ++ str ++"\"")
+            )
