@@ -1,6 +1,5 @@
 module Helpers exposing (..)
 
-import Http
 import Http.Detailed
 import Json.Decode as Decode
 import Model

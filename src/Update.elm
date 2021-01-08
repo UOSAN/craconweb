@@ -1,7 +1,6 @@
 module Update exposing (update)
 
 import Api
-import Browser
 import Browser.Navigation exposing (pushUrl, load)
 import Duration
 import Empty
@@ -17,7 +16,6 @@ import Game.Implementations.VisualSearch
 import Helpers
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Http
 import Http.Detailed
 import Model exposing (..)
 import Port
@@ -28,7 +26,6 @@ import Task exposing (Task)
 import Time
 import Url
 import Jwt
-import Browser.Navigation
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
