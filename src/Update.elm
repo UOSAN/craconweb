@@ -1,8 +1,7 @@
 module Update exposing (update)
 
 import Api
-import Browser
-import Browser.Navigation exposing (pushUrl)
+import Browser.Navigation exposing (pushUrl, load)
 import Duration
 import Empty
 import Entity
@@ -17,7 +16,7 @@ import Game.Implementations.VisualSearch
 import Helpers
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Http
+import Http.Detailed
 import Model exposing (..)
 import Port
 import Random
@@ -27,7 +26,6 @@ import Task exposing (Task)
 import Time
 import Url
 import Jwt
-import Browser.Navigation
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -43,10 +41,11 @@ update msg model =
             , Cmd.none
             )
 
-        MesAnswersResp (Ok myAnswers) ->
+        MesAnswersResp (Ok result) ->
             let
                 cmd =
                     Task.attempt MesQuerysResp (Api.fetchMesQuerys { url = model.httpsrv, token = model.jwtencoded, sub = "" })
+                myAnswers = result.body
             in
             ( { model | mesAnswers = Just myAnswers }, cmd )
 
@@ -131,21 +130,12 @@ update msg model =
             , cmd
             )
 
-        EditUserResp (Ok user) ->
-            ( model
-            , Cmd.none
-            )
-
-        EditUserResp (Err err) ->
-            ( model
-            , Cmd.none
-            )
-
         SetRequestNothing ->
             ( { model | request = Nothing }, Cmd.none )
 
-        MesQuerysResp (Ok querys) ->
+        MesQuerysResp (Ok result) ->
             let
+                queries = result.body
                 ( queryIds, latest ) =
                     case model.mesAnswers of
                         Nothing ->
@@ -157,7 +147,7 @@ update msg model =
                             )
 
                 unanswered =
-                    querys
+                    queries
                         |> List.filter (\q -> List.member q.id queryIds |> not)
 
                 mesQuery_ =
@@ -295,25 +285,31 @@ update msg model =
             ( { model | informing = Just remark }, Cmd.none )
 
         -- ADMIN
-        GroupResp (Ok group) ->
-            case group.slug of
-                "control_a" ->
-                    ( { model | groupIdCon = Just group.id }, Cmd.none )
+        GroupResp (Ok result) ->
+            let
+                group = result.body
+            in
+                case group.slug of
+                    "control_a" ->
+                        ( { model | groupIdCon = Just group.id }, Cmd.none )
 
-                "experimental_a" ->
-                    ( { model | groupIdExp = Just group.id }, Cmd.none )
+                    "experimental_a" ->
+                        ( { model | groupIdExp = Just group.id }, Cmd.none )
 
-                _ ->
-                    ( model
-                    , Cmd.none
-                    )
+                    _ ->
+                        ( model
+                        , Cmd.none
+                        )
 
-        UsersResp (Ok users_) ->
-            ( { model
-                | users = users_
-              }
-            , Cmd.none
-            )
+        UsersResp (Ok result) ->
+            let
+                users_ = result.body
+            in
+                ( { model
+                    | users = users_
+                }
+                , Cmd.none
+                )
 
         SetRegistration key value ->
             let
@@ -389,32 +385,39 @@ update msg model =
                     )
                 )
 
-        MesAuthorsResp (Ok mesAuthors) ->
-            case model.statements of
-                Nothing ->
-                    ( model
-                    , Cmd.none
-                    )
-
-                Just mesAnswers ->
-                    ( { model
-                        | statements =
-                            Just
-                                (List.map (up_mesAnswersDisplayName mesAuthors) mesAnswers)
-                      }
-                    , Cmd.none
-                    )
-
-        MesResp (Ok mesAnswers) ->
-            ( { model
-                | adminModel =
-                    up_mesAnswers model.adminModel mesAnswers
-              }
-            , Cmd.none
-            )
-
-        PublicMesResp (Ok publicMes) ->
+        MesAuthorsResp (Ok result) ->
             let
+                mesAuthors = result.body
+            in
+                case model.statements of
+                    Nothing ->
+                        ( model
+                        , Cmd.none
+                        )
+
+                    Just mesAnswers ->
+                        ( { model
+                            | statements =
+                                Just
+                                    (List.map (up_mesAnswersDisplayName mesAuthors) mesAnswers)
+                        }
+                        , Cmd.none
+                        )
+
+        MesResp (Ok result) ->
+            let
+                mesAnswers = result.body
+            in
+                ( { model
+                    | adminModel =
+                        up_mesAnswers model.adminModel mesAnswers
+                }
+                , Cmd.none
+                )
+
+        PublicMesResp (Ok result) ->
+            let
+                publicMes = result.body
                 cmd =
                     case model.visitor of
                         LoggedIn jwt ->
@@ -487,15 +490,18 @@ update msg model =
             , Cmd.none
             )
 
-        RegisterUserResp (Ok newUser) ->
-            ( { model
-                | loading = Nothing
-                , users = [ newUser ] ++ model.users
-                , adminModel =
-                    up_tmpUserRecord model.adminModel Empty.emptyUserRecord
-              }
-            , pushUrl model.key R.adminPath
-            )
+        RegisterUserResp (Ok result) ->
+            let
+                newUser = result.body
+            in
+                ( { model
+                    | loading = Nothing
+                    , users = [ newUser ] ++ model.users
+                    , adminModel =
+                        up_tmpUserRecord model.adminModel Empty.emptyUserRecord
+                }
+                , pushUrl model.key R.adminPath
+                )
 
         -- SHARED
         DomLoaded loaded ->
@@ -511,12 +517,7 @@ update msg model =
             )
 
         UpdateLocation path ->
-            let
-                cmds =
-                    [ pushUrl model.key path
-                    ]
-            in
-            ( model, Cmd.batch cmds )
+            ( model, pushUrl model.key path )
 
         OnUpdateLocation location ->
             onUpdateLocation location model
@@ -562,10 +563,10 @@ update msg model =
             in
             ( Empty.emptyModel model, Cmd.batch cmds )
 
-        AuthResp (Ok token) ->
+        AuthResp (Ok result) ->
             let
-                jwtdecoded_ =
-                    Api.jwtDecoded token
+                token = result.body
+                jwtdecoded_ = Api.jwtDecoded token
 
                 ( model_, command_ ) =
                     case jwtdecoded_ of
@@ -577,10 +578,10 @@ update msg model =
 
                                 skipToAdmin jsonWebTokenArg =
                                     if isPowerful (List.map .name jsonWebTokenArg.roles) then
-                                        pushUrl model.key R.adminPath
+                                        load R.adminPath
 
                                     else
-                                        pushUrl model.key R.homePath
+                                        load R.homePath
                             in
                             ( { model
                                 | loading = Nothing
@@ -605,10 +606,13 @@ update msg model =
             in
             ( model_, command_ )
 
-        UserResp (Ok user_) ->
-            ( { model | user = Just user_ }
-            , Cmd.none
-            )
+        UserResp (Ok result) ->
+            let
+                user_ = result.body
+            in
+                ( { model | user = Just user_ }
+                , Cmd.none
+                )
 
         StartSession data ->
             startSession data model
@@ -644,27 +648,30 @@ update msg model =
         InitVisualSearch ->
             initVisualSearch model
 
-        GameResp (Ok game) ->
-            case game.slug of
-                "gonogo" ->
-                    ( { model | gonogoGame = Just game }, Cmd.none )
+        GameResp (Ok result) ->
+            let
+                game = result.body
+            in
+                case game.slug of
+                    "gonogo" ->
+                        ( { model | gonogoGame = Just game }, Cmd.none )
 
-                "dotprobe" ->
-                    ( { model | dotprobeGame = Just game }, Cmd.none )
+                    "dotprobe" ->
+                        ( { model | dotprobeGame = Just game }, Cmd.none )
 
-                "stopsignal" ->
-                    ( { model | stopsignalGame = Just game }, Cmd.none )
+                    "stopsignal" ->
+                        ( { model | stopsignalGame = Just game }, Cmd.none )
 
-                "respondsignal" ->
-                    ( { model | respondsignalGame = Just game }, Cmd.none )
+                    "respondsignal" ->
+                        ( { model | respondsignalGame = Just game }, Cmd.none )
 
-                "visualsearch" ->
-                    ( { model | visualsearchGame = Just game }, Cmd.none )
+                    "visualsearch" ->
+                        ( { model | visualsearchGame = Just game }, Cmd.none )
 
-                _ ->
-                    ( model
-                    , Cmd.none
-                    )
+                    _ ->
+                        ( model
+                        , Cmd.none
+                        )
 
         Presses keyCode ->
             presses keyCode model
@@ -684,23 +691,35 @@ update msg model =
         NewCurrentTime t ->
             handleTimeUpdate t model
 
-        RoleResp (Ok role) ->
-            ( { model | userRole = role }, Cmd.none )
+        RoleResp (Ok result) ->
+            let
+                role = result.body
+            in
+                ( { model | userRole = role }, Cmd.none )
 
-        FillerResp (Ok ugimages) ->
-            ( { model | ugimages_f = Just ugimages }
-            , preloadUgImages model.filesrv ugimages
-            )
+        FillerResp (Ok result) ->
+            let
+                ugimages = result.body
+            in
+                ( { model | ugimages_f = Just ugimages }
+                , preloadUgImages model.filesrv ugimages
+                )
 
-        ValidResp (Ok ugimages) ->
-            ( { model | ugimages_v = Just ugimages }
-            , preloadUgImages model.filesrv ugimages
-            )
+        ValidResp (Ok result) ->
+            let
+                ugimages = result.body
+            in
+                ( { model | ugimages_v = Just ugimages }
+                , preloadUgImages model.filesrv ugimages
+                )
 
-        InvalidResp (Ok ugimages) ->
-            ( { model | ugimages_i = Just ugimages }
-            , preloadUgImages model.filesrv ugimages
-            )
+        InvalidResp (Ok result) ->
+            let
+                ugimages = result.body
+            in
+                ( { model | ugimages_i = Just ugimages }
+                , preloadUgImages model.filesrv ugimages
+                )
 
         ToggleStatementsModal ->
             ( { model | statementsModal = not model.statementsModal }
@@ -771,17 +790,8 @@ update msg model =
         PutMesResp (Err err) ->
             httpErrorState model err
 
-        ClickedLink urlRequest ->
-            case urlRequest of
-                Browser.Internal url ->
-                    ( model
-                    , Browser.Navigation.pushUrl model.key (Url.toString url)
-                    )
-
-                Browser.External href ->
-                    ( model
-                    , Browser.Navigation.load href
-                    )
+        ClickedLink _ ->
+            (model, Cmd.none)
 
         ChangedUrl url ->
             onUpdateLocation url model
@@ -1081,7 +1091,7 @@ valuationsErrState model err =
     )
 
 
-httpErrorState : Model -> Http.Error -> ( Model, Cmd msg )
+httpErrorState : Model -> Http.Detailed.Error String -> ( Model, Cmd msg )
 httpErrorState model err =
     ( { model
         | loading = Nothing
@@ -1376,7 +1386,7 @@ handleTimeUpdate t model =
     handleInput (Game.Tick t) model
 
 
-startSessionResp : Random.Seed -> Game.Game Msg -> RemoteData.WebData Game.Session -> Model -> ( Model, Cmd Msg )
+startSessionResp : Random.Seed -> Game.Game Msg -> (RemoteData.RemoteData (Http.Detailed.Error String) (Http.Detailed.Success Game.Session)) -> Model -> ( Model, Cmd Msg )
 startSessionResp nextSeed game remoteData model =
     let
         updatedModel =
@@ -1384,7 +1394,7 @@ startSessionResp nextSeed game remoteData model =
     in
     case remoteData of
         RemoteData.Success session ->
-            playGame game session nextSeed updatedModel
+            playGame game session.body nextSeed updatedModel
 
         RemoteData.Failure err ->
             ( { updatedModel | glitching = Just <| Helpers.httpHumanError err }
@@ -1402,7 +1412,7 @@ startSessionResp nextSeed game remoteData model =
             )
 
 
-gameDataSaved : Game.State -> Game.Session -> RemoteData.WebData ( Game.Session, List Game.Cycle ) -> Model -> ( Model, Cmd Msg )
+gameDataSaved : Game.State -> Game.Session -> (RemoteData.RemoteData (Http.Detailed.Error String) ( (Http.Detailed.Success Game.Session), (Http.Detailed.Success (List Game.Cycle) ))) -> Model -> ( Model, Cmd Msg )
 gameDataSaved state session remoteData model =
     let
         updatedModel =
@@ -1411,7 +1421,7 @@ gameDataSaved state session remoteData model =
     case remoteData of
         RemoteData.Success ( tempSession, cycles ) ->
             ( { model
-                | gameState = Game.Saved state { session = tempSession, cycles = cycles }
+                | gameState = Game.Saved state { session = tempSession.body, cycles = cycles.body }
                 , fmriUserData = RemoteData.NotAsked
               }
             , Cmd.none

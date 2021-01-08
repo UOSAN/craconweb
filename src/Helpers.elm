@@ -1,28 +1,32 @@
 module Helpers exposing (..)
 
-import Http
+import Http.Detailed
 import Json.Decode as Decode
 import Model
 import Routing as R
 
 
-httpHumanError : Http.Error -> String
+httpHumanError : Http.Detailed.Error String -> String
 httpHumanError err =
     case err of
-        Http.Timeout ->
+        Http.Detailed.Timeout ->
             "Something is taking too long."
 
-        Http.NetworkError ->
+        Http.Detailed.NetworkError ->
             "Oops. There's been a network error."
 
-        Http.BadStatus statusCode ->
-            "Bad status " ++ String.fromInt statusCode
+        Http.Detailed.BadStatus metadata body ->
+            case Decode.decodeString bodyErrorDecoder body of
+                Ok errorString ->
+                    "Bad status - " ++ String.fromInt metadata.statusCode ++ " " ++ metadata.statusText ++ " - " ++ errorString
+                Err decodingError ->
+                    "Bad status - " ++ String.fromInt metadata.statusCode ++ " " ++ metadata.statusText ++ " - " ++ body ++ " - JSON decoding error - " ++ Decode.errorToString decodingError
 
-        Http.BadBody _ ->
-            "Bad payload"
+        Http.Detailed.BadBody metadata body s ->
+            "Bad payload - " ++ String.fromInt metadata.statusCode ++ " " ++ metadata.statusText ++ " - body - " ++ body ++ " - JSON decoding error - " ++ s
 
-        _ ->
-            "Unknown error"
+        Http.Detailed.BadUrl url ->
+            "Bad url - " ++ url
 
 
 checkAccess : R.Route -> Model.JwtPayload -> R.Route
@@ -111,3 +115,8 @@ isStaff jwt =
 keyDecoder : Decode.Decoder String
 keyDecoder =
   Decode.field "key" Decode.string
+
+
+bodyErrorDecoder : Decode.Decoder String
+bodyErrorDecoder =
+  Decode.field "error" Decode.string

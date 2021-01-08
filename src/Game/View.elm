@@ -7,6 +7,7 @@ import Game.Result
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http.Detailed
 import Json.Decode
 import List.Extra
 import Markdown
@@ -160,7 +161,8 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
                 ]
 
 
-viewResult : Game.State -> Game.Session -> { a | percentCorrect : Float, averageResponseTimeResult : Result String Float, savingStatus : RemoteData.WebData b } -> Html Msg
+viewResult : Game.State -> Game.Session -> { a | percentCorrect : Float, averageResponseTimeResult : Result String Float, savingStatus : RemoteData.RemoteData
+              (Http.Detailed.Error String) b } -> Html Msg
 viewResult state session { percentCorrect, averageResponseTimeResult, savingStatus } =
     let
         averageResponseTime =
