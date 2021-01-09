@@ -1,22 +1,73 @@
-module Game exposing (..)
+module Game exposing
+    ( BorderType(..)
+    , Continuation
+    , Cycle
+    , Direction(..)
+    , Game
+    , GameState(..)
+    , Image
+    , Input(..)
+    , Layout(..)
+    , LogEntry(..)
+    , Logic
+    , Result(..)
+    , Session
+    , State
+    , addIntervals
+    , andThen
+    , andThenRest
+    , directionToIndex
+    , emptyState
+    , flipDirection
+    , info
+    , isAfter
+    , isBefore
+    , isFailed
+    , isFinish
+    , isInterval
+    , isPlaying
+    , leftOrRight
+    , log
+    , logWithCondition
+    , onDirection
+    , onIndication
+    , onSelect
+    , prependInterval
+    , randomInterval
+    , resetBlockStart
+    , resetSegmentStart
+    , restart
+    , resultTimeout
+    , segment
+    , selectTimeout
+    , shouldRest
+    , showZoom
+    , shuffle
+    , startSession
+    , startTrial
+    , timeout
+    , timeoutFromSegmentStart
+    , trialFailed
+    , unwrap
+    , updateCurrTime
+    )
 
 import Duration exposing (Duration)
 import Game.Card as Card exposing (Continuation(..))
 import Http.Detailed
+import Quantity
 import Random exposing (Generator)
 import Random.Extra
 import Random.List
 import RemoteData
 import Time
-import Random.Extra
-import Quantity
 
 
 type GameState msg
     = NotPlaying
     | Loading (Game msg) (RemoteData.RemoteData (Http.Detailed.Error String) (Http.Detailed.Success Session))
     | Playing { game : Game msg, session : Session, nextSeed : Random.Seed }
-    | Saving State Session (RemoteData.RemoteData (Http.Detailed.Error String) ( (Http.Detailed.Success Session), (Http.Detailed.Success (List Cycle) )))
+    | Saving State Session (RemoteData.RemoteData (Http.Detailed.Error String) ( Http.Detailed.Success Session, Http.Detailed.Success (List Cycle) ))
     | Saved State { session : Session, cycles : List Cycle }
 
 
@@ -191,7 +242,7 @@ andThenCheckTimeout gameDuration =
 isTimeout : Duration -> State -> Bool
 isTimeout gameDuration state =
     state.sessionStart
-        |> Maybe.map (\sessionStart -> isBefore ( Duration.addTo sessionStart gameDuration) state.currTime)
+        |> Maybe.map (\sessionStart -> isBefore (Duration.addTo sessionStart gameDuration) state.currTime)
         |> Maybe.withDefault False
 
 
@@ -298,7 +349,8 @@ randomInterval min jitter =
 addIntervals : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
 addIntervals layout min jitter trials =
     let
-        randomDurationIntervals = Random.map interval ( randomInterval min jitter )
+        randomDurationIntervals =
+            Random.map interval (randomInterval min jitter)
     in
     trials
         |> List.map Random.constant
@@ -308,7 +360,7 @@ addIntervals layout min jitter trials =
 
 prependInterval : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
 prependInterval layout min jitter trials =
-    Random.map interval ( randomInterval min jitter )
+    Random.map interval (randomInterval min jitter)
         :: List.map Random.constant trials
         |> Random.Extra.combine
 
@@ -617,6 +669,7 @@ shuffle { seedInt, totalBlocks, blockDuration, restDuration, currentTime, interv
 isAfter : Time.Posix -> Time.Posix -> Basics.Bool
 isAfter a b =
     Time.posixToMillis a > Time.posixToMillis b
+
 
 {-| Return if `a` is before `b`
 -}

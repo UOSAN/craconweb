@@ -1,4 +1,11 @@
-module Helpers exposing (..)
+module Helpers exposing
+    ( httpHumanError
+    , checkAccess
+    , getJwt
+    , isAdmin
+    , isStaff
+    , keyDecoder
+    )
 
 import Http.Detailed
 import Json.Decode as Decode

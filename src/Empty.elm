@@ -1,4 +1,8 @@
-module Empty exposing (..)
+module Empty exposing
+    ( emptyModel
+    , emptyUserRecord
+    , emptyRole
+    )
 
 import Entity
 import Game
