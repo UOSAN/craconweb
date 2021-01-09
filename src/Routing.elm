@@ -1,4 +1,20 @@
-module Routing exposing (..)
+module Routing exposing
+    ( powerPaths
+    , parseLocation
+    , onLinkClick
+    , Route(..)
+    , homePath
+    , loginPath
+    , adminPath
+    , registerPath
+    , settingsPath
+    , logoutPath
+    , mesPath
+    , badgesPath
+    , statementsPath
+    , instructionsPath
+    , editPath
+    )
 
 import Html exposing (Attribute)
 import Html.Events exposing (custom)

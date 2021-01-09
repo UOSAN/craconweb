@@ -1,4 +1,13 @@
-port module Port exposing (..)
+port module Port exposing
+    ( Key
+    , Value
+    , status
+    , domLoaded
+    , upload
+    , set
+    , clear
+    , preload
+    )
 
 import Json.Encode
 

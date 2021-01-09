@@ -1,4 +1,21 @@
-module Entity exposing (..)
+module Entity exposing
+    ( Game
+    , Gimage
+    , Group
+    , Role
+    , Ugimage
+    , Ugimgset
+    , User
+    , UserRecord
+    , gameDecoder
+    , gimageDecoder
+    , groupDecoder
+    , roleDecoder
+    , ugimageDecoder
+    , ugimgsetDecoder
+    , userDecoder
+    , userRecordEncoder
+    )
 
 import Json.Decode as JD
 import Json.Encode as JE
