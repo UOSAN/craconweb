@@ -1,6 +1,5 @@
 module Game.Result exposing
     ( averageResponseTimeInMillisecond
-    , isCorrect
     , percentCorrect
     )
 
@@ -55,7 +54,7 @@ averageResponseTimeInMillisecond state =
         Ok <| toFloat (List.sum responseTimesList) / toFloat totalResponses
 
 
-percentCorrect : { gameSlug : String } -> Game.State -> Float
+percentCorrect : String -> Game.State -> Float
 percentCorrect gameSlug state =
     let
         cycles =
@@ -72,8 +71,8 @@ percentCorrect gameSlug state =
     (toFloat correctAnswers / toFloat totalAnswer) * 100
 
 
-isCorrect : { gameSlug : String } -> Game.Cycle -> Bool
-isCorrect { gameSlug } cycle =
+isCorrect : String -> Game.Cycle -> Bool
+isCorrect gameSlug cycle =
     case gameSlug of
         "dotprobe" ->
             isDotProbeCorrect cycle
