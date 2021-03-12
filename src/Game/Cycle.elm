@@ -16,19 +16,19 @@ fillCycles sessionId logEntry cycles =
         Game.BeginSession { seed } time ->
             cycles
 
-        Game.EndSession time ->
+        Game.EndSession _ ->
             cycles
 
         Game.BeginTrial time ->
             beginCycle { sessionId = sessionId, time = time, sort = List.length cycles } cycles
 
-        Game.EndTrial time ->
+        Game.EndTrial _ ->
             cycles
 
         Game.BeginDisplay maybeLayout time ->
             beginDisplay { sessionId = sessionId, maybeLayout = maybeLayout, time = time } cycles
 
-        Game.BeginInput time ->
+        Game.BeginInput _ ->
             cycles
 
         Game.AcceptIndication { desired } time ->

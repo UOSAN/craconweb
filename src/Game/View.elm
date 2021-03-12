@@ -30,7 +30,7 @@ view :
     -> Html Msg
 view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
     case gameState of
-        Game.Loading game remoteData ->
+        Game.Loading _ remoteData ->
             case remoteData of
                 RemoteData.Loading ->
                     div []
@@ -58,7 +58,7 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
                 state =
                     game |> Game.unwrap
 
-                timer =
+                _ =
                     state.sessionStart
                         |> Maybe.map (\sessionStart -> (Time.posixToMillis state.currTime) - (Time.posixToMillis sessionStart))
                         |> Maybe.map (\t -> toFloat t / 1000)
@@ -70,13 +70,13 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
                     Nothing ->
                         text ""
 
-                    Just (Game.Info borderType string) ->
+                    Just (Game.Info _ string) ->
                         Ui.Parts.middleBlock [ Markdown.toHtml [ onClick IndicationInput ] string ]
 
                     Just (Game.Single borderType image) ->
                         viewSingleLayout borderType image
 
-                    Just (Game.LeftRight borderType direction lImage rImage) ->
+                    Just (Game.LeftRight borderType _ lImage rImage) ->
                         viewLeftRightLayout
                             { borderType = borderType
                             , lImage = lImage
@@ -361,7 +361,7 @@ viewLeftRightLayout { borderType, lImage, rImage } =
 
 
 viewFixation : BorderType -> Html msg
-viewFixation borderType =
+viewFixation _ =
     div
         [ class "columns is-mobile" ]
         [ div
@@ -402,7 +402,7 @@ viewRest messages state =
 
 
 viewProbe : BorderType -> Game.Direction -> Html Msg
-viewProbe borderType direction =
+viewProbe _ direction =
     div
         [ class "columns is-mobile" ]
         (case direction of

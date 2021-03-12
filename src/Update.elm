@@ -136,7 +136,7 @@ update msg model =
         MesQuerysResp (Ok result) ->
             let
                 queries = result.body
-                ( queryIds, latest ) =
+                ( queryIds, _ ) =
                     case model.mesAnswers of
                         Nothing ->
                             ( [], Nothing )
@@ -366,7 +366,7 @@ update msg model =
             in
             ( { model | adminModel = { adminModel_ | tmpUserRecord = tmpUserRecord_ } }, Cmd.none )
 
-        EditUserAccount key value ->
+        EditUserAccount _ _ ->
             ( model
             , Cmd.none
             )
@@ -444,7 +444,7 @@ update msg model =
 
                 Just mess ->
                     let
-                        userId =
+                        _ =
                             case model.visitor of
                                 Anon ->
                                     ""
@@ -485,7 +485,7 @@ update msg model =
                                 )
                             )
 
-        PutMesResp (Ok r) ->
+        PutMesResp (Ok _) ->
             ( model
             , Cmd.none
             )
@@ -764,22 +764,22 @@ update msg model =
         RoleResp (Err err) ->
             httpErrorState model err
 
-        MesAuthorsResp (Err err) ->
+        MesAuthorsResp (Err _) ->
             ( model
             , Cmd.none
             )
 
-        MesAnswersResp (Err err) ->
+        MesAnswersResp (Err _) ->
             ( model
             , Cmd.none
             )
 
-        MesResp (Err err) ->
+        MesResp (Err _) ->
             ( model
             , Cmd.none
             )
 
-        PublicMesResp (Err err) ->
+        PublicMesResp (Err _) ->
             ( model
             , Cmd.none
             )
@@ -1285,7 +1285,7 @@ handleInput input model =
                         ]
                     )
 
-                ( Game.Card.Continue state newGame, cmd ) ->
+                ( Game.Card.Continue _ newGame, cmd ) ->
                     ( { model | gameState = Game.Playing { game = newGame, session = session, nextSeed = nextSeed } }, cmd )
 
                 ( Game.Card.Rest _ newGame, cmd ) ->

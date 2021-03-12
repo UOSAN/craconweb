@@ -427,7 +427,7 @@ okyToky now token =
                 Ok False ->
                     Ok decoded
 
-                Err jwtErr ->
+                Err _ ->
                     Err "Decoding Problem"
 
         _ ->

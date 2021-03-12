@@ -824,7 +824,7 @@ view model =
                 R.MesRoute ->
                     Admin.mesPage model
 
-                R.FmriRoute userId ->
+                R.FmriRoute _ ->
                     stopSignalGame model
     in
     { title = ""
