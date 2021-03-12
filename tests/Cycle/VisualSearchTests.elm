@@ -210,7 +210,7 @@ all =
                     ]
                     (Game.Cycle.generate "sessionId"
                         [ EndTrial 1495328607751
-                        , Timeout { desired = False } 1495328606735
+                        , Timeout False 1495328606735
                         , BeginInput 1495328603751
                         , BeginDisplay
                             (Just

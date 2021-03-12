@@ -673,7 +673,7 @@ stopSignalGame model =
             game model "Stop Signal" InitStopSignal
 
         Just { user } ->
-            game model "Stop Signal" (InitFmriStopSignal { user = user })
+            game model "Stop Signal" (InitFmriStopSignal user)
 
 
 instructionsPage : Model -> Html Msg

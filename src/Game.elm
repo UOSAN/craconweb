@@ -176,16 +176,16 @@ type alias Image =
 
 
 type LogEntry
-    = BeginSession { seed : Int } Time.Posix
+    = BeginSession Int Time.Posix
     | EndSession Time.Posix
     | BeginTrial Time.Posix
     | EndTrial Time.Posix
     | BeginDisplay (Maybe Layout) Time.Posix
     | BeginInput Time.Posix
-    | AcceptIndication { desired : Bool } Time.Posix
+    | AcceptIndication Bool Time.Posix
     | AcceptDirection { desired : Direction, actual : Direction } Time.Posix
     | AcceptSelection { desired : Int, actual : Int } Time.Posix
-    | Timeout { desired : Bool } Time.Posix
+    | Timeout Bool Time.Posix
 
 
 type alias State =
@@ -400,7 +400,7 @@ onIndication desired state input =
         ( Indication, NoResult ) ->
             ( False
             , { state
-                | log = AcceptIndication { desired = desired } state.currTime :: state.log
+                | log = AcceptIndication desired state.currTime :: state.log
                 , trialResult = BoolResult desired
               }
             )
@@ -455,7 +455,7 @@ selectTimeout expiration state input =
         ( NoResult, ( False, newState ) ) ->
             ( False
             , { state
-                | log = Timeout { desired = False } state.currTime :: newState.log
+                | log = Timeout  False state.currTime :: newState.log
                 , trialResult = SelectResult { result = False, answer = Nothing }
               }
             )
@@ -476,7 +476,7 @@ resultTimeout desired expiration state input =
         ( NoResult, ( False, newState ) ) ->
             ( False
             , { state
-                | log = Timeout { desired = desired } state.currTime :: newState.log
+                | log = Timeout desired state.currTime :: newState.log
                 , trialResult = BoolResult desired
               }
             )
@@ -637,7 +637,7 @@ shuffle { seedInt, totalBlocks, blockDuration, restDuration, currentTime, interv
         |> Random.map
             (\shuffledTrials ->
                 (startSession
-                    :: log (BeginSession { seed = seedInt })
+                    :: log (BeginSession seedInt)
                     :: (shuffledTrials
                             ++ [ Card.restart
                                     { totalBlocks = totalBlocks

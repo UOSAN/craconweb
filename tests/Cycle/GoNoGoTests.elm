@@ -46,7 +46,7 @@ goTests =
                     (Game.Cycle.generate "sessionId"
                         [ EndTrial 1495162246038
                         , BeginDisplay (Just (RedCross Black)) 1495162245538
-                        , Timeout { desired = False } 1495162245538
+                        , Timeout False 1495162245538
                         , BeginInput 1495162244273
                         , BeginDisplay (Just (LeftOrRight Black Right { url = "http://localhost:8654/repo/36ba69efa7c71b0430cb0a5ecfaff5be.png", id = "6920533513820449510" })) 1495162244273
                         , BeginTrial 1495162244273
@@ -155,7 +155,7 @@ noGoTests =
                     ]
                     (Game.Cycle.generate "sessionId"
                         [ EndTrial 1495249099189
-                        , Timeout { desired = True } 1495249099189
+                        , Timeout True 1495249099189
                         , BeginInput 1495249097925
                         , BeginDisplay (Just (LeftOrRight Dashed Right { url = "http://localhost:8654/repo/454574ac9a2d099147aa51be6a1b0c2e.png", id = "4615715483824159516" })) 1495249097925
                         , BeginTrial 1495249097925

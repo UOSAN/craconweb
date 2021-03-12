@@ -1358,7 +1358,7 @@ presses keyCode model =
         cmd3 =
             case ( keyCode, newModel2.gameState, RemoteData.toMaybe newModel2.fmriUserData ) of
                 ( "'" {- ' -}, Game.NotPlaying, Just { user } ) ->
-                    Task.perform InitFmriStopSignal (Task.succeed { user = user })
+                    Task.perform InitFmriStopSignal (Task.succeed user)
 
                 _ ->
                     Cmd.none

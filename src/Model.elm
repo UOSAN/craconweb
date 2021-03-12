@@ -136,7 +136,7 @@ type Msg
     | DirectionInput Game.Direction
     | IndicationInput
     | InitStopSignal
-    | InitFmriStopSignal { user : Entity.User }
+    | InitFmriStopSignal Entity.User
     | InitGoNoGo
     | InitDotProbe
     | InitVisualSearch
