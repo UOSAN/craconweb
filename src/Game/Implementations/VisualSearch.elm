@@ -9,24 +9,17 @@ import Game
         , Layout(..)
         , LogEntry(..)
         , State
-        , addIntervals
         , andThen
-        , emptyState
-        , info
-        , leftOrRight
         , log
-        , onDirection
         , onSelect
         , segment
         , selectTimeout
-        , showZoom
-        , startSession
         , timeout
         , timeoutFromSegmentStart
         )
 import List.Extra
 import Quantity
-import Random exposing (Generator)
+import Random
 import Random.List
 import Time
 

@@ -22,7 +22,7 @@ import Port
 import Random
 import RemoteData
 import Routing as R
-import Task exposing (Task)
+import Task
 import Time
 import Url
 import Jwt

@@ -7,13 +7,11 @@ module Ui.Parts exposing
     , notification
     )
 
-import Helpers
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import List.Extra
 import Model exposing (Msg(..))
-import RemoteData
 import Routing as R
 
 
