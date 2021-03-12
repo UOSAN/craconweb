@@ -496,7 +496,7 @@ update msg model =
             in
                 ( { model
                     | loading = Nothing
-                    , users = [ newUser ] ++ model.users
+                    , users = ( newUser ) :: model.users
                     , adminModel =
                         up_tmpUserRecord model.adminModel Empty.emptyUserRecord
                 }

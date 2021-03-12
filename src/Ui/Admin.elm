@@ -28,7 +28,7 @@ basicAdminPage glitching children =
     section [ class "section gray" ]
         [ div
             [ class "container" ]
-            ([ Parts.notification glitching "is-warning" ] ++ children)
+            (( Parts.notification glitching "is-warning" ) :: children)
         ]
 
 
@@ -626,7 +626,7 @@ regButtons loading =
             [ class class_ ]
             [ text "Submit" ]
         , button
-            ([ class "button is-link" ] ++ Parts.linkAttrs R.adminPath)
+            (( class "button is-link" ) :: Parts.linkAttrs R.adminPath)
             [ text "Cancel" ]
         ]
 
@@ -644,5 +644,5 @@ primaryButton title path =
 backButton : Html Msg
 backButton =
     button
-        ([ class "button is-link" ] ++ Parts.linkAttrs R.adminPath)
+        (( class "button is-link" ) :: Parts.linkAttrs R.adminPath)
         [ text "Go back" ]
