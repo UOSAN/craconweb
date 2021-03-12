@@ -52,15 +52,12 @@ import Time
 
 fetchAll : String -> M.JwtPayload -> String -> Cmd M.Msg
 fetchAll httpsrv jwt token =
-    case isAdmin jwt || isStaff jwt of
-        True ->
-            Cmd.batch <|
-                adminOnly httpsrv token
-                    ++ shared httpsrv token jwt.sub
-
-        False ->
-            Cmd.batch <|
-                shared httpsrv token jwt.sub
+     if isAdmin jwt || isStaff jwt then
+        Cmd.batch <|
+            adminOnly httpsrv token ++ shared httpsrv token jwt.sub
+     else
+        Cmd.batch <|
+            shared httpsrv token jwt.sub
 
 
 shared : String -> String -> String -> List (Cmd M.Msg)
