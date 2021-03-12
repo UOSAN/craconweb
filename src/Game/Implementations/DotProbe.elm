@@ -9,21 +9,14 @@ import Game
         , Layout(..)
         , LogEntry(..)
         , State
-        , addIntervals
         , andThen
-        , emptyState
-        , info
-        , leftOrRight
         , log
         , onDirection
-        , onIndication
-        , resultTimeout
         , segment
-        , startSession
         , timeout
         )
-import Quantity exposing (Quantity)
-import Random exposing (Generator)
+import Quantity
+import Random
 import Time
 
 

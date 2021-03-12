@@ -9,7 +9,7 @@ import Dropdown exposing (Options)
 import Entity
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onCheck, onClick, onInput, onSubmit)
+import Html.Events exposing (onClick, onInput, onSubmit)
 import Model exposing (AdminModel, Model, Msg(..))
 import Routing as R
 import Ui.Parts as Parts

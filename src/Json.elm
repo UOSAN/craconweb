@@ -15,7 +15,7 @@ module Json exposing
 
 import Game
 import Json.Decode as JD exposing (Decoder)
-import Json.Decode.Pipeline exposing (hardcoded, optional, required)
+import Json.Decode.Pipeline exposing (optional, required)
 import Json.Encode as JE exposing (object)
 import Json.Encode.Extra
 import Model as M

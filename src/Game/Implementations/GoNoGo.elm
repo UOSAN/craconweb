@@ -9,24 +9,17 @@ import Game
         , Layout(..)
         , LogEntry(..)
         , State
-        , addIntervals
         , andThen
-        , emptyState
-        , info
         , isFailed
-        , leftOrRight
         , log
         , logWithCondition
         , onDirection
-        , onIndication
         , resultTimeout
         , segment
-        , startSession
-        , timeout
         , timeoutFromSegmentStart
         , trialFailed
         )
-import Random exposing (Generator)
+import Random
 import Time
 
 
