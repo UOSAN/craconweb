@@ -41,7 +41,7 @@ all =
                         , BeginDisplay (Just Interval) 1498361916027
                         , BeginDisplay (Just Interval) 1498361909395
                         , EndTrial 1498361909395
-                        , Timeout { desired = True } 1498361909395
+                        , Timeout True 1498361909395
                         , BeginDisplay (Just (Single Gray { url = "http://localhost:8654/repo/df01a1fc573101cf57ce3a9bdc4d15ac.png", id = "210374515808349668" })) 1498361908494
                         , BeginInput 1498361908494
                         , BeginDisplay (Just (Single None { url = "http://localhost:8654/repo/df01a1fc573101cf57ce3a9bdc4d15ac.png", id = "210374515808349668" })) 1498361908394

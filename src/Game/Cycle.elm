@@ -13,7 +13,7 @@ generate sessionId logEntries =
 fillCycles : String -> Game.LogEntry -> List Game.Cycle -> List Game.Cycle
 fillCycles sessionId logEntry cycles =
     case logEntry of
-        Game.BeginSession { seed } _ ->
+        Game.BeginSession _ _ ->
             cycles
 
         Game.EndSession _ ->
@@ -31,7 +31,7 @@ fillCycles sessionId logEntry cycles =
         Game.BeginInput _ ->
             cycles
 
-        Game.AcceptIndication { desired } time ->
+        Game.AcceptIndication desired time ->
             acceptIndication { desired = desired, time = time } cycles
 
         Game.AcceptDirection { desired, actual } time ->
@@ -40,7 +40,7 @@ fillCycles sessionId logEntry cycles =
         Game.AcceptSelection { desired, actual } time ->
             acceptSelection { desired = desired, actual = actual, time = time } cycles
 
-        Game.Timeout { desired } time ->
+        Game.Timeout _ time ->
             timeout time cycles
 
 
