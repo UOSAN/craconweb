@@ -53,7 +53,7 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
                 _ ->
                     text ""
 
-        Game.Playing { game, session } ->
+        Game.Playing { game } ->
             let
                 state =
                     game |> Game.unwrap
@@ -285,7 +285,7 @@ viewLeftOrRightLayout { borderType, direction, image } =
 
 
 viewSelectGridLayout : { result : Game.Result, borderType : BorderType, columns : Int, images : List Game.Image, goIndex : Int } -> Html Msg
-viewSelectGridLayout { result, borderType, columns, images, goIndex } =
+viewSelectGridLayout { result, columns, images, goIndex } =
     div [ class "columns is-mobile" ]
         (List.Extra.groupsOf columns images
             |> List.indexedMap
@@ -351,7 +351,7 @@ viewGridRow { result, columnIndex, goIndex } rowIndex image =
 
 
 viewLeftRightLayout : { borderType : BorderType, lImage : Game.Image, rImage : Game.Image } -> Html Msg
-viewLeftRightLayout { borderType, lImage, rImage } =
+viewLeftRightLayout { lImage, rImage } =
     div [ class "columns is-mobile" ]
         [ div [ class "column", onTouch (DirectionInput Game.Left), onClick (DirectionInput Game.Left) ]
             [ img [ src lImage.url ] [] ]

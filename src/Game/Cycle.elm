@@ -13,7 +13,7 @@ generate sessionId logEntries =
 fillCycles : String -> Game.LogEntry -> List Game.Cycle -> List Game.Cycle
 fillCycles sessionId logEntry cycles =
     case logEntry of
-        Game.BeginSession { seed } time ->
+        Game.BeginSession { seed } _ ->
             cycles
 
         Game.EndSession _ ->
@@ -45,7 +45,7 @@ fillCycles sessionId logEntry cycles =
 
 
 beginCycle : { sessionId : String, time : Time.Posix, sort : Int } -> List Game.Cycle -> List Game.Cycle
-beginCycle { sessionId, time, sort } cycles =
+beginCycle { sessionId, sort } cycles =
     { id = Nothing
     , sessionId = sessionId
     , sort = sort
@@ -72,7 +72,7 @@ beginCycle { sessionId, time, sort } cycles =
 
 
 beginDisplay : { sessionId : String, time : Time.Posix, maybeLayout : Maybe Game.Layout } -> List Game.Cycle -> List Game.Cycle
-beginDisplay { sessionId, time, maybeLayout } cycles =
+beginDisplay { time, maybeLayout } cycles =
     case ( maybeLayout, cycles ) of
         ( _, [] ) ->
             cycles
@@ -275,7 +275,7 @@ timeout time cycles =
 
 
 acceptDirection : { desired : Game.Direction, actual : Game.Direction, time : Time.Posix } -> List Game.Cycle -> List Game.Cycle
-acceptDirection { desired, actual, time } cycles =
+acceptDirection { actual, time } cycles =
     case cycles of
         [] ->
             cycles
@@ -285,7 +285,7 @@ acceptDirection { desired, actual, time } cycles =
 
 
 acceptIndication : { desired : Bool, time : Time.Posix } -> List Game.Cycle -> List Game.Cycle
-acceptIndication { desired, time } cycles =
+acceptIndication { time } cycles =
     case cycles of
         [] ->
             cycles
@@ -295,7 +295,7 @@ acceptIndication { desired, time } cycles =
 
 
 acceptSelection : { desired : Int, actual : Int, time : Time.Posix } -> List Game.Cycle -> List Game.Cycle
-acceptSelection { desired, actual, time } cycles =
+acceptSelection { actual, time } cycles =
     case cycles of
         [] ->
             cycles

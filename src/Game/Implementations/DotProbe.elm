@@ -35,7 +35,7 @@ init :
     , intervalJitter : Duration
     }
     -> ( Game msg, Random.Seed )
-init ({ fixationDuration, imageDuration, infoString, responseImages, nonResponseImages, seedInt, currentTime, blockDuration, restDuration, totalBlocks } as args) =
+init ({ fixationDuration, imageDuration, responseImages, nonResponseImages } as args) =
     let
         trials =
             List.map2
@@ -63,7 +63,7 @@ trial :
     }
     -> State
     -> Game msg
-trial { fixationDuration, imageDuration, goTrial, goImage, noGoImage } state =
+trial { fixationDuration, imageDuration, goImage, noGoImage } state =
     let
         ( direction, firstSeed ) =
             Random.step Game.leftOrRight state.currentSeed

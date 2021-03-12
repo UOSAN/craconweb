@@ -630,8 +630,8 @@ update msg model =
         InitStopSignal ->
             initStopSignal model
 
-        InitFmriStopSignal user ->
-            initFmriStopSignal user model
+        InitFmriStopSignal _ ->
+            initFmriStopSignal model
 
         FmriImagesResp result ->
             ( { model | fmriUserData = result }, Cmd.none )
@@ -797,8 +797,8 @@ update msg model =
             onUpdateLocation url model
 
 
-initFmriStopSignal : { user : Entity.User } -> Model -> ( Model, Cmd Msg )
-initFmriStopSignal { user } model =
+initFmriStopSignal : Model -> ( Model, Cmd Msg )
+initFmriStopSignal model =
     case model.stopsignalGame of
         Nothing ->
             ( model

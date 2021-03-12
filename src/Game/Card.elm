@@ -84,7 +84,7 @@ andThenRest :
     -> (state -> Card state layout input msg)
     -> Card state layout input msg
     -> Card state layout input msg
-andThenRest ({ restCard, isInterval, restDuration, shouldRest, isFinish, resetSegmentStart, resetBlockStart, initialize } as args) f (Card tempCard) =
+andThenRest ({ restCard, restDuration, shouldRest, isFinish, resetSegmentStart, resetBlockStart } as args) f (Card tempCard) =
     let
         newLogic input =
             case tempCard.logic input of

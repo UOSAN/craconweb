@@ -593,7 +593,7 @@ isFinish totalBlocks state =
 restart : { totalBlocks : Int, blockDuration : Duration, restDuration : Duration, nextTrials : Generator (List (State -> Game msg)) } -> State -> GameState msg -> GameState msg
 restart args state gameState =
     case gameState of
-        Playing { game, session, nextSeed } ->
+        Playing { session, nextSeed } ->
             let
                 ( newGame, newSeed ) =
                     args.nextTrials

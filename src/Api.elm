@@ -116,11 +116,11 @@ updateMesStatus { url, token, sub } id updatedMes =
 
 
 updateUser : M.Base -> M.UserEdit -> Task (Http.Detailed.Error String) (Http.Detailed.Success String)
-updateUser { url, token, sub } user =
+updateUser b user =
     putRequest
-        { endpoint = url ++ "/user/" ++ user.id
+        { endpoint = b.url ++ "/user/" ++ user.id
         , decoder = JD.succeed "Saved."
-        , token = token
+        , token = b.token
         , json = Json.userEncoder user
         }
 
@@ -165,11 +165,11 @@ fetchMesAuthors b answers groupId =
 
 
 fetchBadgeRules : M.Base -> Cmd M.Msg
-fetchBadgeRules { url, token, sub } =
+fetchBadgeRules b =
     Http.request
         { method = "GET"
-        , headers = defaultHeaders token
-        , url = url ++ "/badgerules?sortEach=true"
+        , headers = defaultHeaders b.token
+        , url = b.url ++ "/badgerules?sortEach=true"
         , body = Http.emptyBody
         , expect = Http.expectJson (RemoteData.fromResult >> M.BadgeRulesResp) Json.badgeRulesDecoder
         , timeout = Nothing
@@ -178,11 +178,11 @@ fetchBadgeRules { url, token, sub } =
 
 
 fetchBadgesByUserId : M.Base -> Cmd M.Msg
-fetchBadgesByUserId { url, token, sub } =
+fetchBadgesByUserId b =
     Http.request
         { method = "GET"
-        , headers = defaultHeaders token
-        , url = url ++ "/user/" ++ sub ++ "/badges"
+        , headers = defaultHeaders b.token
+        , url = b.url ++ "/user/" ++ b.sub ++ "/badges"
         , body = Http.emptyBody
         , expect = Http.expectJson (RemoteData.fromResult >> M.BadgesResp) Json.badgesDecoder
         , timeout = Nothing
