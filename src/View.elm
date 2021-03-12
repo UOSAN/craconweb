@@ -29,25 +29,21 @@ bigLogo filesrv =
 
 statementsModalButtonClass : Bool -> String
 statementsModalButtonClass isOn =
-    case isOn of
-        True ->
-            "button is-fullwidth is-info"
-
-        False ->
-            "button is-fullwidth is-info is-outlined"
+    if isOn then
+        "button is-fullwidth is-info"
+    else
+        "button is-fullwidth is-info is-outlined"
 
 
 statementsModal : Model -> Html Msg
 statementsModal model =
-    case model.statementsModal of
-        False ->
-            text ""
-
-        True ->
-            Parts.modalCard
-                ToggleStatementsModal
-                "Statements from participants"
-                (statements 2 model.statements)
+    if model.statementsModal then
+        Parts.modalCard
+            ToggleStatementsModal
+            "Statements from participants"
+            (statements 2 model.statements)
+    else
+        text ""
 
 
 loginPage : Model -> Html Msg
@@ -179,12 +175,11 @@ navToggler activeMenu =
 
 adminLink : Visitor -> Html Msg
 adminLink visitor =
-    case isPowerful visitor of
-        True ->
-            navLink "Admin" R.adminPath False
+    if isPowerful visitor then
+        navLink "Admin" R.adminPath False
 
-        False ->
-            div [] []
+    else
+        div [] []
 
 
 navRight : Bool -> R.Route -> Visitor -> Html Msg
@@ -258,12 +253,10 @@ homePage model =
 
 loading_screen : Bool -> Html msg
 loading_screen is_loading =
-    case is_loading of
-        True ->
-            Parts.modal [ section [ class "modal-card-body" ] [ h1 [ class "title" ] [ text "Loading games...", i [ class "fa fa-loading fa-spin" ] [] ] ] ]
-
-        False ->
-            text ""
+    if is_loading then
+        Parts.modal [ section [ class "modal-card-body" ] [ h1 [ class "title" ] [ text "Loading games...", i [ class "fa fa-loading fa-spin" ] [] ] ] ]
+    else
+        text ""
 
 
 homePageBody : Model -> Html Msg
@@ -447,12 +440,10 @@ tryUnlock ids b =
         b_ =
             { name = b.name, dscript = b.dscript, unlocked = True, fg = "#000", bg = "#eee" }
     in
-    case List.member b.id ids of
-        True ->
-            { b_ | unlocked = True, bg = "#F2E86B" }
-
-        False ->
-            { b_ | unlocked = False }
+    if List.member b.id ids then
+        { b_ | unlocked = True, bg = "#F2E86B" }
+    else
+        { b_ | unlocked = False }
 
 
 rules :
