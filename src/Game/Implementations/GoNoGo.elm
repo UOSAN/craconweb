@@ -39,7 +39,7 @@ init :
     , intervalJitter : Duration
     }
     -> ( Game msg, Random.Seed )
-init ({ totalDuration, infoString, responseImages, nonResponseImages, fillerImages, seedInt, currentTime, redCrossDuration } as args) =
+init ({ totalDuration, responseImages, nonResponseImages, fillerImages, redCrossDuration } as args) =
     let
         gos =
             responseImages

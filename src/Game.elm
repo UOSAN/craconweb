@@ -347,7 +347,7 @@ randomInterval min jitter =
 
 
 addIntervals : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
-addIntervals layout min jitter trials =
+addIntervals _ min jitter trials =
     let
         randomDurationIntervals =
             Random.map interval (randomInterval min jitter)
@@ -359,7 +359,7 @@ addIntervals layout min jitter trials =
 
 
 prependInterval : Maybe Layout -> Duration -> Duration -> List (State -> Game msg) -> Generator (List (State -> Game msg))
-prependInterval layout min jitter trials =
+prependInterval _ min jitter trials =
     Random.map interval (randomInterval min jitter)
         :: List.map Random.constant trials
         |> Random.Extra.combine
@@ -508,14 +508,14 @@ isFailed state =
 
 
 trialFailed : Logic
-trialFailed state input =
+trialFailed state _ =
     state
         |> isFailed
         |> (\a -> (\b c -> ( b, c )) a state)
 
 
 showZoom : Logic
-showZoom state input =
+showZoom state _ =
     case state.trialResult of
         NoResult ->
             ( False, state )
@@ -593,7 +593,7 @@ isFinish totalBlocks state =
 restart : { totalBlocks : Int, blockDuration : Duration, restDuration : Duration, nextTrials : Generator (List (State -> Game msg)) } -> State -> GameState msg -> GameState msg
 restart args state gameState =
     case gameState of
-        Playing { game, session, nextSeed } ->
+        Playing { session, nextSeed } ->
             let
                 ( newGame, newSeed ) =
                     args.nextTrials

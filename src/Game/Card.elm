@@ -65,7 +65,7 @@ andThen isTimeout resetSegmentStart initialize f (Card tempCard) =
                     , cmd
                     )
 
-                ( Restart _ _, cmd ) ->
+                ( Restart _ _, _ ) ->
                     Debug.todo "andThen"
     in
     Card { tempCard | logic = newLogic }
@@ -84,7 +84,7 @@ andThenRest :
     -> (state -> Card state layout input msg)
     -> Card state layout input msg
     -> Card state layout input msg
-andThenRest ({ restCard, isInterval, restDuration, shouldRest, isFinish, resetSegmentStart, resetBlockStart, initialize } as args) f (Card tempCard) =
+andThenRest ({ restCard, restDuration, shouldRest, isFinish, resetSegmentStart, resetBlockStart } as args) f (Card tempCard) =
     let
         newLogic input =
             case tempCard.logic input of
@@ -152,7 +152,7 @@ continuingFromRest args cmd newCard f state =
             continuationCard continuation
     in
     case ( contCard, Maybe.map args.isInterval contCard ) of
-        ( Just tempCard, Just True ) ->
+        ( Just _, Just True ) ->
             let
                 ( nextContinuation, cmd3 ) =
                     step args.initialize (f (args.resetSegmentStart (unwrapContinuation continuation)))

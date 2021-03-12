@@ -76,7 +76,7 @@ mesTableHelper rows =
 
 
 adminTop : Maybe Entity.User -> Html Msg
-adminTop user =
+adminTop _ =
     div [ class "columns" ]
         [ div [ class "column" ]
             [ h1 [ class "title" ] [ text "Admin" ]
@@ -167,7 +167,7 @@ usersTable model =
 
 
 userRows : ( String, String ) -> List Entity.User -> Maybe String -> List (Html Msg)
-userRows ( expId, conId ) users request =
+userRows ( expId, conId ) users _ =
     let
         groupToString id =
             if id == expId then
@@ -265,7 +265,7 @@ divColumns children =
 
 
 editUserPage : Model -> String -> Html Msg
-editUserPage model userid =
+editUserPage model _ =
     case model.adminModel.tmpUserEdit of
         Just user ->
             editUser
@@ -288,7 +288,7 @@ editUser :
     -> Model.UserEdit
     -> Maybe (List Entity.Ugimgset)
     -> Html Msg
-editUser exp con informing tasksrv user ugimgsets =
+editUser exp con informing tasksrv user _ =
     basicAdminPage Nothing
         [ divColumns
             [ div [ class "column is-half is-offset-one-quarter" ]
@@ -325,7 +325,7 @@ userForm :
     -> Maybe String
     -> Bool
     -> Html Msg
-userForm user exp con saving =
+userForm user exp con _ =
     Html.form []
         [ div [ class "columns" ]
             [ div [ class "column" ]
@@ -614,7 +614,7 @@ regButtons loading =
     let
         class_ =
             case loading of
-                Just l ->
+                Just _ ->
                     "button is-primary is-loading"
 
                 Nothing ->

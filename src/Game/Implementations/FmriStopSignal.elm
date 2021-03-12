@@ -40,7 +40,7 @@ init :
     , intervalJitter : Duration
     }
     -> ( Game msg, Random.Seed )
-init ({ borderDelay, totalDuration, infoString, responseImages, nonResponseImages, seedInt, currentTime, blockDuration, redCrossDuration, totalBlocks, restDuration } as args) =
+init ({ borderDelay, totalDuration, responseImages, nonResponseImages, blockDuration, redCrossDuration } as args) =
     let
         gos =
             responseImages
@@ -82,7 +82,7 @@ trial :
     -> Image
     -> State
     -> Game msg
-trial { borderDelay, totalDuration, goTrial, blockDuration, redCrossDuration } image state =
+trial { borderDelay, totalDuration, goTrial, redCrossDuration } image state =
     let
         borderType =
             if goTrial then

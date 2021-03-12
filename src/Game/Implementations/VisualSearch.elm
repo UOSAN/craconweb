@@ -40,7 +40,7 @@ init :
     , intervalJitter : Duration
     }
     -> ( Game msg, Random.Seed )
-init ({ fixationDuration, imageDuration, zoomDuration, infoString, responseImages, nonResponseImages, seedInt, currentTime, blockDuration } as args) =
+init ({ fixationDuration, imageDuration, zoomDuration, responseImages, nonResponseImages } as args) =
     let
         trials =
             responseImages
@@ -67,7 +67,7 @@ trial :
     -> Image
     -> State
     -> Game msg
-trial { fixationDuration, imageDuration, zoomDuration, goTrial, noGoImages } goImage state =
+trial { fixationDuration, imageDuration, zoomDuration, noGoImages } goImage state =
     let
         ( noGoImagesShuffled, newSeed ) =
             Random.step (Random.List.shuffle noGoImages) state.currentSeed

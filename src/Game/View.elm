@@ -30,7 +30,7 @@ view :
     -> Html Msg
 view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
     case gameState of
-        Game.Loading game remoteData ->
+        Game.Loading _ remoteData ->
             case remoteData of
                 RemoteData.Loading ->
                     div []
@@ -53,12 +53,12 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
                 _ ->
                     text ""
 
-        Game.Playing { game, session } ->
+        Game.Playing { game } ->
             let
                 state =
                     game |> Game.unwrap
 
-                timer =
+                _ =
                     state.sessionStart
                         |> Maybe.map (\sessionStart -> (Time.posixToMillis state.currTime) - (Time.posixToMillis sessionStart))
                         |> Maybe.map (\t -> toFloat t / 1000)
@@ -70,13 +70,13 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
                     Nothing ->
                         text ""
 
-                    Just (Game.Info borderType string) ->
+                    Just (Game.Info _ string) ->
                         Ui.Parts.middleBlock [ Markdown.toHtml [ onClick IndicationInput ] string ]
 
                     Just (Game.Single borderType image) ->
                         viewSingleLayout borderType image
 
-                    Just (Game.LeftRight borderType direction lImage rImage) ->
+                    Just (Game.LeftRight borderType _ lImage rImage) ->
                         viewLeftRightLayout
                             { borderType = borderType
                             , lImage = lImage
@@ -285,7 +285,7 @@ viewLeftOrRightLayout { borderType, direction, image } =
 
 
 viewSelectGridLayout : { result : Game.Result, borderType : BorderType, columns : Int, images : List Game.Image, goIndex : Int } -> Html Msg
-viewSelectGridLayout { result, borderType, columns, images, goIndex } =
+viewSelectGridLayout { result, columns, images, goIndex } =
     div [ class "columns is-mobile" ]
         (List.Extra.groupsOf columns images
             |> List.indexedMap
@@ -351,7 +351,7 @@ viewGridRow { result, columnIndex, goIndex } rowIndex image =
 
 
 viewLeftRightLayout : { borderType : BorderType, lImage : Game.Image, rImage : Game.Image } -> Html Msg
-viewLeftRightLayout { borderType, lImage, rImage } =
+viewLeftRightLayout { lImage, rImage } =
     div [ class "columns is-mobile" ]
         [ div [ class "column", onTouch (DirectionInput Game.Left), onClick (DirectionInput Game.Left) ]
             [ img [ src lImage.url ] [] ]
@@ -361,7 +361,7 @@ viewLeftRightLayout { borderType, lImage, rImage } =
 
 
 viewFixation : BorderType -> Html msg
-viewFixation borderType =
+viewFixation _ =
     div
         [ class "columns is-mobile" ]
         [ div
@@ -402,7 +402,7 @@ viewRest messages state =
 
 
 viewProbe : BorderType -> Game.Direction -> Html Msg
-viewProbe borderType direction =
+viewProbe _ direction =
     div
         [ class "columns is-mobile" ]
         (case direction of
