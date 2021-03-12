@@ -205,7 +205,7 @@ navLink text_ path active =
             else
                 "nav-item is-tab"
     in
-    a ([ class class_ ] ++ Parts.linkAttrs path)
+    a (( class class_ ) :: Parts.linkAttrs path)
         [ text text_ ]
 
 
@@ -728,8 +728,8 @@ instBlock title content =
 statementsPage : Model -> Html Msg
 statementsPage model =
     basicPage model
-        ([ h1 [ class "title has-text-centered" ] [ text "Statements" ] ]
-            ++ statements 4 model.statements
+        (( h1 [ class "title has-text-centered" ] [ text "Statements" ] )
+            :: statements 4 model.statements
         )
 
 
