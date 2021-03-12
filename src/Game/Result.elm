@@ -1,6 +1,5 @@
 module Game.Result exposing
     ( averageResponseTimeInMillisecond
-    , isCorrect
     , percentCorrect
     )
 
