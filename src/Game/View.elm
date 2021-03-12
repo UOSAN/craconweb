@@ -118,7 +118,7 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
         Game.Saving state session remoteData ->
             viewResult state
                 session
-                { percentCorrect = Game.Result.percentCorrect { gameSlug = gameSlug } state
+                { percentCorrect = Game.Result.percentCorrect gameSlug state
                 , averageResponseTimeResult = Game.Result.averageResponseTimeInMillisecond state
                 , savingStatus = remoteData
                 }
@@ -126,7 +126,7 @@ view { gameSlug, gameState, initMsg, fmriUser, restMessages } =
         Game.Saved state data ->
             viewResult state
                 data.session
-                { percentCorrect = Game.Result.percentCorrect { gameSlug = gameSlug } state
+                { percentCorrect = Game.Result.percentCorrect gameSlug state
                 , averageResponseTimeResult = Game.Result.averageResponseTimeInMillisecond state
                 , savingStatus = RemoteData.Success data
                 }
