@@ -1069,17 +1069,6 @@ preloadUgImages prefix images =
         |> Port.preload
 
 
-isAdmin : Visitor -> Bool
-isAdmin visitor =
-    case visitor of
-        LoggedIn jwt ->
-            List.map .name jwt.roles
-                |> List.member "admin"
-
-        _ ->
-            False
-
-
 valuationsErrState : Model -> ValuationsError -> ( Model, Cmd msg )
 valuationsErrState model err =
     ( { model
