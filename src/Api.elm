@@ -220,21 +220,6 @@ createAuthRecord httpsrv login =
         }
 
 
-fetchAllUgimgsets :
-    String
-    -> String
-    -> String
-    -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.Ugimgset))
-fetchAllUgimgsets httpsrv token sub =
-    getRequest token
-        (httpsrv
-            ++ "/user/"
-            ++ sub
-            ++ "/ugimgsets?createdDesc=true&createdEach=true"
-        )
-        M.ugimgsetsDecoder
-
-
 fetchUsers_ : String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
 fetchUsers_ httpsrv token =
     fetchRole httpsrv token "user"
