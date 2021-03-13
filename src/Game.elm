@@ -234,18 +234,6 @@ segment logics layout state =
         )
 
 
-andThenCheckTimeout : Duration -> (State -> Game msg) -> Game msg -> Game msg
-andThenCheckTimeout gameDuration =
-    Card.andThen (isTimeout gameDuration) resetSegmentStart Initialize
-
-
-isTimeout : Duration -> State -> Bool
-isTimeout gameDuration state =
-    state.sessionStart
-        |> Maybe.map (\sessionStart -> isBefore (Duration.addTo sessionStart gameDuration) state.currTime)
-        |> Maybe.withDefault False
-
-
 andThenRest : { restDuration : Duration, tempShouldRest : State -> Bool, tempIsFinish : State -> Bool } -> (State -> Game msg) -> Game msg -> Game msg
 andThenRest { restDuration, tempShouldRest, tempIsFinish } =
     Card.andThenRest
