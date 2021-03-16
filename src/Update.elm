@@ -1069,17 +1069,6 @@ preloadUgImages prefix images =
         |> Port.preload
 
 
-isAdmin : Visitor -> Bool
-isAdmin visitor =
-    case visitor of
-        LoggedIn jwt ->
-            List.map .name jwt.roles
-                |> List.member "admin"
-
-        _ ->
-            False
-
-
 valuationsErrState : Model -> ValuationsError -> ( Model, Cmd msg )
 valuationsErrState model err =
     ( { model
@@ -1114,104 +1103,6 @@ valuationsError err =
 
 
 -- Instruction Views
-
-
-highlight : String -> Html Msg
-highlight l =
-    span [ class "highlight" ] [ strong [] [ text l ] ]
-
-
-solid : String -> Html Msg
-solid t =
-    span [ style "border" "solid 1px #000", style "padding" "2px" ] [ text t ]
-
-
-dashed : String -> Html Msg
-dashed t =
-    span [ style "border" "dashed 1px #000", style "padding" "2px" ] [ text t ]
-
-
-base : List (Html Msg) -> Html Msg
-base kids =
-    div [ class "columns" ]
-        [ div [ class "column is-half is-offset-one-quarter" ]
-            [ div [ class "box" ]
-                kids
-            ]
-        ]
-
-
-title : Html Msg
-title =
-    h3 [ class "title" ] [ text "Instructions" ]
-
-
-pressAnyKey : Html Msg
-pressAnyKey =
-    div []
-        [ br [] []
-        , br [] []
-        , strong [] [ text "Press any key to continue." ]
-        ]
-
-
-dpInstructions : Html Msg
-dpInstructions =
-    base
-        [ title
-        , text "You will see pictures on the left and right side of the screen, followed by a dot on the left or right side of the screen. Press the "
-        , highlight "c"
-        , text " if the dot is on the left side of the screen or "
-        , highlight "m"
-        , text " when the dot is on the right side of the screen. Go as fast as you can, but don't sacrifice accuracy for speed."
-        , pressAnyKey
-        ]
-
-
-vsInstructions : Html Msg
-vsInstructions =
-    base
-        [ title
-        , text "You will see a grid of images. Select the target image as quickly as you can."
-        , pressAnyKey
-        ]
-
-
-rsInstructions : Html Msg
-rsInstructions =
-    base
-        [ title
-        , text "You will see pictures on the screen. Some of the pictures will be followed by a tone (a beep). Please press the space bar as quickly as you can. BUT only if you hear a beep after the picture. Do not press if you do not hear a beep."
-        , pressAnyKey
-        ]
-
-
-ssInstructions : Html Msg
-ssInstructions =
-    base
-        [ title
-        , text "You will see pictures presented in either a dark blue or light gray border. Press the space bar as quickly as you can. BUT only if you see a blue border around the picture. Do not press if you see a gray border. Go as fast as you can, but don't sacrifice accuracy for speed."
-        , pressAnyKey
-        ]
-
-
-gngInstructions : Html Msg
-gngInstructions =
-    base
-        [ title
-        , p []
-            [ text "You will see pictures either on the left or right side of the screen, surrounded by a solid or dashed border. Press "
-            , highlight "c"
-            , text " when the picture is on the left side of the screen or "
-            , highlight "m"
-            , text " when the picture is on the right side of the screen. BUT only if you see a "
-            , solid "solid border"
-            , text " around the picture. Do not press if you see a "
-            , dashed "dashed border"
-            , text ". Go as fast as you can, but don't sacrifice accuracy for speed."
-            , pressAnyKey
-            ]
-        ]
 
 
 missing : Entity.UserRecord -> Bool
@@ -1489,27 +1380,6 @@ fix_email ur =
         ur
 
 
-fmriImagesResp : RemoteData.RemoteData ValuationsError Model.FmriUserData -> Model -> ( Model, Cmd Msg )
-fmriImagesResp resp model =
-    case resp of
-        RemoteData.Failure error ->
-            valuationsErrState model error
-
-        RemoteData.Success fmriUserData ->
-            ( { model | fmriUserData = resp }
-            , Cmd.batch
-                [ preloadUgImages model.filesrv (fmriUserData.ugimages_v ++ fmriUserData.ugimages_i ++ fmriUserData.ugimages_f)
-                , pushUrl model.key "stopsignal"
-                ]
-            )
-
-        RemoteData.Loading ->
-            ( model, Cmd.none )
-
-        RemoteData.NotAsked ->
-            ( model, Cmd.none )
-
-
 onUpdateLocation : Url.Url -> Model -> ( Model, Cmd Msg )
 onUpdateLocation location model =
     let
@@ -1531,7 +1401,7 @@ refetchDataOnChange : Model -> ( Model, Cmd Msg )
 refetchDataOnChange model =
     case model.activeRoute of
         R.AdminRoute ->
-            ( model, Task.attempt UsersResp (Api.fetchUsers_ model.httpsrv model.jwtencoded) )
+            ( model, Task.attempt UsersResp (Api.fetchUsers model.httpsrv model.jwtencoded) )
 
         R.FmriRoute _ ->
             Api.fetchFmriUserData model

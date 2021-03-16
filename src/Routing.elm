@@ -1,6 +1,5 @@
 module Routing exposing
-    ( powerPaths
-    , parseLocation
+    (  parseLocation
     , onLinkClick
     , Route(..)
     , homePath
@@ -21,11 +20,6 @@ import Html.Events exposing (custom)
 import Json.Decode as Decode
 import Url
 import Url.Parser exposing (Parser, (</>), s, map, oneOf, top, parse, string)
-
-
-powerPaths : List String
-powerPaths =
-    [ adminPath, registerPath, mesPath ]
 
 
 parseLocation : Url.Url -> Route

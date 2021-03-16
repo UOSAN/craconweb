@@ -15,7 +15,6 @@ module Api exposing
     , fetchRole
     , fetchUser
     , fetchUsers
-    , fetchUsers_
     , fetchValid
     , jwtDecoded
     , okyToky
@@ -80,7 +79,7 @@ shared httpsrv token sub =
 
 adminOnly : String -> String -> List (Cmd M.Msg)
 adminOnly httpsrv token =
-    [ Task.attempt M.UsersResp (fetchUsers_ httpsrv token)
+    [ Task.attempt M.UsersResp (fetchUsers httpsrv token)
     , Task.attempt M.RoleResp (fetchRole httpsrv token "user")
     , Task.attempt M.GroupResp (fetchGroup httpsrv token "control_a")
     , Task.attempt M.GroupResp (fetchGroup httpsrv token "experimental_a")
@@ -220,23 +219,8 @@ createAuthRecord httpsrv login =
         }
 
 
-fetchAllUgimgsets :
-    String
-    -> String
-    -> String
-    -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.Ugimgset))
-fetchAllUgimgsets httpsrv token sub =
-    getRequest token
-        (httpsrv
-            ++ "/user/"
-            ++ sub
-            ++ "/ugimgsets?createdDesc=true&createdEach=true"
-        )
-        M.ugimgsetsDecoder
-
-
-fetchUsers_ : String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
-fetchUsers_ httpsrv token =
+fetchUsers : String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
+fetchUsers httpsrv token =
     fetchRole httpsrv token "user"
         |> Task.andThen (\result ->
             fetchUsersInRole httpsrv token result.body.id)
@@ -344,13 +328,6 @@ fetchGame httpsrv token slug =
 fetchUser : String -> String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success Entity.User)
 fetchUser httpsrv token sub =
     getRequest token (httpsrv ++ "/user/" ++ sub) Entity.userDecoder
-
-
-fetchUsers : String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
-fetchUsers httpsrv token =
-    getRequest token
-        (httpsrv ++ "/users?createdEach=true")
-        (JD.field "users" (JD.list Entity.userDecoder))
 
 
 fetchUserImages : String -> String -> String -> Cmd M.Msg

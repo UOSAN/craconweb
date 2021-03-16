@@ -417,11 +417,6 @@ notFoundPage model =
         ]
 
 
-badge : String -> Html Msg
-badge text_ =
-    p [] [ i [ class "fa fa-certificate fa-6" ] [], text text_ ]
-
-
 badgesPage : Model -> Html Msg
 badgesPage model =
     basicPage model

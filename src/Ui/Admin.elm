@@ -219,36 +219,6 @@ userRows ( expId, conId ) users _ =
         |> List.map row
 
 
-iconButton : String -> String -> String -> String -> Html Msg
-iconButton text_ path icon mods =
-    a
-        [ class <| "button " ++ mods
-        , href <| path
-        , R.onLinkClick <| UpdateLocation path
-        ]
-        [ span
-            [ class <| "icon " ++ mods ]
-            [ i
-                [ class <| "fa " ++ icon ]
-                []
-            ]
-        , span
-            []
-            [ text text_
-            ]
-        ]
-
-
-bButton : String -> String -> String -> Html Msg
-bButton title path mods =
-    a
-        [ class ("button " ++ mods)
-        , href <| path
-        , R.onLinkClick <| UpdateLocation path
-        ]
-        [ text title ]
-
-
 editUser404 : Html Msg
 editUser404 =
     basicAdminPage Nothing
@@ -629,16 +599,6 @@ regButtons loading =
             (( class "button is-link" ) :: Parts.linkAttrs R.adminPath)
             [ text "Cancel" ]
         ]
-
-
-primaryButton : String -> String -> Html Msg
-primaryButton title path =
-    a
-        [ class "button is-primary"
-        , href <| path
-        , R.onLinkClick <| UpdateLocation path
-        ]
-        [ text title ]
 
 
 backButton : Html Msg
