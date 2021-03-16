@@ -14,7 +14,6 @@ module Api exposing
     , fetchPublicMesAnswers
     , fetchRole
     , fetchUser
-    , fetchUsers
     , fetchUsers_
     , fetchValid
     , jwtDecoded
@@ -329,13 +328,6 @@ fetchGame httpsrv token slug =
 fetchUser : String -> String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success Entity.User)
 fetchUser httpsrv token sub =
     getRequest token (httpsrv ++ "/user/" ++ sub) Entity.userDecoder
-
-
-fetchUsers : String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
-fetchUsers httpsrv token =
-    getRequest token
-        (httpsrv ++ "/users?createdEach=true")
-        (JD.field "users" (JD.list Entity.userDecoder))
 
 
 fetchUserImages : String -> String -> String -> Cmd M.Msg
