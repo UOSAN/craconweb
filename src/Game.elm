@@ -19,7 +19,6 @@ module Game exposing
     , directionToIndex
     , emptyState
     , flipDirection
-    , info
     , isAfter
     , isBefore
     , isFailed
@@ -41,7 +40,6 @@ module Game exposing
     , segment
     , selectTimeout
     , shouldRest
-    , showZoom
     , shuffle
     , startSession
     , startTrial
@@ -367,21 +365,6 @@ startTrial state =
     { state | trialStart = state.currTime, trialResult = NoResult }
 
 
-info : String -> State -> Game msg
-info infoString state =
-    segment [ advanceOnIndication ] (Just (Info None infoString)) state
-
-
-advanceOnIndication : Logic
-advanceOnIndication state input =
-    case input of
-        Indication ->
-            ( False, state )
-
-        _ ->
-            ( True, state )
-
-
 onIndication : Bool -> Logic
 onIndication desired state input =
     case ( input, state.trialResult ) of
@@ -500,22 +483,6 @@ trialFailed state _ =
     state
         |> isFailed
         |> (\a -> (\b c -> ( b, c )) a state)
-
-
-showZoom : Logic
-showZoom state _ =
-    case state.trialResult of
-        NoResult ->
-            ( False, state )
-
-        BoolResult True ->
-            ( False, state )
-
-        BoolResult False ->
-            ( False, state )
-
-        SelectResult _ ->
-            ( True, state )
 
 
 updateCurrTime : Logic
