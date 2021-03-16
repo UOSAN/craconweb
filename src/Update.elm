@@ -1401,7 +1401,7 @@ refetchDataOnChange : Model -> ( Model, Cmd Msg )
 refetchDataOnChange model =
     case model.activeRoute of
         R.AdminRoute ->
-            ( model, Task.attempt UsersResp (Api.fetchUsers_ model.httpsrv model.jwtencoded) )
+            ( model, Task.attempt UsersResp (Api.fetchUsers model.httpsrv model.jwtencoded) )
 
         R.FmriRoute _ ->
             Api.fetchFmriUserData model

@@ -14,7 +14,7 @@ module Api exposing
     , fetchPublicMesAnswers
     , fetchRole
     , fetchUser
-    , fetchUsers_
+    , fetchUsers
     , fetchValid
     , jwtDecoded
     , okyToky
@@ -79,7 +79,7 @@ shared httpsrv token sub =
 
 adminOnly : String -> String -> List (Cmd M.Msg)
 adminOnly httpsrv token =
-    [ Task.attempt M.UsersResp (fetchUsers_ httpsrv token)
+    [ Task.attempt M.UsersResp (fetchUsers httpsrv token)
     , Task.attempt M.RoleResp (fetchRole httpsrv token "user")
     , Task.attempt M.GroupResp (fetchGroup httpsrv token "control_a")
     , Task.attempt M.GroupResp (fetchGroup httpsrv token "experimental_a")
@@ -219,8 +219,8 @@ createAuthRecord httpsrv login =
         }
 
 
-fetchUsers_ : String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
-fetchUsers_ httpsrv token =
+fetchUsers : String -> String -> Task (Http.Detailed.Error String) (Http.Detailed.Success (List Entity.User))
+fetchUsers httpsrv token =
     fetchRole httpsrv token "user"
         |> Task.andThen (\result ->
             fetchUsersInRole httpsrv token result.body.id)
